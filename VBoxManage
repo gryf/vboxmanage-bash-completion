@@ -2,12 +2,17 @@
 # development version, or specially used for my opts
 # Author: Sebastian T. Hafner <sonix@own-hero.net>
 #
-# [ ] adoptstate
+# This version of bash completion was born due to the need of fast and easy
+# access to the maze of commands and parameters VBoxManage provides. Based on
+# Sebastian script I've managed to improve it and adapt to newest stable version
+# available in Gentoo Portage.
+#
+# [x] adoptstate
 # [ ] bandwidthctl
-# [ ] clonehd
-# [ ] clonevm
+# [x] clonehd
+# [x] clonevm
 # [ ] closemedium
-# [ ] controlvm
+# [x] controlvm
 # [ ] convertfromraw
 # [ ] createhd
 # [ ] createvm
@@ -24,54 +29,54 @@
 # [x] list
 # [ ] metrics
 # [ ] modifyhd
-# [ ] modifyvm
+# [.] modifyvm  - a LOT options missing
 # [ ] natnetwork
 # [ ] registervm
 # [ ] setextradata
 # [ ] setproperty
 # [ ] sharedfolder
-# [ ] showhdinfo
-# [ ] showvminfo
-# [ ] snapshot
+# [x] showhdinfo
+# [x] showvminfo
+# [x] snapshot
 # [x] startvm
-# [ ] storageattach
+# [o] storageattach  - no all options yet
 # [ ] storagectl
-# [ ] unregistervm
+# [x] unregistervm
 # [ ] usbfilter
 
 _VBoxManage() {
     local cur prev opts vms vms cmd count item
 
-    # TODO: This function works quite well with option 'default'. Unfortunately
-    # there is an issue with filenames which contain space with that setting.
-    # OTOH I don't know how to force bash (or readline) to display full path in
-    # possible matches, so there would be a problem with completion of filenames
-    # if they are in different place on the fs. After an hour or so of trying to
-    # make it work I just gave up :/
+    # Generate registered hard disk files.
+    # NOTE: This function may introduce some quirks, if there is a space or
+    # other characters which usually are treated as IFS - like space. Pipe
+    # character used in disk filename will ruin this completions.
     _hdcomp() {
         local cur=$1
         local hdds
 
         hdds=$(VBoxManage list hdds | \
+            grep -A 1 'normal (base)' | \
             grep "Location:" | \
             sed 's/Location:\s\+//' | \
+            sed 's/\s/\\ /g' | \
             tr '\n' '|' | \
             sed 's/|$//')
         IFS='|' read -ra hdds <<< "$hdds"
 
         for item in "${hdds[@]}"
         do
-            [[ ${item^^} == ${cur^^}* ]] && COMPREPLY+=("$item") && echo "added hd $item"
+            [[ ${item^^} == ${cur^^}* ]] && COMPREPLY+=("$item")
         done
     }
 
-    # Custom function to fill up the COMPREPLY. Works well with spaces in the
-    # names of the VMs using option 'filename' for the complete function. Will
-    # not work if you have a pipe in the VM names. Sorry.
+    # Complete registered VM names.
+    # Issues are the same as in above function.
     _vmscomp() {
         local cur=$1
         local vms
 
+        compopt -o filenames
         vms=$(VBoxManage list vms | \
             awk -F ' {' '{ print $1 }' | \
             tr '\n' '|' | \
@@ -110,30 +115,39 @@ _VBoxManage() {
     fi
 
     case "${prev}" in
-
-        # adoptstate)
-        showhdinfo|clonehd)
+        showhdinfo)
             _hdcomp ${cur}
+            ;;
+        clonevm)
+            _vmscomp ${cur}
+            ;;
+        clonehd)
+            case "${cur}" in
+                -*)
+                    COMPREPLY=( $(compgen -W "--format --variant
+                    --existing" -- ${cur}) )
+                    ;;
+                *)
+                    _hdcomp ${cur}
+                    ;;
+            esac
             ;;
         --format)
             COMPREPLY=( $(compgen -W "VDI VMDK VHD RAW" -- ${cur}) )
             ;;
         adoptstate|storageattach|startvm|modifyvm|controlvm|showvminfo|\
-            unregistervm|vmstatistics|snapshot)
+            unregistervm|snapshot)
             _vmscomp ${cur}
             ;;
         --type) #startvm --type
-            if [[ ${cmd} == "startvm" ]]; then
+            [[ ${cmd} == "startvm" ]] && \
                 COMPREPLY=( $(compgen -W "headless vrdp sdl gui" -- ${cur}) )
-            fi
-            if [[ ${cmd} == "createhd" ]]; then
+            [[ ${cmd} == "createhd" ]] && \
                 COMPREPLY=( $(compgen -W "normal writethrough" -- ${cur}) )
-            fi
             ;;
         --ostype)
-            OS=`VBoxManage list ostypes | grep ID | awk '{ print $2 }'`
-            COMPREPLY=( $(compgen -W "$OS" \
-                -- ${cur}) )
+            OS=$(VBoxManage list ostypes | egrep "^ID" | sed "s/ID:\s\+//"|sort)
+            COMPREPLY=( $(compgen -W "$OS" -- ${cur}) )
             ;;
         --variant)
             COMPREPLY=( $(compgen -W "Standard Fixed Split2G Stream ESX" \
@@ -153,19 +167,16 @@ _VBoxManage() {
         --boot[1-4])
             COMPREPLY=( $(compgen -W "none floppy dvd disk net" -- ${cur}) )
             ;;
-        *vrdp)
-            COMPREPLY=( $(compgen -W "on off" -- ${cur}) )
-            ;;
         list)
-            COMPREPLY=( $(compgen -W "vms runningvms ostypes hostdvds
-            hostfloppies intnets bridgedifs hostonlyifs natnets dhcpservers
-            hostinfo hostcpuids hddbackends hdds dvds floppies usbhost
-            usbfilters systemproperties extpacks groups webcams" -- ${cur}) )
-            ;;
-        # --storageattach
-        --storagectl)
-            CONTROLLER="SATA IDE"
-            COMPREPLY=( $(compgen -W "$CONTROLLER"  -- ${cur}) )
+            t=$(VBoxManage list | \
+                grep '|' | \
+                sed 's/\[.*\]//g'| \
+                sed 's/VBoxManage list//' | \
+                tr "\\n" " " | \
+                sed 's/$/\n/' | \
+                sed 's/\s\+//g' | \
+                sed 's/|/ /g')
+            COMPREPLY=( $(compgen -W "$t" -- ${cur}) )
             ;;
         --device)
             COMPREPLY=( $(compgen -W "0" -- ${cur}) )
@@ -183,13 +194,28 @@ _VBoxManage() {
             done
             _hdcomp ${cur}
             ;;
+        --snapshot)
+            ;;
         --*) #any options ..
             COMPREPLY=()
             ;;
         *)
             case "${cmd}" in
+                clonevm)
+                    case "${prev}" in
+                        --mode)
+                            COMPREPLY=( $(compgen -W "machine machineandchildren all" -- ${cur}) )
+                            ;;
+                        --options)
+                            COMPREPLY=( $(compgen -W "link keepallmacs
+                            keepnatmacs keepdisknames" -- ${cur}) )
+                            ;;
+                    esac
+                    COMPREPLY=( $(compgen -W "--snapshot --mode --options
+                    --name --groups --basefolder --uuid --register" -- ${cur}) )
+                    ;;
                 adoptstate)
-                    COMPREPLY=("dupa")
+                    COMPREPLY=()
                     ;;
                 createhd)
                     COMPREPLY=( $(compgen -W "--filename --size --type
@@ -200,15 +226,86 @@ _VBoxManage() {
                     --basefolder --settingsfile --uid" -- ${cur}) )
                     ;;
                 controlvm)
-                    COMPREPLY=( $(compgen -W "pause resume poweroff reset
-                    savestate acpipowerbutton acpisleepbutton vrdp" -- ${cur}) )
+                    case "${prev}" in
+                        nictracefile[0-9]*)
+                            COMPREPLY=( $(compgen -f -- ${cur}) )
+                            ;;
+                        nictrace[0-9]*)
+                            COMPREPLY=( $(compgen -W "on off" -- ${cur}) )
+                            ;;
+                        nicpromisc[0-9]*)
+                            COMPREPLY=( $(compgen -W "deny allow-vms
+                            allow-all" -- ${cur}) )
+                            ;;
+                        nic[0-9]*)
+                            COMPREPLY=( $(compgen -W "null nat bridged intnet
+                            hostonly generic natnetwork" -- ${cur}) )
+                            ;;
+                        natpf[0-9]*)
+                            COMPREPLY=( $(compgen -W "delete tcp
+                            udp" -- ${cur}) )
+                            ;;
+                        clipboard)
+                            COMPREPLY=( $(compgen -W "disabled hosttoguest
+                            guesttohost bidirectional" -- ${cur}) )
+                            ;;
+                        draganddrop)
+                            COMPREPLY=( $(compgen -W "disabled
+                            hosttoguest" -- ${cur}) )
+                            ;;
+                        vrde)
+                            COMPREPLY=( $(compgen -W "on off" -- ${cur}) )
+                            ;;
+                        vcpenabled)
+                            COMPREPLY=( $(compgen -W "on off" -- ${cur}) )
+                            ;;
+                        vcpscreens)
+                            COMPREPLY=( $(compgen -W "all none" -- ${cur}) )
+                            ;;
+                        setcredentials)
+                            COMPREPLY=( $(compgen -W "--passwordfile
+                            --allowlocallogon" -- ${cur}) )
+                            ;;
+                        teleport)
+                            COMPREPLY=( $(compgen -W "--host --port --maxdowntime
+                            --passwordfile --password" -- ${cur}) )
+                            ;;
+                        webcam)
+                            COMPREPLY=( $(compgen -W "attach detach
+                            list" -- ${cur}) )
+                            ;;
+                        acpipowerbutton|acpisleepbutton|cpuexecutioncap|\
+                            guestmemoryballoon|keyboardputscancode|\
+                            nicproperty[0-9]*|pause|plugcpu|poweroff|reset|\
+                            resume|savestate|screenshotpng|setlinkstate1|\
+                            setvideomodehint|unplugcpu|usbattach|usbdetach|\
+                            vrdeport|vrdeproperty|vrdevideochannelquality)
+                            COMPREPLY=()
+                            ;;
+                        *)
+                            COMPREPLY=( $(compgen -W "acpipowerbutton
+                            acpisleepbutton clipboard cpuexecutioncap
+                            draganddrop guestmemoryballoon keyboardputscancode
+                            natpf1 nic1 nicpromisc1 nicproperty1 nictrace1
+                            nictracefile1 pause plugcpu poweroff reset resume
+                            savestate screenshotpng setcredentials setlinkstate1
+                            setvideomodehint teleport unplugcpu usbattach
+                            usbdetach vcpenabled vcpscreens vrde vrdeport
+                            vrdeproperty vrdevideochannelquality
+                            webcam" -- ${cur}) )
+                            ;;
+                    esac
+                    ;;
+                unregistervm)
+                    COMPREPLY=( $(compgen -W "--delete" -- ${cur}) )
                     ;;
                 startvm)
                     COMPREPLY=( $(compgen -W "--type" -- ${cur}) )
                     ;;
                 snapshot)
                     COMPREPLY=( $(compgen -W "take delete restore restorecurrent
-                    edit list showvminfo" -- ${cur}) )
+                    edit list showvminfo --description --current --name
+                    --details --machinereadable" -- ${cur}) )
                     ;;
                 modifyvm)
                     COMPREPLY=( $(compgen -W "--name --memory --ostype --usb
@@ -228,6 +325,10 @@ _VBoxManage() {
                     COMPREPLY=( $(compgen -W "--storagectl --device --port
                     --medium --type" -- ${cur}) )
                     ;;
+                showvminfo)
+                    COMPREPLY=( $(compgen -W "--details --machinereadable
+                    --log" -- ${cur}) )
+                    ;;
                 *)
                     COMPREPLY=()
                     ;;
@@ -235,7 +336,6 @@ _VBoxManage() {
             ;;
     esac
 }
-complete -o filenames -F _VBoxManage VBoxManage
-#complete -o default -F _VBoxManage VBoxManage
+complete -o default -F _VBoxManage VBoxManage
 
 # vim: set ft=sh tw=80 sw=4 et :
