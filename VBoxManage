@@ -2,7 +2,7 @@
 #
 # This version of bash completion was born due to the need of fast and easy
 # access to the maze of commands and parameters VBoxManage provides. Based on
-# Sebastian[1] script I've managed to improve it and adapt to newest stable 
+# Sebastian[1] script I've managed to improve it and adapt to newest stable
 # version available in Gentoo Portage.
 #
 # [1] Sebastian T. Hafner <sonix@own-hero.net>
@@ -10,10 +10,10 @@
 #
 # [x] adoptstate
 # [x] bandwidthctl
-# [ ] clonehd
-# [ ] clonevm
+# [x] clonehd
+# [x] clonevm
 # [ ] closemedium
-# [ ] controlvm
+# [x] controlvm
 # [ ] convertfromraw
 # [ ] createhd
 # [ ] createvm
@@ -46,7 +46,7 @@
 # [ ] usbfilter
 
 _VBoxManage() {
-    local cur prev opts vms vms cmd subcommand count item tmp name index
+    local cur prev opts cmd subcommand tmp items name index result
 
     # Generate registered hard disk files.
     # NOTE: This function may introduce some quirks, if there is a space or
@@ -55,6 +55,7 @@ _VBoxManage() {
     _hdd_comp() {
         local cur=$1
         local hdds
+        local item
 
         hdds=$(VBoxManage list hdds | \
             grep -A 1 'normal (base)' | \
@@ -71,14 +72,54 @@ _VBoxManage() {
         done
     }
 
+    _floppy_comp() {
+        local cur=$1
+        local floppies
+        local item
+
+        floppies=$(VBoxManage list floppies | \
+            grep "Location:" | \
+            sed 's/Location:\s\+//' | \
+            sed 's/\s/\\ /g' | \
+            tr '\n' '|' | \
+            sed 's/|$//')
+        IFS='|' read -ra floppies <<< "$floppies"
+
+        for item in "${floppies[@]}"
+        do
+            [[ ${item^^} == ${cur^^}* ]] && COMPREPLY+=("$item")
+        done
+    }
+
+    _dvds_comp() {
+        local cur=$1
+        local dvds
+        local item
+
+        dvds=$(VBoxManage list dvds | \
+            grep "Location:" | \
+            sed 's/Location:\s\+//' | \
+            sed 's/\s/\\ /g' | \
+            tr '\n' '|' | \
+            sed 's/|$//')
+        IFS='|' read -ra dvds <<< "$dvds"
+
+        for item in "${dvds[@]}"
+        do
+            [[ ${item^^} == ${cur^^}* ]] && COMPREPLY+=("$item")
+        done
+    }
+
     # Complete registered VM names.
     # Issues are the same as in above function.
     _vms_comp() {
-        local cur=$1
+        local command=$1
+        local cur=$2
         local vms
+        local item
 
         compopt -o filenames
-        vms=$(VBoxManage list vms | \
+        vms=$(VBoxManage list $command | \
             awk -F ' {' '{ print $1 }' | \
             tr '\n' '|' | \
             sed 's/|$//' | \
@@ -104,6 +145,23 @@ _VBoxManage() {
             sed 's/|/ /g')
         COMPREPLY=( $(compgen -W "$list" -- ${cur}) )
     }
+    _group_comp() {
+        local cur=$1
+        local list
+        local item
+
+        list=$(VBoxManage list groups | \
+            tr '\n' '|' | \
+            sed 's/|$//' | \
+            sed 's/\s/\\ /g'| \
+            sed 's/"//g')
+        IFS='|' read -ra list <<< "$list"
+
+        for item in "${list[@]}"
+        do
+            [[ ${item^^} == ${cur^^}* ]] && COMPREPLY+=("$item")
+        done
+    }
 
     # Check the COMP_WORDS looking for name of the vm. If name contain space or
     # is enclosed in quotes, glue name together in variable name. Variable index
@@ -128,8 +186,19 @@ _VBoxManage() {
         index=$idx
     }
 
+    _get_excluded_items() {
+        local i
+
+        result=""
+        for i in $@; do
+            [[ " ${COMP_WORDS[@]} " == *" $i "* ]] && continue
+            result="$result $i"
+        done
+    }
+
     _bandwidthctl_comp() {
         local rules cur=$1
+        local item
 
         _find_item_name 2
         rules=$(VBoxManage bandwidthctl "${name//\\/}" \
@@ -149,6 +218,7 @@ _VBoxManage() {
 
     _snapshot_comp() {
         local snap cur=$1
+        local item
 
         _find_item_name 2
         snap=$(VBoxManage snapshot "${name//\\/}" \
@@ -166,9 +236,25 @@ _VBoxManage() {
         done
     }
 
+    _webcam_comp() {
+        local devs cur=$1
+        local item
+
+        _find_item_name 2
+        devs=$(VBoxManage controlvm "${name//\\/}" \
+            webcam list | \
+            tr '\n' ' ' | \
+            sed 's/|s$//')
+        read -ra devs <<< "$devs"
+
+        for item in "${devs[@]}"
+        do
+            [[ ${item^^} == ${cur^^}* ]] && COMPREPLY+=("$item")
+        done
+    }
+
     COMP_WORDBREAKS=${COMP_WORDBREAKS//|/}  # remove pipe from comp word breaks
     COMPREPLY=()
-
 
     cur="${COMP_WORDS[COMP_CWORD]}"
     prev="${COMP_WORDS[COMP_CWORD-1]}"
@@ -195,26 +281,24 @@ _VBoxManage() {
 
     case "${cmd}" in
         adoptstate)
-            _vms_comp ${cur}
+            _vms_comp vms ${cur}
             ;;
         bandwidthctl)
+            local items=(add set remove list)
             if [[ ${prev} == ${cmd} ]]; then
-                _vms_comp ${cur}
+                _vms_comp vms ${cur}
             else
                 _find_item_name 2
                 subcommand=${COMP_WORDS[$((index+1))]}
-                if [[ " add set remove list " == *" $subcommand "* ]]; then
+                if [[ " ${items[@]} " == *" $subcommand "* ]]; then
                     case "${subcommand}" in
                         add)
-                            tmp=""
-                            for i in --type --limit; do
-                                [[ " ${COMP_WORDS[@]} " == *" $i "* ]] && continue
-                                tmp="$tmp $i"
-                            done
-                            COMPREPLY=( $(compgen -W "$tmp" -- ${cur}) )
+                            items=(--type --limit)
+                            _get_excluded_items "${items[@]}"
+                            COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
                             ;;
                         set)
-                            if [[ ${prev} == "set" ]]; then 
+                            if [[ ${prev} == "set" ]]; then
                                 _bandwidthctl_comp ${cur}
                             else
                                 [[ " ${COMP_WORDS[@]} " != *" --limit "* ]] && \
@@ -223,12 +307,12 @@ _VBoxManage() {
                             fi
                             ;;
                         remove)
-                            if [[ ${prev} == "remove" ]]; then 
+                            if [[ ${prev} == "remove" ]]; then
                                 _bandwidthctl_comp ${cur}
                             fi
                             ;;
                         list)
-                            if [[ ${prev} == "list" ]]; then 
+                            if [[ ${prev} == "list" ]]; then
                                 COMPREPLY=( $(compgen -W "--machinereadable" \
                                     -- ${cur}) )
                             fi
@@ -241,18 +325,180 @@ _VBoxManage() {
                     esac
                 else
                     [[ ${#COMPREPLY[@]} -eq 0 ]] && \
-                        COMPREPLY=( $(compgen -W "add set remove list" \
-                        -- ${cur}) )
+                        COMPREPLY=( $(compgen -W "${items[*]}" -- ${cur}) )
                 fi
             fi
             ;;
         clonehd)
+            if [[ ${prev} == ${cmd} ]]; then
+                _hdd_comp ${cur}
+            else
+                _find_item_name 2
+                items=(--format --variant --existing)
+                _get_excluded_items "${items[@]}"
+                COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+
+                case "${prev}" in
+                    --format)
+                        COMPREPLY=( $(compgen -W "VDI VMDK VHD RAW" -- ${cur}) )
+                        ;;
+                    --variant)
+                        COMPREPLY=( $(compgen -W "Standard Fixed Split2G Stream
+                        ESX" -- ${cur}) )
+                        ;;
+                esac
+            fi
             ;;
         clonevm)
+            if [[ ${prev} == ${cmd} ]]; then
+                _vms_comp vms ${cur}
+            else
+                _find_item_name 2
+                items=(--snapshot --mode --options --name --groups --basefolder
+                --uuid --register)
+                _get_excluded_items "${items[@]}"
+                COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+                case "${prev}" in
+                    --snapshot)
+                        COMPREPLY=()
+                        _snapshot_comp ${cur}
+                        ;;
+                    --mode)
+                        COMPREPLY=( $(compgen -W "machine machineandchildren
+                        all" -- ${cur}) )
+                        ;;
+                    --options)
+                        COMPREPLY=( $(compgen -W "link keepallmacs keepnatmacs
+                        keepdisknames" -- ${cur}) )
+                        ;;
+                    --groups)
+                        COMPREPLY=()
+                        _group_comp ${cur}
+                        ;;
+                    --basefolder)
+                        COMPREPLY=( $(compgen -o dirnames -- ${cur}) )
+                        ;;
+                esac
+            fi
             ;;
         closemedium)
+            if [[ ${prev} == ${cmd} ]]; then
+                COMPREPLY=( $(compgen -W "disk dvd floppy" -- ${cur}) )
+            else
+                case "${prev}" in
+                    disk)
+                        _hdd_comp ${cur}
+                        ;;
+                    dvd)
+                        _dvds_comp ${cur}
+                        ;;
+                    floppy)
+                        _floppy_comp ${cur}
+                        ;;
+                    *)
+                        items=(--delete)
+                        _get_excluded_items "${items[@]}"
+                        COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+                        ;;
+                esac
+            fi
             ;;
         controlvm)
+            if [[ ${prev} == ${cmd} ]]; then
+                _vms_comp runningvms ${cur}
+            else
+                local items=(acpipowerbutton acpisleepbutton clipboard
+                cpuexecutioncap draganddrop guestmemoryballoon
+                keyboardputscancode natpf1 nic1 nicpromisc1 nicproperty1
+                nictrace1 nictracefile1 natpf2 nic2 nicpromisc2 nicproperty2
+                nictrace2 nictracefile2 natpf3 nic3 nicpromisc3 nicproperty3
+                nictrace3 nictracefile3 natpf4 nic4 nicpromisc4 nicproperty4
+                nictrace4 nictracefile4 natpf5 nic5 nicpromisc5 nicproperty5
+                nictrace5 nictracefile5 natpf6 nic6 nicpromisc6 nicproperty6
+                nictrace6 nictracefile6 natpf7 nic7 nicpromisc7 nicproperty7
+                nictrace7 nictracefile7 natpf8 nic8 nicpromisc8 nicproperty8
+                nictrace8 pause plugcpu poweroff reset resume savestate
+                screenshotpng setcredentials setlinkstate1 setlinkstate2
+                setlinkstate3 setlinkstate4 setlinkstate5 setlinkstate6
+                setlinkstate7 setlinkstate8 setvideomodehint teleport unplugcpu
+                usbattach usbdetach vcpenabled vcpscreens vrde vrdeport
+                vrdeproperty vrdevideochannelquality webcam)
+
+                _find_item_name 2
+                subcommand=${COMP_WORDS[$((index+1))]}
+
+                if [[ " ${items[@]} " == *" $subcommand "* ]]; then
+                    case "${subcommand}" in
+                        nictracefile[1-8])
+                            [[ ${prev} == "nictracefile"* ]] && \
+                                COMPREPLY=( $(compgen -f -- ${cur}) )
+                            ;;
+                        nictrace[1-8])
+                            [[ ${prev} == "nictrace"* ]] && \
+                                COMPREPLY=( $(compgen -W "on off" -- ${cur}) )
+                            ;;
+                        nicpromisc[1-8])
+                            [[ ${prev} == "nicpromisc"* ]] && \
+                                COMPREPLY=( $(compgen -W "deny allow-vms
+                                allow-all" -- ${cur}) )
+                            ;;
+                        nic[1-8])
+                            [[ ${prev} == "nic"* ]] && \
+                                COMPREPLY=( $(compgen -W "null nat bridged intnet
+                                hostonly generic natnetwork" -- ${cur}) )
+                            ;;
+                        natpf[1-8])
+                            [[ ${prev} == "natpf"* ]] && \
+                                COMPREPLY=( $(compgen -W "delete tcp
+                                udp" -- ${cur}) )
+                            ;;
+                        setlinkstate[1-8])
+                            [[ ${prev} == "setlinkstate"* ]] && \
+                                COMPREPLY=( $(compgen -W "on off" -- ${cur}) )
+                            ;;
+                        clipboard)
+                            [[ ${prev} == "clipboard" ]] && \
+                                COMPREPLY=( $(compgen -W "disabled hosttoguest
+                                guesttohost bidirectional" -- ${cur}) )
+                            ;;
+                        draganddrop)
+                            [[ ${prev} == "draganddrop" ]] && \
+                                COMPREPLY=( $(compgen -W "disabled
+                                hosttoguest" -- ${cur}) )
+                            ;;
+                        vrde|vcpenabled)
+                            [[ ${prev} == "vrde" ||
+                            ${prev} == "vcpenabled" ]] && \
+                                COMPREPLY=( $(compgen -W "on off" -- ${cur}) )
+                            ;;
+                        vcpscreens)
+                            [[ ${prev} == "vcpscreens" ]] && \
+                                COMPREPLY=( $(compgen -W "all none" -- ${cur}) )
+                            ;;
+                        setcredentials)
+                            tmp=(--passwordfile --allowlocallogon)
+                            _get_excluded_items "${tmp[@]}"
+                            COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+                            ;;
+                        teleport)
+                            tmp=(--host --port --maxdowntime --passwordfile
+                            --password)
+                            _get_excluded_items "${tmp[@]}"
+                            COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+                            ;;
+                        webcam)
+                            [[ ${prev} == "webcam" ]] && \
+                                COMPREPLY=( $(compgen -W "attach detach
+                                list" -- ${cur}) )
+                            [[ ${prev} == "detach" ]] && \
+                                _webcam_comp ${cur}
+                            ;;
+                    esac
+                else
+                    [[ ${#COMPREPLY[@]} -eq 0 ]] && \
+                            COMPREPLY=( $(compgen -W "${items[*]}" -- ${cur}) )
+                fi
+            fi
             ;;
         convertfromraw)
             ;;
