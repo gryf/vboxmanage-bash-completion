@@ -27,7 +27,7 @@
 # [ ] guestproperty
 # [ ] hostonlyif
 # [ ] import
-# [ ] list
+# [x] list
 # [ ] metrics
 # [ ] modifyhd
 # [ ] modifyvm  - a LOT options missing
@@ -36,8 +36,8 @@
 # [ ] setextradata
 # [ ] setproperty
 # [ ] sharedfolder
-# [ ] showhdinfo
-# [ ] showvminfo
+# [x] showhdinfo
+# [x] showvminfo
 # [ ] snapshot
 # [ ] startvm
 # [ ] storageattach  - no all options yet
@@ -251,6 +251,36 @@ _VBoxManage() {
         do
             [[ ${item^^} == ${cur^^}* ]] && COMPREPLY+=("$item")
         done
+    }
+
+    _webcam_avail_comp() {
+        local devs cur=$1
+        local item
+
+        _find_item_name 2
+        devs=$(VBoxManage list webcams | \
+            grep dev | \
+            tr '\n' ' ' | \
+            sed 's/|s$//')
+        read -ra devs <<< "$devs"
+
+        for item in "${devs[@]}"
+        do
+            [[ ${item^^} == ${cur^^}* ]] && COMPREPLY+=("$item")
+        done
+    }
+
+    _list_comp() {
+        local list
+        list=$(VBoxManage list | \
+            grep '|' | \
+            sed 's/\[.*\]//g'| \
+            sed 's/VBoxManage list//' | \
+            tr "\\n" " " | \
+            sed 's/$/\n/' | \
+            sed 's/\s\+//g' | \
+            sed 's/|/ /g')
+        COMPREPLY=( $(compgen -W "$list" -- ${cur}) )
     }
 
     COMP_WORDBREAKS=${COMP_WORDBREAKS//|/}  # remove pipe from comp word breaks
@@ -492,6 +522,8 @@ _VBoxManage() {
                                 list" -- ${cur}) )
                             [[ ${prev} == "detach" ]] && \
                                 _webcam_comp ${cur}
+                            [[ ${prev} == "attach" ]] && \
+                                _webcam_avail_comp ${cur}
                             ;;
                     esac
                 else
@@ -527,6 +559,18 @@ _VBoxManage() {
         import)
             ;;
         list)
+            if [[ ${prev} == ${cmd} ]]; then
+                _list_comp ${cur}
+            else
+                case "${prev}" in
+                    --long|-l)
+                        COMPREPLY=()
+                        ;;
+                    *)
+                        COMPREPLY=( $(compgen -W "-l --long" -- ${cur}) )
+                        ;;
+                esac
+            fi
             ;;
         metrics)
             ;;
@@ -545,8 +589,25 @@ _VBoxManage() {
         sharedfolder)
             ;;
         showhdinfo)
+            _hdd_comp ${cur}
             ;;
         showvminfo)
+            if [[ ${prev} == ${cmd} ]]; then
+                _vms_comp vms ${cur}
+            else
+                if [[ " ${COMP_WORDS[@]} " == *" --log "* ]]; then
+                    COMPREPLY=()
+                elif [[ " ${COMP_WORDS[@]} " == *" --details "* ||
+                    " ${COMP_WORDS[@]} " == *" --machinereadable "*  ]]; then
+                    local items=(--details --machinereadable)
+                    _get_excluded_items "${items[@]}"
+                    COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+                else
+                    local items=(--details --machinereadable --log)
+                    _get_excluded_items "${items[@]}"
+                    COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+                fi
+            fi
             ;;
         snapshot)
             ;;
