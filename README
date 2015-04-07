@@ -1,3 +1,11 @@
 VBoxManage bash completion script.
 
-This is improved version of the completion by Sebastian T. Hafner
+This version of the completion was initially based on Sebastian T. Hafner 
+script. However, in some point of time I've decided to revrite it almost from 
+scratch.
+
+Current version of script was written and tested against VBoxManage in version 
+4.3.18, and supports dcommands:
+
+- adoptstate
+- bandwidthctl
