@@ -11,7 +11,15 @@ Current version of script was written and tested against VBoxManage in version
 - bandwidthctl
 - clonehd
 - clonevm
+- closemedium
 - controlvm
+- convertfromraw
 - list
 - showhdinfo
 - showvminfo
+- snapshot
+- startvm
+- storageattach
+- storagectl
+- unregistervm
+- usbfilter

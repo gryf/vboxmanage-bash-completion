@@ -12,9 +12,9 @@
 # [x] bandwidthctl
 # [x] clonehd
 # [x] clonevm
-# [ ] closemedium
+# [x] closemedium
 # [x] controlvm
-# [ ] convertfromraw
+# [x] convertfromraw
 # [ ] createhd
 # [ ] createvm
 # [ ] debugvm
@@ -38,12 +38,12 @@
 # [ ] sharedfolder
 # [x] showhdinfo
 # [x] showvminfo
-# [ ] snapshot
-# [ ] startvm
-# [ ] storageattach  - no all options yet
-# [ ] storagectl
-# [ ] unregistervm
-# [ ] usbfilter
+# [x] snapshot
+# [x] startvm
+# [x] storageattach
+# [x] storagectl
+# [x] unregistervm
+# [x] usbfilter
 
 _VBoxManage() {
     local cur prev opts cmd subcommand tmp items name index result
@@ -223,6 +223,7 @@ _VBoxManage() {
         _find_item_name 2
         snap=$(VBoxManage snapshot "${name//\\/}" \
             list | \
+            grep UUID |
             awk -F ': ' '{print $2}' | \
             sed 's/ (.*//' | \
             tr '\n' '|' | \
@@ -533,6 +534,23 @@ _VBoxManage() {
             fi
             ;;
         convertfromraw)
+            local items=(--format --variant --uuid)
+
+            if [[ ${prev} == ${cmd} ]]; then
+                COMPREPLY=( $(compgen -W "${items[*]}" -- ${cur}) )
+            else
+                _get_excluded_items "${items[@]}"
+                COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+                case "${prev}" in
+                    --format)
+                        COMPREPLY=( $(compgen -W "VDI VMDK VHD" -- ${cur}) )
+                        ;;
+                    --variant)
+                        COMPREPLY=( $(compgen -W "Standard Fixed Split2G Stream
+                        ESX" -- ${cur}) )
+                        ;;
+                esac
+            fi
             ;;
         createhd)
             ;;
@@ -610,16 +628,169 @@ _VBoxManage() {
             fi
             ;;
         snapshot)
+            items=(take delete restore restorecurrent edit list showvminfo)
+            if [[ ${prev} == ${cmd} ]]; then
+                _vms_comp vms ${cur}
+            else
+                _find_item_name 2
+                subcommand=${COMP_WORDS[$((index+1))]}
+                if [[ " ${items[@]} " == *" $subcommand "* ]]; then
+                    case "${subcommand}" in
+                        take)
+                            items=(--description --live)
+                            _get_excluded_items "${items[@]}"
+                            COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+                            ;;
+                        delete|restore|showvminfo)
+                            _snapshot_comp ${cur}
+                            ;;
+                        restorecurrent)
+                            COMPREPLY=()
+                            ;;
+                        edit)
+                            if [[ ${prev} == "edit" &&
+                                ${#COMP_WORDS[@]} == 5 ]]; then
+                                _snapshot_comp ${cur}
+                                COMPREPLY+=("--current")
+                            else
+                                items=(--name --description)
+                                _get_excluded_items "${items[@]}"
+                                COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+                            fi
+                            ;;
+                        list)
+                            items=(--details --machinereadable)
+                            _get_excluded_items "${items[@]}"
+                            COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+                            ;;
+                    esac
+                else
+                    [[ ${#COMPREPLY[@]} -eq 0 ]] && \
+                        COMPREPLY=( $(compgen -W "${items[*]}" -- ${cur}) )
+                fi
+            fi
             ;;
         startvm)
+            if [[ ${prev} == ${cmd} ]]; then
+                _vms_comp vms ${cur}
+            elif [[ "${prev}" == "--type" ]]; then
+                COMPREPLY=( $(compgen -W "gui sdl headless" -- ${cur}) )
+            else
+                local items=(--type)
+                _get_excluded_items "${items[@]}"
+                COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+            fi
             ;;
         storageattach)
+            if [[ ${prev} == ${cmd} ]]; then
+                _vms_comp vms ${cur}
+            else
+                _find_item_name 2
+                local items=(--storagectl --port --device --type --medium --mtype
+                --comment --setuuid --setparentuuid --passthrough --tempeject
+                --nonrotational --discard --bandwidthgroup --forceunmount
+                --server --target --tport --lun --encodedlun --username
+                --password --initiator --intnet)
+                _get_excluded_items "${items[@]}"
+                COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+
+                case "${prev}" in
+                    --type)
+                        COMPREPLY=( $(compgen -W "dvddrive hdd fdd" -- ${cur}) )
+                        ;;
+                    --medium)
+                        COMPREPLY=()
+                        local tmp=(none emptydrive additions)
+                        _hdd_comp ${cur}
+                        _floppy_comp ${cur}
+                        _dvds_comp ${cur}
+                        for item in "${tmp[@]}"
+                        do
+                            [[ ${item^^} == ${cur^^}* ]] && COMPREPLY+=("$item")
+                        done
+                        ;;
+                    --mtype)
+                        COMPREPLY=( $(compgen -W "normal writethrough immutable
+                        shareable readonly multiattach" -- ${cur}) )
+                        ;;
+                    --passthrough|--tempeject|--nonrotational|--discard)
+                        COMPREPLY=( $(compgen -W "on off" -- ${cur}) )
+                        ;;
+                esac
+            fi
             ;;
         storagectl)
+            local items=(--name --add --controller --portcount --hostiocache
+            --bootable --remove)
+            if [[ ${prev} == ${cmd} ]]; then
+                _vms_comp vms ${cur}
+            else
+                _get_excluded_items "${items[@]}"
+                COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+                case "${prev}" in
+                    --add)
+                        COMPREPLY=( $(compgen -W "ide sata scsi floppy
+                        sas" -- ${cur}) )
+                        ;;
+                    --controller)
+                        COMPREPLY=( $(compgen -W "LSILogic LSILogicSAS BusLogic
+                        IntelAHCI PIIX3 PIIX4 ICH6 I82078" -- ${cur}) )
+                        ;;
+                    --bootable|--hostiocache)
+                        COMPREPLY=( $(compgen -W "on off" -- ${cur}) )
+                        ;;
+                esac
+            fi
             ;;
         unregistervm)
+            if [[ ${prev} == ${cmd} ]]; then
+                _vms_comp vms ${cur}
+            else
+                local items=(--delete)
+                _get_excluded_items "${items[@]}"
+                COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+            fi
             ;;
         usbfilter)
+            if [[ COMP_CWORD -ge 3 ]]; then
+                subcommand="${COMP_WORDS[2]}"
+                if [[ $subcommand == "${cmd}" ]]; then
+                    subcommand="${COMP_WORDS[3]}"
+                fi
+            fi
+
+            if [[ ${prev} == ${cmd} ]]; then
+                COMPREPLY=( $(compgen -W "add modify remove" -- ${cur}) )
+            else
+                case "${prev}" in
+                    --target)
+                        _vms_comp vms ${cur}
+                        COMPREPLY+=( $(compgen -W "global" -- ${cur}) )
+                        ;;
+                    --action)
+                        COMPREPLY=( $(compgen -W "ignore hold" -- ${cur}) )
+                        ;;
+                    --active|--remote)
+                        COMPREPLY=( $(compgen -W "yes no" -- ${cur}) )
+                        ;;
+                esac
+                if [[ ${#COMPREPLY[@]} -eq 0 ]]; then
+                    case "${subcommand}" in
+                        add|modify)
+                            local items=(--target --name --action --active
+                            --vendorid --productid --revision --manufacturer
+                            --product --remote --serialnumber --maskedinterfaces)
+                            _get_excluded_items "${items[@]}"
+                            COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+                            ;;
+                        remove)
+                            local items=(--target)
+                            _get_excluded_items "${items[@]}"
+                            COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+                            ;;
+                    esac
+                fi
+            fi
             ;;
     esac
 }
