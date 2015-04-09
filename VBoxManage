@@ -15,7 +15,7 @@
 # [x] closemedium
 # [x] controlvm
 # [x] convertfromraw
-# [ ] createhd
+# [x] createhd
 # [ ] createvm
 # [ ] debugvm
 # [ ] dhcpserver
@@ -553,6 +553,33 @@ _VBoxManage() {
             fi
             ;;
         createhd)
+            items=(--filename --size --sizebyte --diffparent --format --variant)
+            if [[ ${prev} == ${cmd} ]]; then
+                COMPREPLY=( $(compgen -W "${items[*]}" -- ${cur}) )
+            else
+                [[ " ${COMP_WORDS[@]} " == *" --size "* ||
+                    " ${COMP_WORDS[@]} " == *" --sizebyte "* ]] &&
+                    items=(--filename --diffparent --format --variant)
+                _get_excluded_items "${items[@]}"
+                COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+
+                case "${prev}" in
+                    --filename)
+                        COMPREPLY=( $(compgen -- ${cur}) )
+                        ;;
+                    --diffparent)
+                        COMPREPLY=()
+                        _hdd_comp ${cur}
+                        ;;
+                    --format)
+                        COMPREPLY=( $(compgen -W "VDI VMDK VHD" -- ${cur}) )
+                        ;;
+                    --variant)
+                        COMPREPLY=( $(compgen -W "Standard Fixed Split2G Stream
+                        ESX" -- ${cur}) )
+                        ;;
+                esac
+            fi
             ;;
         createvm)
             ;;
