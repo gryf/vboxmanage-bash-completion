@@ -7,8 +7,6 @@
 #
 # [1] Sebastian T. Hafner <sonix@own-hero.net>
 #
-#
-# [ ] dhcpserver
 # [ ] discardstate
 # [ ] export
 # [ ] extpack
@@ -153,6 +151,44 @@ _VBoxManage() {
         list=$(VBoxManage list ostypes | \
             egrep ^ID: | \
             sed 's/ID:\s\+//' | \
+            tr '\n' '|' | \
+            sed 's/|$//')
+        IFS='|' read -ra list <<< "$list"
+
+        for item in "${list[@]}"
+        do
+            [[ ${item^^} == ${cur^^}* ]] && COMPREPLY+=("$item")
+        done
+    }
+
+    _dhcp_comp() {
+        local cur=$1
+        local list
+        local item
+
+        list=$(VBoxManage list dhcpservers | \
+            grep NetworkName: | \
+            sed 's/NetworkName:\s\+//' | \
+            sed 's/\s/\\ /g'| \
+            tr '\n' '|' | \
+            sed 's/|$//')
+        IFS='|' read -ra list <<< "$list"
+
+        for item in "${list[@]}"
+        do
+            [[ ${item^^} == ${cur^^}* ]] && COMPREPLY+=("$item")
+        done
+    }
+
+    _hostonlyif_comp() {
+        local cur=$1
+        local list
+        local item
+
+        list=$(VBoxManage list hostonlyifs | \
+            egrep ^Name: | \
+            sed 's/Name:\s\+//' | \
+            sed 's/\s/\\ /g'| \
             tr '\n' '|' | \
             sed 's/|$//')
         IFS='|' read -ra list <<< "$list"
@@ -654,6 +690,48 @@ _VBoxManage() {
             fi
             ;;
         dhcpserver)
+            items=(add modify remove)
+            subcommand=${COMP_WORDS[2]}
+            if [[ " ${items[@]} " == *" $subcommand "* ]]; then
+                case "${subcommand}" in
+                    add|modify)
+                        items=(--ip --netmask --lowerip --upperip)
+
+                        [[ " ${COMP_WORDS[@]} " != *" --ifname"* &&
+                            " ${COMP_WORDS[@]} " != *" --netname"* ]] &&
+                            items+=(--netname --ifname)
+
+                        [[ " ${COMP_WORDS[@]} " != *" --enable"* &&
+                            " ${COMP_WORDS[@]} " != *" --disable"* ]] &&
+                            items+=(--enable --disable)
+
+                        _get_excluded_items "${items[@]}"
+                        COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+                        ;;
+                    remove)
+                        case "${prev}" in
+                            --netname)
+                                COMPREPLY=()
+                                _dhcp_comp ${cur}
+                                ;;
+                            --ifname)
+                                COMPREPLY=()
+                                _hostonlyif_comp ${cur}
+                                ;;
+                        esac
+
+                        if [[ " ${COMP_WORDS[@]} " != *" --ifname"* &&
+                            " ${COMP_WORDS[@]} " != *" --netname"* ]]; then
+                            items=(--netname --ifname)
+                            _get_excluded_items "${items[@]}"
+                            COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+                        fi
+                        ;;
+                esac
+            else
+                [[ ${#COMPREPLY[@]} -eq 0 ]] && \
+                    COMPREPLY=( $(compgen -W "${items[*]}" -- ${cur}) )
+            fi
             ;;
         discardstate)
             ;;
