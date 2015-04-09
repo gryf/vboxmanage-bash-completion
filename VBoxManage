@@ -16,7 +16,7 @@
 # [x] controlvm
 # [x] convertfromraw
 # [x] createhd
-# [ ] createvm
+# [x] createvm
 # [ ] debugvm
 # [ ] dhcpserver
 # [ ] discardstate
@@ -145,6 +145,7 @@ _VBoxManage() {
             sed 's/|/ /g')
         COMPREPLY=( $(compgen -W "$list" -- ${cur}) )
     }
+
     _group_comp() {
         local cur=$1
         local list
@@ -155,6 +156,24 @@ _VBoxManage() {
             sed 's/|$//' | \
             sed 's/\s/\\ /g'| \
             sed 's/"//g')
+        IFS='|' read -ra list <<< "$list"
+
+        for item in "${list[@]}"
+        do
+            [[ ${item^^} == ${cur^^}* ]] && COMPREPLY+=("$item")
+        done
+    }
+
+    _os_comp() {
+        local cur=$1
+        local list
+        local item
+
+        list=$(VBoxManage list ostypes | \
+            egrep ^ID: | \
+            sed 's/ID:\s\+//' | \
+            tr '\n' '|' | \
+            sed 's/|$//')
         IFS='|' read -ra list <<< "$list"
 
         for item in "${list[@]}"
@@ -582,6 +601,31 @@ _VBoxManage() {
             fi
             ;;
         createvm)
+            items=(--name --groups --ostype --register --basefolder --uuid)
+            if [[ ${prev} == ${cmd} ]]; then
+                COMPREPLY=( $(compgen -W "${items[*]}" -- ${cur}) )
+            else
+                _get_excluded_items "${items[@]}"
+                COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+
+                case "${prev}" in
+                    --groups)
+                        COMPREPLY=()
+                        _group_comp ${cur}
+                        ;;
+                    --ostype)
+                        COMPREPLY=()
+                        _os_comp ${cur}
+                        ;;
+                    --basefolder)
+                        COMPREPLY=( $(compgen -o dirnames -- ${cur}) )
+                        ;;
+                    --variant)
+                        COMPREPLY=( $(compgen -W "Standard Fixed Split2G Stream
+                        ESX" -- ${cur}) )
+                        ;;
+                esac
+            fi
             ;;
         debugvm)
             ;;

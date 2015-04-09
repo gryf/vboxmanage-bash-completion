@@ -15,6 +15,7 @@ Current version of script was written and tested against VBoxManage in version
 - controlvm
 - convertfromraw
 - createhd
+- createvm
 - list
 - showhdinfo
 - showvminfo
