@@ -8,16 +8,6 @@
 # [1] Sebastian T. Hafner <sonix@own-hero.net>
 #
 #
-# [x] adoptstate
-# [x] bandwidthctl
-# [x] clonehd
-# [x] clonevm
-# [x] closemedium
-# [x] controlvm
-# [x] convertfromraw
-# [x] createhd
-# [x] createvm
-# [ ] debugvm
 # [ ] dhcpserver
 # [ ] discardstate
 # [ ] export
@@ -27,23 +17,14 @@
 # [ ] guestproperty
 # [ ] hostonlyif
 # [ ] import
-# [x] list
 # [ ] metrics
 # [ ] modifyhd
-# [ ] modifyvm  - a LOT options missing
+# [ ] modifyvm
 # [ ] natnetwork
 # [ ] registervm
 # [ ] setextradata
 # [ ] setproperty
 # [ ] sharedfolder
-# [x] showhdinfo
-# [x] showvminfo
-# [x] snapshot
-# [x] startvm
-# [x] storageattach
-# [x] storagectl
-# [x] unregistervm
-# [x] usbfilter
 
 _VBoxManage() {
     local cur prev opts cmd subcommand tmp items name index result
@@ -192,7 +173,7 @@ _VBoxManage() {
 
         while true
         do
-            name="${NAME}${COMP_WORDS[$idx]}"
+            name="${name}${COMP_WORDS[$idx]}"
             [[ ${COMP_WORDS[$idx]} = *'"' ]] && break
 
             if [[ ${COMP_WORDS[$idx]} = '"'* || ${COMP_WORDS[$idx]} = *'\ ' ]]
@@ -628,6 +609,49 @@ _VBoxManage() {
             fi
             ;;
         debugvm)
+            items=(dumpguestcore info injectnmi log logdest logflags osdetect
+            osinfo getregisters setregisters show statistics)
+            if [[ ${prev} == ${cmd} ]]; then
+                _vms_comp runningvms ${cur}
+            else
+                _find_item_name 2
+                subcommand=${COMP_WORDS[$((index+1))]}
+                if [[ " ${items[@]} " == *" $subcommand "* ]]; then
+                    case "${subcommand}" in
+                        dumpguestcore)
+                            _get_excluded_items "--filename"
+                            COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+                            ;;
+                        log|logdest|logflags)
+                            items=(--release --debug)
+                            _get_excluded_items "${items[@]}"
+                            COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+                            ;;
+                        getregisters|setregisters)
+                            _get_excluded_items "--cpu"
+                            COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+                            ;;
+                        show)
+                            items=(--human-readable --sh-export --sh-eval
+                            --cmd-set)
+                            _get_excluded_items "${items[@]}"
+                            COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+                            ;;
+                        statistics)
+                            items=(--reset --pattern)
+                            _get_excluded_items "${items[@]}"
+                            COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+                            ;;
+                    esac
+                    _get_excluded_items "--descriptions"
+                    COMPREPLY+=( $(compgen -W "$result" -- ${cur}) )
+                else
+                    [[ "${prev}" == "--filename" ]] && \
+                        COMPREPLY=( $(compgen -- ${cur}) )
+                    [[ ${#COMPREPLY[@]} -eq 0 ]] && \
+                        COMPREPLY=( $(compgen -W "${items[*]}" -- ${cur}) )
+                fi
+            fi
             ;;
         dhcpserver)
             ;;
