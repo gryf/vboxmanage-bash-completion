@@ -18,6 +18,7 @@ Current version of script was written and tested against VBoxManage in version
 - createvm
 - debugvm
 - dhcpserver
+- discardstate
 - list
 - showhdinfo
 - showvminfo

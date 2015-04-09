@@ -7,7 +7,6 @@
 #
 # [1] Sebastian T. Hafner <sonix@own-hero.net>
 #
-# [ ] discardstate
 # [ ] export
 # [ ] extpack
 # [ ] getextradata
@@ -100,6 +99,28 @@ _VBoxManage() {
         compopt -o filenames
         vms=$(VBoxManage list $command | \
             awk -F ' {' '{ print $1 }' | \
+            tr '\n' '|' | \
+            sed 's/|$//' | \
+            sed 's/"//g')
+        IFS='|' read -ra vms <<< "$vms"
+        for item in "${vms[@]}"
+        do
+            [[ ${item^^} == ${cur^^}* ]] && COMPREPLY+=("$item")
+        done
+    }
+
+    _vms_state_comp() {
+        local command=$1
+        local cur=$2
+        local vms
+        local item
+
+        compopt -o filenames
+
+        vms=$(VBoxManage list vms -l | \
+            egrep '^Name|State' | \
+            egrep -B1 'State:\s+saved' | \
+            grep Name |sed 's/Name:\s\+//' | \
             tr '\n' '|' | \
             sed 's/|$//' | \
             sed 's/"//g')
@@ -348,7 +369,10 @@ _VBoxManage() {
 
     case "${cmd}" in
         adoptstate)
-            _vms_comp vms ${cur}
+            _find_item_name 2
+            COMPREPLY=()
+            [[ -z "${name}" ]] &&
+                _vms_state_comp ${cur}
             ;;
         bandwidthctl)
             local items=(add set remove list)
@@ -734,6 +758,10 @@ _VBoxManage() {
             fi
             ;;
         discardstate)
+            _find_item_name 2
+            COMPREPLY=()
+            [[ -z "${name}" ]] &&
+                _vms_state_comp ${cur}
             ;;
         "export")
             ;;
