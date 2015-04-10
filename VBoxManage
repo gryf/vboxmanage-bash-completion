@@ -7,7 +7,6 @@
 #
 # [1] Sebastian T. Hafner <sonix@own-hero.net>
 #
-# [ ] getextradata
 # [ ] guestcontrol
 # [ ] guestproperty
 # [ ] hostonlyif
@@ -816,6 +815,13 @@ _VBoxManage() {
             fi
             ;;
         getextradata)
+            if [[ ${prev} == ${cmd} ]]; then
+                COMPREPLY=( $(compgen -W "global" -- ${cur}) )
+                _vms_comp vms ${cur}
+            else
+                _get_excluded_items "enumerate"
+                COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+            fi
             ;;
         guestcontrol)
             ;;
