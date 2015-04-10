@@ -7,7 +7,6 @@
 #
 # [1] Sebastian T. Hafner <sonix@own-hero.net>
 #
-# [ ] extpack
 # [ ] getextradata
 # [ ] guestcontrol
 # [ ] guestproperty
@@ -792,6 +791,29 @@ _VBoxManage() {
             fi
             ;;
         extpack)
+            items=(install uninstall cleanup)
+            subcommand=${COMP_WORDS[2]}
+            if [[ " ${items[@]} " == *" $subcommand "* ]]; then
+                case "${subcommand}" in
+                    install)
+                        _get_excluded_items "--replace"
+                        COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+                        ;;
+                    uninstall)
+                        _get_excluded_items "--force"
+                        COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+                        ;;
+                    cleanup)
+                        COMPREPLY=()
+                        ;;
+                    --replace)
+                        COMPREPLY=()
+                        ;;
+                esac
+            else
+                [[ ${#COMPREPLY[@]} -eq 0 ]] && \
+                    COMPREPLY=( $(compgen -W "${items[*]}" -- ${cur}) )
+            fi
             ;;
         getextradata)
             ;;

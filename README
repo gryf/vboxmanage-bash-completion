@@ -20,6 +20,7 @@ Current version of script was written and tested against VBoxManage in version
 - dhcpserver
 - discardstate
 - export
+- extpack
 - list
 - showhdinfo
 - showvminfo
