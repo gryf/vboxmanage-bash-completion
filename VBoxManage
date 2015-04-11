@@ -16,12 +16,43 @@
 # [ ] modifyvm
 # [ ] natnetwork
 # [ ] registervm
-# [ ] setextradata
 # [ ] setproperty
-# [ ] sharedfolder
 
 _VBoxManage() {
     local cur prev opts cmd subcommand tmp items name index result
+
+    # Check the COMP_WORDS looking for name of the vm. If name contain space or
+    # is enclosed in quotes, glue name together in variable name. Variable index
+    # will hold the last index of COMP_WORDS array which contain the end of the
+    # name.
+    _find_item_name() {
+        local idx=$1
+        name=""
+
+        while true
+        do
+            name="${name}${COMP_WORDS[$idx]}"
+            [[ ${COMP_WORDS[$idx]} = *'"' ]] && break
+
+            if [[ ${COMP_WORDS[$idx]} = '"'* || ${COMP_WORDS[$idx]} = *'\ ' ]]
+            then
+                idx=$((++idx))
+                continue
+            fi
+            break
+        done
+        index=$idx
+    }
+
+    _get_excluded_items() {
+        local i
+
+        result=""
+        for i in $@; do
+            [[ " ${COMP_WORDS[@]} " == *" $i "* ]] && continue
+            result="$result $i"
+        done
+    }
 
     # Generate registered hard disk files.
     # NOTE: This function may introduce some quirks, if there is a space or
@@ -217,39 +248,6 @@ _VBoxManage() {
         done
     }
 
-    # Check the COMP_WORDS looking for name of the vm. If name contain space or
-    # is enclosed in quotes, glue name together in variable name. Variable index
-    # will hold the last index of COMP_WORDS array which contain the end of the
-    # name.
-    _find_item_name() {
-        local idx=$1
-        name=""
-
-        while true
-        do
-            name="${name}${COMP_WORDS[$idx]}"
-            [[ ${COMP_WORDS[$idx]} = *'"' ]] && break
-
-            if [[ ${COMP_WORDS[$idx]} = '"'* || ${COMP_WORDS[$idx]} = *'\ ' ]]
-            then
-                idx=$((++idx))
-                continue
-            fi
-            break
-        done
-        index=$idx
-    }
-
-    _get_excluded_items() {
-        local i
-
-        result=""
-        for i in $@; do
-            [[ " ${COMP_WORDS[@]} " == *" $i "* ]] && continue
-            result="$result $i"
-        done
-    }
-
     _bandwidthctl_comp() {
         local rules cur=$1
         local item
@@ -337,6 +335,28 @@ _VBoxManage() {
             sed 's/|/ /g')
         COMPREPLY=( $(compgen -W "$list" -- ${cur}) )
     }
+
+    _sharedfolder_comp() {
+        local vm=$1
+        local cur=$2
+        local folders
+        local item
+
+        folders=$(VBoxManage showvminfo ${vm} --machinereadable | \
+            grep SharedFolderName | \
+            awk -F= '{print $2}' | \
+            sed 's/\s/\\ /g'| \
+            tr '\n' '|' | \
+            sed 's/|$//' | \
+            sed 's/"//g')
+        IFS='|' read -ra folders <<< "$folders"
+
+        for item in "${folders[@]}"
+        do
+            [[ ${item^^} == ${cur^^}* ]] && COMPREPLY+=("$item")
+        done
+    }
+
 
     COMP_WORDBREAKS=${COMP_WORDBREAKS//|/}  # remove pipe from comp word breaks
     COMPREPLY=()
@@ -856,13 +876,53 @@ _VBoxManage() {
         registervm)
             ;;
         setextradata)
+            if [[ ${prev} == ${cmd} ]]; then
+                COMPREPLY=( $(compgen -W "global" -- ${cur}) )
+                _vms_comp vms ${cur}
+            fi
             ;;
         setproperty)
             ;;
         sharedfolder)
+            items=(add remove)
+            subcommand=${COMP_WORDS[2]}
+            case "${prev}" in
+                add|remove)
+                    _vms_comp vms ${cur}
+                    ;;
+                --hostpath)
+                    COMPREPLY=( $(compgen -o dirnames -- ${cur}) )
+                    ;;
+                --name)
+                    if [[ ${subcommand} == "remove" ]]; then
+                        _find_item_name 3
+                        _sharedfolder_comp "${name}" "${cur}"
+                    fi
+                    ;;
+            esac
+            if [[ ${#COMPREPLY[@]} -eq 0 ]]; then
+                case "${subcommand}" in
+                    add)
+                        items=(--name --hostpath --transient --readonly
+                        --automount)
+                        _get_excluded_items "${items[@]}"
+                        COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+                        ;;
+                    remove)
+                        items=(--name --transient)
+                        _get_excluded_items "${items[@]}"
+                        COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+                        ;;
+                esac
+            fi
+
+            [[ ${#COMPREPLY[@]} -eq 0 ]] && \
+                COMPREPLY=( $(compgen -W "${items[*]}" -- ${cur}) )
             ;;
         showhdinfo)
-            _hdd_comp ${cur}
+            if [[ ${prev} == ${cmd} ]]; then
+                _hdd_comp ${cur}
+            fi
             ;;
         showvminfo)
             if [[ ${prev} == ${cmd} ]]; then

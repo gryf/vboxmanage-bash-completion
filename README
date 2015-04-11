@@ -23,6 +23,8 @@ Current version of script was written and tested against VBoxManage in version
 - extpack
 - getextradata
 - list
+- setextradata
+- sharedfolder
 - showhdinfo
 - showvminfo
 - snapshot
