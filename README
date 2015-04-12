@@ -22,8 +22,11 @@ Current version of script was written and tested against VBoxManage in version
 - export
 - extpack
 - getextradata
+- guestcontrol
 - list
+- registervm
 - setextradata
+- setproperty
 - sharedfolder
 - showhdinfo
 - showvminfo
