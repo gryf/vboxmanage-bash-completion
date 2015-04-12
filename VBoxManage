@@ -7,10 +7,8 @@
 #
 # [1] Sebastian T. Hafner <sonix@own-hero.net>
 #
-# [ ] metrics
 # [ ] modifyhd
 # [ ] modifyvm
-# [ ] natnetwork
 
 _VBoxManage() {
     local cur prev opts cmd subcommand tmp items name index result
@@ -346,6 +344,25 @@ _VBoxManage() {
         IFS='|' read -ra folders <<< "$folders"
 
         for item in "${folders[@]}"
+        do
+            [[ ${item^^} == ${cur^^}* ]] && COMPREPLY+=("$item")
+        done
+    }
+
+    _natnet_comp() {
+        local cur=$1
+        local list
+        local item
+
+        list=$(VBoxManage list natnets | \
+            grep NetworkName: | \
+            sed 's/NetworkName:\s\+//' | \
+            sed 's/\s/\\ /g'| \
+            tr '\n' '|' | \
+            sed 's/|$//')
+        IFS='|' read -ra list <<< "$list"
+
+        for item in "${list[@]}"
         do
             [[ ${item^^} == ${cur^^}* ]] && COMPREPLY+=("$item")
         done
@@ -1104,12 +1121,94 @@ _VBoxManage() {
             fi
             ;;
         metrics)
+            items=(list setup query enable disable collect)
+            subcommand=${COMP_WORDS[2]}
+            if [[ " ${items[@]} " == *" $subcommand "* ]]; then
+                case "${subcommand}" in
+                    list|query)
+                        if [[ "${subcommand}" == "${prev}" ]]; then
+                            _vms_comp vms ${cur}
+                            items=(host)
+                            _get_excluded_items "${items[@]}"
+                            COMPREPLY+=( $(compgen -W '$result' -- ${cur}) )
+                        fi
+                        ;;
+                    setup)
+                        if [[ "${subcommand}" == "${prev}" ]]; then
+                            _vms_comp vms ${cur}
+                            items=(host)
+                            _get_excluded_items "${items[@]}"
+                            COMPREPLY+=( $(compgen -W '$result' -- ${cur}) )
+                        else
+                            items=(--period --samples --list)
+                            _get_excluded_items "${items[@]}"
+                            COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+                        fi
+                        ;;
+                    enable|disable)
+                        if [[ "${subcommand}" == "${prev}" ]]; then
+                            _vms_comp vms ${cur}
+                            items=(host)
+                            _get_excluded_items "${items[@]}"
+                            COMPREPLY+=( $(compgen -W '$result' -- ${cur}) )
+                        else
+                            _get_excluded_items "--list"
+                            COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+                        fi
+                        ;;
+                    collect)
+                        if [[ "${subcommand}" == "${prev}" ]]; then
+                            _vms_comp vms ${cur}
+                            items=(host)
+                            _get_excluded_items "${items[@]}"
+                            COMPREPLY+=( $(compgen -W '$result' -- ${cur}) )
+                        else
+                            items=(--period --samples --detach --list)
+                            _get_excluded_items "${items[@]}"
+                            COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+                        fi
+
+                        ;;
+                esac
+            else
+                [[ ${#COMPREPLY[@]} -eq 0 ]] && \
+                    COMPREPLY=( $(compgen -W "${items[*]}" -- ${cur}) )
+            fi
+
             ;;
         modifyhd)
             ;;
         modifyvm)
             ;;
         natnetwork)
+            items=(add remove modify start stop)
+            subcommand=${COMP_WORDS[2]}
+            if [[ "${prev}" == "--netname" ]]; then
+                _natnet_comp ${cur}
+            elif [[ "${prev}" == "--dhcp" ]]; then
+                COMPREPLY=( $(compgen -W "on off" -- ${cur}) )
+            elif [[ " ${items[@]} " == *" $subcommand "* ]]; then
+                case "${subcommand}" in
+                    add|modify)
+                        items=(--netname --network --dhcp --port-forward-4
+                        --loopback-4 --ipv6 --port-forward-6 --loopback-6)
+
+                        [[ " ${COMP_WORDS[@]} " != *" --enable"* &&
+                            " ${COMP_WORDS[@]} " != *" --disable"* ]] &&
+                            items+=(--enable --disable)
+
+                        _get_excluded_items "${items[@]}"
+                        COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+                        ;;
+                    start|stop|remove)
+                        _get_excluded_items "--netname"
+                        COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+                        ;;
+                esac
+            else
+                [[ ${#COMPREPLY[@]} -eq 0 ]] && \
+                    COMPREPLY=( $(compgen -W "${items[*]}" -- ${cur}) )
+            fi
             ;;
         registervm)
             if [[ ${prev} == ${cmd} ]]; then
