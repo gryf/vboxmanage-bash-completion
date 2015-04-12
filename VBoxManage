@@ -7,9 +7,6 @@
 #
 # [1] Sebastian T. Hafner <sonix@own-hero.net>
 #
-# [ ] guestproperty
-# [ ] hostonlyif
-# [ ] import
 # [ ] metrics
 # [ ] modifyhd
 # [ ] modifyvm
@@ -1007,10 +1004,90 @@ _VBoxManage() {
             fi
             ;;
         guestproperty)
+            items=(get set delete unset enumerate wait)
+            subcommand=${COMP_WORDS[2]}
+
+            if [[ "${prev}" == "${subcommand}" ]]; then
+                _vms_comp vms ${cur}
+            elif [[ " ${items[@]} " == *" $subcommand "* ]]; then
+                case "${subcommand}" in
+                    get)
+                        _get_excluded_items "--verbose"
+                        COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+                        ;;
+                    set)
+                        _get_excluded_items "--flags"
+                        COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+                        ;;
+                    enumerate)
+                        _get_excluded_items "--patterns"
+                        COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+                        ;;
+                    wait)
+                        items=(--timeout --fail-on-timeout)
+                        _get_excluded_items "${items[@]}"
+                        COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+                        ;;
+                esac
+            else
+                [[ ${#COMPREPLY[@]} -eq 0 ]] && \
+                    COMPREPLY=( $(compgen -W "${items[*]}" -- ${cur}) )
+            fi
             ;;
         hostonlyif)
+            items=(ipconfig create remove)
+            subcommand=${COMP_WORDS[2]}
+            case "${prev}" in
+                ipconfig|remove)
+                    _hostonlyif_comp ${cur}
+                    ;;
+            esac
+
+            if [[ ${#COMPREPLY[@]} -eq 0  && \
+                " ${items[@]} " == *" $subcommand "* ]]; then
+                case "${subcommand}" in
+                    ipconfig)
+                        items=(--dhcp --ip --ipv6 --netmask --netmasklengthv6)
+                        [[ " ${COMP_WORDS[@]} " == *" --dhcp "* ]] && items=()
+                        [[ " ${COMP_WORDS[@]} " == *" --ip "* ]] &&
+                            items=(--netmask)
+                        [[ " ${COMP_WORDS[@]} " == *" --netmask "* ]] &&
+                            items=(--ip)
+                        [[ " ${COMP_WORDS[@]} " == *" --ipv6 "* ]] &&
+                            items=(--netmasklengthv6)
+                        [[ " ${COMP_WORDS[@]} " == *" --netmasklengthv6 "* ]] &&
+                            items=(--ipv6)
+
+                        _get_excluded_items "${items[@]}"
+                        COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+                        ;;
+                esac
+            else
+                [[ ${COMP_CWORD} -eq 2 ]] && \
+                    COMPREPLY=( $(compgen -W "${items[*]}" -- ${cur}) )
+            fi
             ;;
         import)
+            items=(--options)
+            if [[ "${prev}" == "import" ]]; then
+                COMPREPLY=( $(compgen -o plusdirs -f -X '!@(*.ovf|*.ova)' \
+                    -- ${cur}) )
+            else
+                case "${prev}" in
+                    --options)
+                        COMPREPLY=( $(compgen -W "keepallmacs keepnatmacs" \
+                            -- ${cur}) )
+                        ;;
+                esac
+                [[ " ${COMP_WORDS[@]} " != *" --dry-run"* &&
+                    " ${COMP_WORDS[@]} " != *" -n"* ]] &&
+                    items+=(-n --dry-run)
+
+                if [[ ${#COMPREPLY[@]} -eq 0 ]]; then
+                    _get_excluded_items "${items[@]}"
+                    COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+                fi
+            fi
             ;;
         list)
             if [[ ${prev} == ${cmd} ]]; then

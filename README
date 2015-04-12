@@ -23,6 +23,9 @@ Current version of script was written and tested against VBoxManage in version
 - extpack
 - getextradata
 - guestcontrol
+- guestproperty
+- hostonlyif
+- import
 - list
 - registervm
 - setextradata
