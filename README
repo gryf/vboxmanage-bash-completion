@@ -28,6 +28,7 @@ Current version of script was written and tested against VBoxManage in version
 - import
 - list
 - metrics
+- modifyhd
 - natnetwork
 - registervm
 - setextradata

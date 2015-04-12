@@ -7,7 +7,6 @@
 #
 # [1] Sebastian T. Hafner <sonix@own-hero.net>
 #
-# [ ] modifyhd
 # [ ] modifyvm
 
 _VBoxManage() {
@@ -1177,6 +1176,23 @@ _VBoxManage() {
 
             ;;
         modifyhd)
+            if [[ ${prev} == ${cmd} ]]; then
+                _hdd_comp ${cur}
+            else
+                _find_item_name 2
+                items=(--type --autoreset --property --compact --resize)
+                _get_excluded_items "${items[@]}"
+                COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+                case "${prev}" in
+                    --type)
+                        COMPREPLY=( $(compgen -W "normal writethrough immutable
+                        shareable readonly multiattach" -- ${cur}) )
+                        ;;
+                    --autoreset)
+                        COMPREPLY=( $(compgen -W "on off" -- ${cur}) )
+                        ;;
+                esac
+            fi
             ;;
         modifyvm)
             ;;
