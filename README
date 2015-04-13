@@ -5,40 +5,4 @@ script. However, in some point of time I've decided to rewrite it almost from
 scratch.
 
 Current version of script was written and tested against VBoxManage in version
-4.3.18, and supports commands:
-
-- adoptstate
-- bandwidthctl
-- clonehd
-- clonevm
-- closemedium
-- controlvm
-- convertfromraw
-- createhd
-- createvm
-- debugvm
-- dhcpserver
-- discardstate
-- export
-- extpack
-- getextradata
-- guestcontrol
-- guestproperty
-- hostonlyif
-- import
-- list
-- metrics
-- modifyhd
-- natnetwork
-- registervm
-- setextradata
-- setproperty
-- sharedfolder
-- showhdinfo
-- showvminfo
-- snapshot
-- startvm
-- storageattach
-- storagectl
-- unregistervm
-- usbfilter
+4.3.18, and supports all commands (in some extent ;)).

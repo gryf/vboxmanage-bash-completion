@@ -1,13 +1,6 @@
-# bash command-line completion for virtualbox
+# bash command-line completion for VBoxManage command
 #
-# This version of bash completion was born due to the need of fast and easy
-# access to the maze of commands and parameters VBoxManage provides. Based on
-# Sebastian[1] script I've managed to improve it and adapt to newest stable
-# version available in Gentoo Portage.
-#
-# [1] Sebastian T. Hafner <sonix@own-hero.net>
-#
-# [ ] modifyvm
+# Author: Roman 'gryf' Dobosz <gryf73@gmail.com>
 
 _VBoxManage() {
     local cur prev opts cmd subcommand tmp items name index result
@@ -367,13 +360,50 @@ _VBoxManage() {
         done
     }
 
+    _bridgedif_comp() {
+        local cur=$1
+        local list
+        local item
+
+        list=$(VBoxManage list bridgedifs | \
+            egrep ^Name: | \
+            sed 's/Name:\s\+//' | \
+            sed 's/\s/\\ /g'| \
+            tr '\n' '|' | \
+            sed 's/|$//')
+        IFS='|' read -ra list <<< "$list"
+
+        for item in "${list[@]}"
+        do
+            [[ ${item^^} == ${cur^^}* ]] && COMPREPLY+=("$item")
+        done
+    }
+
+    _intnet_comp() {
+        local cur=$1
+        local list
+        local item
+
+        list=$(VBoxManage list intnets| \
+            egrep ^Name: | \
+            sed 's/Name:\s\+//' | \
+            sed 's/\s/\\ /g'| \
+            tr '\n' '|' | \
+            sed 's/|$//')
+        IFS='|' read -ra list <<< "$list"
+
+        for item in "${list[@]}"
+        do
+            [[ ${item^^} == ${cur^^}* ]] && COMPREPLY+=("$item")
+        done
+    }
+
 
     COMP_WORDBREAKS=${COMP_WORDBREAKS//|/}  # remove pipe from comp word breaks
     COMPREPLY=()
 
     cur="${COMP_WORDS[COMP_CWORD]}"
     prev="${COMP_WORDS[COMP_CWORD-1]}"
-    lastbutone="${COMP_WORDS[COMP_CWORD-2]}"
     if [[ COMP_CWORD -ge 2 ]]; then
         cmd="${COMP_WORDS[1]}"
         if [[ $cmd == "-q" ]]; then
@@ -1195,6 +1225,229 @@ _VBoxManage() {
             fi
             ;;
         modifyvm)
+            items=(--name --groups --description --ostype --iconfile --memory
+            --pagefusion --vram --acpi --pciattach --pcidetach --ioapic --hpet
+            --triplefaultreset --hwvirtex --nestedpaging --largepages --vtxvpid
+            --vtxux --pae --longmode --synthcpu --cpuidset --cpuidremove
+            --cpuidremoveall --hardwareuuid --cpus --cpuhotplug --plugcpu
+            --unplugcpu --cpuexecutioncap --rtcuseutc --graphicscontroller
+            --monitorcount --accelerate3d --accelerate2dvideo --firmware
+            --chipset --bioslogofadein --bioslogofadeout --bioslogodisplaytime
+            --bioslogoimagepath --biosbootmenu --biossystemtimeoffset
+            --biospxedebug --boot1 --boot2 --boot3 --boot4 --nicbootprio1
+            --nicbandwidthgroup1 --bridgeadapter1 --bridgeadapter2
+            --bridgeadapter3 --bridgeadapter4 --bridgeadapter5 --bridgeadapter6
+            --bridgeadapter7 --bridgeadapter8 --hostonlyadapter1
+            --hostonlyadapter2 --hostonlyadapter3 --hostonlyadapter4
+            --hostonlyadapter5 --hostonlyadapter6 --hostonlyadapter7
+            --hostonlyadapter8 --intnet1 --intnet2 --intnet3 --intnet4 --intnet5
+            --intnet6 --intnet7 --intnet8 --nat-network1 --nicgenericdrv1
+            --natnet1 --natsettings1 --nat-network2 --nicgenericdrv2 --natnet2
+            --natsettings2 --nat-network3 --nicgenericdrv3 --natnet3
+            --natsettings3 --nat-network4 --nicgenericdrv4 --natnet4
+            --natsettings4 --nat-network5 --nicgenericdrv5 --natnet5
+            --natsettings5 --nat-network6 --nicgenericdrv6 --natnet6
+            --natsettings6 --nat-network7 --nicgenericdrv7 --natnet7
+            --natsettings7 --nat-network8 --nicgenericdrv8 --natnet8
+            --natsettings8 --natpf1 --nic1 --nicpromisc1 --nicproperty1
+            --nictrace1 --nictracefile1 --natpf2 --nic2 --nicpromisc2
+            --nicproperty2 --nictrace2 --nictracefile2 --natpf3 --nic3
+            --nicpromisc3 --nicproperty3 --nictrace3 --nictracefile3 --natpf4
+            --nic4 --nicpromisc4 --nicproperty4 --nictrace4 --nictracefile4
+            --natpf5 --nic5 --nicpromisc5 --nicproperty5 --nictrace5
+            --nictracefile5 --natpf6 --nic6 --nicpromisc6 --nicproperty6
+            --nictrace6 --nictracefile6 --natpf7 --nic7 --nicpromisc7
+            --nicproperty7 --nictrace7 --nictracefile7 --natpf8 --nic8
+            --nicpromisc8 --nicproperty8 --nictrace8 --nictype1 --nictype2
+            --nictype3 --nictype4 --nictype5 --nictype6 --nictype7 --nictype8
+            --cableconnected1 --cableconnected2 --cableconnected3
+            --cableconnected4 --cableconnected5 --cableconnected6
+            --cableconnected7 --cableconnected8 --nicspeed1 --nicspeed2
+            --nicspeed3 --nicspeed4 --nicspeed5 --nicspeed6 --nicspeed7
+            --nicspeed8 --nattftpprefix1 --nattftpprefix2 --nattftpprefix3
+            --nattftpprefix4 --nattftpprefix5 --nattftpprefix6 --nattftpprefix7
+            --nattftpprefix8 --nattftpfile1 --nattftpfile2 --nattftpfile3
+            --nattftpfile4 --nattftpfile5 --nattftpfile6 --nattftpfile7
+            --nattftpfile8 --nattftpserver1 --nattftpserver2 --nattftpserver3
+            --nattftpserver4 --nattftpserver5 --nattftpserver6 --nattftpserver7
+            --nattftpserver8 --natbindip1 --natbindip2 --natbindip3 --natbindip4
+            --natbindip5 --natbindip6 --natbindip7 --natbindip8
+            --natdnspassdomain1 --natdnspassdomain2 --natdnspassdomain3
+            --natdnspassdomain4 --natdnspassdomain5 --natdnspassdomain6
+            --natdnspassdomain7 --natdnspassdomain8 --natdnsproxy1
+            --natdnsproxy2 --natdnsproxy3 --natdnsproxy4 --natdnsproxy5
+            --natdnsproxy6 --natdnsproxy7 --natdnsproxy8 --natdnshostresolver1
+            --natdnshostresolver2 --natdnshostresolver3 --natdnshostresolver4
+            --natdnshostresolver5 --natdnshostresolver6 --natdnshostresolver7
+            --natdnshostresolver8 --nataliasmode1 --nataliasmode2
+            --nataliasmode3 --nataliasmode4 --nataliasmode5 --nataliasmode6
+            --nataliasmode7 --nataliasmode8 --macaddress1 --macaddress2
+            --macaddress3 --macaddress4 --macaddress5 --macaddress6
+            --macaddress7 --macaddress8 --mouse --keyboard --uart1 --uartmode1
+            --uart2 --uartmode2 --lpt1 --lptmode1 --guestmemoryballoon --audio
+            --audiocontroller --clipboard --draganddrop --vrde --vrdeextpack
+            --vrdeproperty --vrdeport --vrdeaddress --vrdeauthtype
+            --vrdeauthlibrary --vrdemulticon --vrdereusecon --vrdevideochannel
+            --vrdevideochannelquality --usb --usbehci --snapshotfolder
+            --teleporter --teleporterport --teleporteraddress
+            --teleporterpassword --teleporterpasswordfile --tracing-enabled
+            --tracing-config --tracing-allow-vm-access --usbcardreader
+            --autostart-enabled --autostart-delay --vcpenabled --vcpscreens
+            --vcpfile --vcpwidth --vcpheight --vcprate --vcpfps
+            --defaultfrontend)
+
+            if [[ ${prev} == ${cmd} ]]; then
+                _vms_comp vms ${cur}
+            else
+                _get_excluded_items "${items[@]}"
+                COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+                case "${prev}" in
+                    --groups)
+                        COMPREPLY=()
+                        _group_comp ${cur}
+                        ;;
+                    --ostype)
+                        COMPREPLY=()
+                        _os_comp ${cur}
+                        ;;
+                    --pagefusion|--acpi|--ioapic|--hpet|--triplefaultreset|\
+                    --hwvirtex|--nestedpaging|--largepages|--vtxvpid|--vtxux|\
+                    --pae|--longmode|--synthcpu|--cpuhotplug|--rtcuseutc|\
+                    --accelerate3d|--accelerate2dvideo|--bioslogofadein|\
+                    --bioslogofadeout|--biospxedebug|--cableconnected1|\
+                    --cableconnected2|--cableconnected3|--cableconnected4|\
+                    --cableconnected5|--cableconnected6|--cableconnected7|\
+                    --cableconnected8|--nictrace1|--nictrace2|--nictrace3|\
+                    --nictrace4|--nictrace5|--nictrace6|--nictrace7|--nictrace8|\
+                    --natdnspassdomain1|--natdnspassdomain2|--natdnspassdomain3|\
+                    --natdnspassdomain4|--natdnspassdomain5|--natdnspassdomain6|\
+                    --natdnspassdomain7|--natdnspassdomain8|--natdnsproxy1|\
+                    --natdnsproxy2|--natdnsproxy3|--natdnsproxy4|--natdnsproxy5|\
+                    --natdnsproxy6|--natdnsproxy7|--natdnsproxy8|\
+                    --natdnshostresolver1|--natdnshostresolver2|\
+                    --natdnshostresolver3|--natdnshostresolver4|\
+                    --natdnshostresolver5|--natdnshostresolver6|\
+                    --natdnshostresolver7|--natdnshostresolver8|--vrde|\
+                    --vrdemulticon|--vrdereusecon|--vrdevideochannel|--usb|\
+                    --usbehci|--teleporter|--tracing-enabled|\
+                    --tracing-allow-vm-access|--usbcardreader|\
+                    --autostart-enabled|--vcpenabled)
+                        COMPREPLY=( $(compgen -W "on off" -- ${cur}) )
+                        ;;
+                    --graphicscontroller)
+                        COMPREPLY=( $(compgen -W "none vboxvga vmsvga" \
+                            -- ${cur}) )
+                        ;;
+                    --firmware)
+                        COMPREPLY=( $(compgen -W "bios efi efi32 efi64" \
+                            -- ${cur}) )
+                        ;;
+                    --chipset)
+                        COMPREPLY=( $(compgen -W "ich9 piix3" -- ${cur}) )
+                        ;;
+                    --biosbootmenu)
+                        COMPREPLY=( $(compgen -W "disabled menuonly
+                        messageandmenu" -- ${cur}) )
+                        ;;
+                    --boot[1-4])
+                        COMPREPLY=( $(compgen -W "none floppy dvd disk net" \
+                            -- ${cur}) )
+                        ;;
+                    --nic[1-8])
+                        COMPREPLY=( $(compgen -W "none null nat bridged intnet
+                        hostonly generic natnetwork" -- ${cur}) )
+                        ;;
+                    --nictype[1-8])
+                        COMPREPLY=( $(compgen -W "Am79C970A Am79C973 82540EM
+                        82543GC 82545EM virtio" -- ${cur}) )
+                        ;;
+                    --nicpromisc[1-8])
+                        COMPREPLY=( $(compgen -W "deny allow-vms allow-all" \
+                            -- ${cur}) )
+                        ;;
+                    --nicbandwidthgroup[1-8])
+                        COMPREPLY=()
+                        _bandwidthctl_comp ${cur}
+                        _get_excluded_items "none"
+                        COMPREPLY+=( $(compgen -W "$result" -- ${cur}) )
+                        ;;
+                    --bridgeadapter[1-8])
+                        COMPREPLY=()
+                        _bridgedif_comp ${cur}
+                        _get_excluded_items "none"
+                        COMPREPLY+=( $(compgen -W "$result" -- ${cur}) )
+                        ;;
+                    --hostonlyadapter[1-8])
+                        COMPREPLY=()
+                        _hostonlyif_comp ${cur}
+                        _get_excluded_items "none"
+                        COMPREPLY+=( $(compgen -W "$result" -- ${cur}) )
+                        ;;
+                    --intnet[1-8])
+                        COMPREPLY=()
+                        _intnet_comp ${cur}
+                        ;;
+                    --nat-network[1-8])
+                        COMPREPLY=()
+                        _natnet_comp ${cur}
+                        ;;
+                    --natnet[1-8])
+                        COMPREPLY=()
+                        _natnet_comp ${cur}
+                        ;;
+                    --natpf[1-8])
+                        COMPREPLY+=( $(compgen -W "delete" -- ${cur}) )
+                        ;;
+                    --nataliasmode[1-8])
+                        COMPREPLY+=( $(compgen -W "default" -- ${cur}) )
+                        ;;
+
+                    --macaddress[1-8])
+                        COMPREPLY+=( $(compgen -W "auto" -- ${cur}) )
+                        ;;
+                    --mouse)
+                        COMPREPLY+=( $(compgen -W "ps2 usb usbtablet
+                        usbmultitouch" -- ${cur}) )
+                        ;;
+                    --keyboard)
+                        COMPREPLY+=( $(compgen -W "ps2 usb" -- ${cur}) )
+                        ;;
+
+                    --uart[1-2]|--lpt[1-2])
+                        COMPREPLY+=( $(compgen -W "off" -- ${cur}) )
+                        ;;
+                    --uartmode[1-2])
+                        COMPREPLY+=( $(compgen -W "disconnected server client
+                        file" -- ${cur}) )
+                        ;;
+                    --audio)
+                        COMPREPLY+=( $(compgen -W "none null oss alsa" \
+                            -- ${cur}) )
+                        ;;
+
+                    --audiocontroller)
+                        COMPREPLY+=( $(compgen -W "ac97 hda sb16" -- ${cur}) )
+                        ;;
+
+                    --clipboard)
+                        COMPREPLY+=( $(compgen -W "disabled hosttoguest
+                        guesttohost bidirectional" -- ${cur}) )
+                        ;;
+                    --draganddrop)
+                        COMPREPLY+=( $(compgen -W "disabled hosttoguest" \
+                            -- ${cur}) )
+                        ;;
+
+                    --vrdeextpack|--vrdeauthlibrary|--snapshotfolder|\
+                        --defaultfrontend)
+                        COMPREPLY+=( $(compgen -W "default" -- ${cur}) )
+                        ;;
+                    --vrdeauthtype)
+                        COMPREPLY+=( $(compgen -W "null external guest" \
+                            -- ${cur}) )
+                        ;;
+                esac
+            fi
             ;;
         natnetwork)
             items=(add remove modify start stop)
