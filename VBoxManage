@@ -43,7 +43,6 @@ _VBoxManage() {
     # other characters which usually are treated as IFS - like space. Pipe
     # character used in disk filename will ruin this completions.
     _hdd_comp() {
-        local cur=$1
         local hdds
         local item
 
@@ -63,7 +62,6 @@ _VBoxManage() {
     }
 
     _floppy_comp() {
-        local cur=$1
         local floppies
         local item
 
@@ -82,7 +80,6 @@ _VBoxManage() {
     }
 
     _dvds_comp() {
-        local cur=$1
         local dvds
         local item
 
@@ -104,7 +101,6 @@ _VBoxManage() {
     # Issues are the same as in above function.
     _vms_comp() {
         local command=$1
-        local cur=$2
         local vms
         local item
 
@@ -122,8 +118,6 @@ _VBoxManage() {
     }
 
     _vms_state_comp() {
-        local command=$1
-        local cur=$2
         local vms
         local item
 
@@ -143,23 +137,7 @@ _VBoxManage() {
         done
     }
 
-    _list_comp() {
-        local cur=$1
-        local list
-
-        list=$(VBoxManage list | \
-            grep '|' | \
-            sed 's/\[.*\]//g'| \
-            sed 's/VBoxManage list//' | \
-            tr "\\n" " " | \
-            sed 's/$/\n/' | \
-            sed 's/\s\+//g' | \
-            sed 's/|/ /g')
-        COMPREPLY=( $(compgen -W "$list" -- ${cur}) )
-    }
-
     _group_comp() {
-        local cur=$1
         local list
         local item
 
@@ -177,7 +155,6 @@ _VBoxManage() {
     }
 
     _os_comp() {
-        local cur=$1
         local list
         local item
 
@@ -195,7 +172,6 @@ _VBoxManage() {
     }
 
     _dhcp_comp() {
-        local cur=$1
         local list
         local item
 
@@ -214,7 +190,6 @@ _VBoxManage() {
     }
 
     _hostonlyif_comp() {
-        local cur=$1
         local list
         local item
 
@@ -233,7 +208,7 @@ _VBoxManage() {
     }
 
     _bandwidthctl_comp() {
-        local rules cur=$1
+        local rules
         local item
 
         _find_item_name 2
@@ -253,7 +228,7 @@ _VBoxManage() {
     }
 
     _snapshot_comp() {
-        local snap cur=$1
+        local snap
         local item
 
         _find_item_name 2
@@ -274,7 +249,7 @@ _VBoxManage() {
     }
 
     _webcam_comp() {
-        local devs cur=$1
+        local devs
         local item
 
         _find_item_name 2
@@ -291,7 +266,7 @@ _VBoxManage() {
     }
 
     _webcam_avail_comp() {
-        local devs cur=$1
+        local devs
         local item
 
         _find_item_name 2
@@ -321,8 +296,7 @@ _VBoxManage() {
     }
 
     _sharedfolder_comp() {
-        local vm=$1
-        local cur=$2
+        local vm="$@"
         local folders
         local item
 
@@ -342,7 +316,6 @@ _VBoxManage() {
     }
 
     _natnet_comp() {
-        local cur=$1
         local list
         local item
 
@@ -361,7 +334,6 @@ _VBoxManage() {
     }
 
     _bridgedif_comp() {
-        local cur=$1
         local list
         local item
 
@@ -380,7 +352,6 @@ _VBoxManage() {
     }
 
     _intnet_comp() {
-        local cur=$1
         local list
         local item
 
@@ -429,12 +400,12 @@ _VBoxManage() {
             _find_item_name 2
             COMPREPLY=()
             [[ -z "${name}" ]] &&
-                _vms_state_comp ${cur}
+                _vms_state_comp
             ;;
         bandwidthctl)
             local items=(add set remove list)
             if [[ ${prev} == ${cmd} ]]; then
-                _vms_comp vms ${cur}
+                _vms_comp vms
             else
                 _find_item_name 2
                 subcommand=${COMP_WORDS[$((index+1))]}
@@ -447,7 +418,7 @@ _VBoxManage() {
                             ;;
                         set)
                             if [[ ${prev} == "set" ]]; then
-                                _bandwidthctl_comp ${cur}
+                                _bandwidthctl_comp
                             else
                                 [[ " ${COMP_WORDS[@]} " != *" --limit "* ]] && \
                                     COMPREPLY=( $(compgen -W "--limit" -- \
@@ -456,7 +427,7 @@ _VBoxManage() {
                             ;;
                         remove)
                             if [[ ${prev} == "remove" ]]; then
-                                _bandwidthctl_comp ${cur}
+                                _bandwidthctl_comp
                             fi
                             ;;
                         list)
@@ -479,7 +450,7 @@ _VBoxManage() {
             ;;
         clonehd)
             if [[ ${prev} == ${cmd} ]]; then
-                _hdd_comp ${cur}
+                _hdd_comp
             else
                 _find_item_name 2
                 items=(--format --variant --existing)
@@ -499,7 +470,7 @@ _VBoxManage() {
             ;;
         clonevm)
             if [[ ${prev} == ${cmd} ]]; then
-                _vms_comp vms ${cur}
+                _vms_comp vms
             else
                 _find_item_name 2
                 items=(--snapshot --mode --options --name --groups --basefolder
@@ -509,7 +480,7 @@ _VBoxManage() {
                 case "${prev}" in
                     --snapshot)
                         COMPREPLY=()
-                        _snapshot_comp ${cur}
+                        _snapshot_comp
                         ;;
                     --mode)
                         COMPREPLY=( $(compgen -W "machine machineandchildren
@@ -521,7 +492,7 @@ _VBoxManage() {
                         ;;
                     --groups)
                         COMPREPLY=()
-                        _group_comp ${cur}
+                        _group_comp
                         ;;
                     --basefolder)
                         COMPREPLY=( $(compgen -o dirnames -- ${cur}) )
@@ -535,13 +506,13 @@ _VBoxManage() {
             else
                 case "${prev}" in
                     disk)
-                        _hdd_comp ${cur}
+                        _hdd_comp
                         ;;
                     dvd)
-                        _dvds_comp ${cur}
+                        _dvds_comp
                         ;;
                     floppy)
-                        _floppy_comp ${cur}
+                        _floppy_comp
                         ;;
                     *)
                         items=(--delete)
@@ -553,7 +524,7 @@ _VBoxManage() {
             ;;
         controlvm)
             if [[ ${prev} == ${cmd} ]]; then
-                _vms_comp runningvms ${cur}
+                _vms_comp runningvms
             else
                 local items=(acpipowerbutton acpisleepbutton clipboard
                 cpuexecutioncap draganddrop guestmemoryballoon
@@ -639,9 +610,9 @@ _VBoxManage() {
                                 COMPREPLY=( $(compgen -W "attach detach
                                 list" -- ${cur}) )
                             [[ ${prev} == "detach" ]] && \
-                                _webcam_comp ${cur}
+                                _webcam_comp
                             [[ ${prev} == "attach" ]] && \
-                                _webcam_avail_comp ${cur}
+                                _webcam_avail_comp
                             ;;
                     esac
                 else
@@ -686,7 +657,7 @@ _VBoxManage() {
                         ;;
                     --diffparent)
                         COMPREPLY=()
-                        _hdd_comp ${cur}
+                        _hdd_comp
                         ;;
                     --format)
                         COMPREPLY=( $(compgen -W "VDI VMDK VHD" -- ${cur}) )
@@ -709,11 +680,11 @@ _VBoxManage() {
                 case "${prev}" in
                     --groups)
                         COMPREPLY=()
-                        _group_comp ${cur}
+                        _group_comp
                         ;;
                     --ostype)
                         COMPREPLY=()
-                        _os_comp ${cur}
+                        _os_comp
                         ;;
                     --basefolder)
                         COMPREPLY=( $(compgen -o dirnames -- ${cur}) )
@@ -729,7 +700,7 @@ _VBoxManage() {
             items=(dumpguestcore info injectnmi log logdest logflags osdetect
             osinfo getregisters setregisters show statistics)
             if [[ ${prev} == ${cmd} ]]; then
-                _vms_comp runningvms ${cur}
+                _vms_comp runningvms
             else
                 _find_item_name 2
                 subcommand=${COMP_WORDS[$((index+1))]}
@@ -793,11 +764,11 @@ _VBoxManage() {
                         case "${prev}" in
                             --netname)
                                 COMPREPLY=()
-                                _dhcp_comp ${cur}
+                                _dhcp_comp
                                 ;;
                             --ifname)
                                 COMPREPLY=()
-                                _hostonlyif_comp ${cur}
+                                _hostonlyif_comp
                                 ;;
                         esac
 
@@ -818,12 +789,12 @@ _VBoxManage() {
             _find_item_name 2
             COMPREPLY=()
             [[ -z "${name}" ]] &&
-                _vms_state_comp ${cur}
+                _vms_state_comp
             ;;
         "export")
             items=( --manifest --iso --options --vsys)
             if [[ ${prev} == ${cmd} ]]; then
-                _vms_comp vms ${cur}
+                _vms_comp vms
             else
                 [[ " ${COMP_WORDS[@]} " != *" -o "* &&
                     " ${COMP_WORDS[@]} " != *" --output "* ]] &&
@@ -877,7 +848,7 @@ _VBoxManage() {
         getextradata)
             if [[ ${prev} == ${cmd} ]]; then
                 COMPREPLY=( $(compgen -W "global" -- ${cur}) )
-                _vms_comp vms ${cur}
+                _vms_comp vms
             else
                 _get_excluded_items "enumerate"
                 COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
@@ -890,7 +861,7 @@ _VBoxManage() {
             stat updateadditions watch)
 
             if [[ ${prev} == ${cmd} ]]; then
-                _vms_comp runningvms ${cur}
+                _vms_comp runningvms
             else
                 _find_item_name 2
                 subcommand=${COMP_WORDS[$((index+1))]}
@@ -1054,7 +1025,7 @@ _VBoxManage() {
             subcommand=${COMP_WORDS[2]}
 
             if [[ "${prev}" == "${subcommand}" ]]; then
-                _vms_comp vms ${cur}
+                _vms_comp vms
             elif [[ " ${items[@]} " == *" $subcommand "* ]]; then
                 case "${subcommand}" in
                     get)
@@ -1085,7 +1056,7 @@ _VBoxManage() {
             subcommand=${COMP_WORDS[2]}
             case "${prev}" in
                 ipconfig|remove)
-                    _hostonlyif_comp ${cur}
+                    _hostonlyif_comp
                     ;;
             esac
 
@@ -1156,7 +1127,7 @@ _VBoxManage() {
                 case "${subcommand}" in
                     list|query)
                         if [[ "${subcommand}" == "${prev}" ]]; then
-                            _vms_comp vms ${cur}
+                            _vms_comp vms
                             items=(host)
                             _get_excluded_items "${items[@]}"
                             COMPREPLY+=( $(compgen -W '$result' -- ${cur}) )
@@ -1164,7 +1135,7 @@ _VBoxManage() {
                         ;;
                     setup)
                         if [[ "${subcommand}" == "${prev}" ]]; then
-                            _vms_comp vms ${cur}
+                            _vms_comp vms
                             items=(host)
                             _get_excluded_items "${items[@]}"
                             COMPREPLY+=( $(compgen -W '$result' -- ${cur}) )
@@ -1176,7 +1147,7 @@ _VBoxManage() {
                         ;;
                     enable|disable)
                         if [[ "${subcommand}" == "${prev}" ]]; then
-                            _vms_comp vms ${cur}
+                            _vms_comp vms
                             items=(host)
                             _get_excluded_items "${items[@]}"
                             COMPREPLY+=( $(compgen -W '$result' -- ${cur}) )
@@ -1187,7 +1158,7 @@ _VBoxManage() {
                         ;;
                     collect)
                         if [[ "${subcommand}" == "${prev}" ]]; then
-                            _vms_comp vms ${cur}
+                            _vms_comp vms
                             items=(host)
                             _get_excluded_items "${items[@]}"
                             COMPREPLY+=( $(compgen -W '$result' -- ${cur}) )
@@ -1207,7 +1178,7 @@ _VBoxManage() {
             ;;
         modifyhd)
             if [[ ${prev} == ${cmd} ]]; then
-                _hdd_comp ${cur}
+                _hdd_comp
             else
                 _find_item_name 2
                 items=(--type --autoreset --property --compact --resize)
@@ -1297,18 +1268,18 @@ _VBoxManage() {
             --defaultfrontend)
 
             if [[ ${prev} == ${cmd} ]]; then
-                _vms_comp vms ${cur}
+                _vms_comp vms
             else
                 _get_excluded_items "${items[@]}"
                 COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
                 case "${prev}" in
                     --groups)
                         COMPREPLY=()
-                        _group_comp ${cur}
+                        _group_comp
                         ;;
                     --ostype)
                         COMPREPLY=()
-                        _os_comp ${cur}
+                        _os_comp
                         ;;
                     --pagefusion|--acpi|--ioapic|--hpet|--triplefaultreset|\
                     --hwvirtex|--nestedpaging|--largepages|--vtxvpid|--vtxux|\
@@ -1367,33 +1338,33 @@ _VBoxManage() {
                         ;;
                     --nicbandwidthgroup[1-8])
                         COMPREPLY=()
-                        _bandwidthctl_comp ${cur}
+                        _bandwidthctl_comp
                         _get_excluded_items "none"
                         COMPREPLY+=( $(compgen -W "$result" -- ${cur}) )
                         ;;
                     --bridgeadapter[1-8])
                         COMPREPLY=()
-                        _bridgedif_comp ${cur}
+                        _bridgedif_comp
                         _get_excluded_items "none"
                         COMPREPLY+=( $(compgen -W "$result" -- ${cur}) )
                         ;;
                     --hostonlyadapter[1-8])
                         COMPREPLY=()
-                        _hostonlyif_comp ${cur}
+                        _hostonlyif_comp
                         _get_excluded_items "none"
                         COMPREPLY+=( $(compgen -W "$result" -- ${cur}) )
                         ;;
                     --intnet[1-8])
                         COMPREPLY=()
-                        _intnet_comp ${cur}
+                        _intnet_comp
                         ;;
                     --nat-network[1-8])
                         COMPREPLY=()
-                        _natnet_comp ${cur}
+                        _natnet_comp
                         ;;
                     --natnet[1-8])
                         COMPREPLY=()
-                        _natnet_comp ${cur}
+                        _natnet_comp
                         ;;
                     --natpf[1-8])
                         COMPREPLY+=( $(compgen -W "delete" -- ${cur}) )
@@ -1453,7 +1424,7 @@ _VBoxManage() {
             items=(add remove modify start stop)
             subcommand=${COMP_WORDS[2]}
             if [[ "${prev}" == "--netname" ]]; then
-                _natnet_comp ${cur}
+                _natnet_comp
             elif [[ "${prev}" == "--dhcp" ]]; then
                 COMPREPLY=( $(compgen -W "on off" -- ${cur}) )
             elif [[ " ${items[@]} " == *" $subcommand "* ]]; then
@@ -1492,7 +1463,7 @@ _VBoxManage() {
         setextradata)
             if [[ ${prev} == ${cmd} ]]; then
                 COMPREPLY=( $(compgen -W "global" -- ${cur}) )
-                _vms_comp vms ${cur}
+                _vms_comp vms
             fi
             ;;
         setproperty)
@@ -1533,7 +1504,7 @@ _VBoxManage() {
             subcommand=${COMP_WORDS[2]}
             case "${prev}" in
                 add|remove)
-                    _vms_comp vms ${cur}
+                    _vms_comp vms
                     ;;
                 --hostpath)
                     COMPREPLY=( $(compgen -o dirnames -- ${cur}) )
@@ -1541,7 +1512,7 @@ _VBoxManage() {
                 --name)
                     if [[ ${subcommand} == "remove" ]]; then
                         _find_item_name 3
-                        _sharedfolder_comp "${name}" "${cur}"
+                        _sharedfolder_comp "${name}"
                     fi
                     ;;
             esac
@@ -1566,12 +1537,12 @@ _VBoxManage() {
             ;;
         showhdinfo)
             if [[ ${prev} == ${cmd} ]]; then
-                _hdd_comp ${cur}
+                _hdd_comp
             fi
             ;;
         showvminfo)
             if [[ ${prev} == ${cmd} ]]; then
-                _vms_comp vms ${cur}
+                _vms_comp vms
             else
                 if [[ " ${COMP_WORDS[@]} " == *" --log "* ]]; then
                     COMPREPLY=()
@@ -1590,7 +1561,7 @@ _VBoxManage() {
         snapshot)
             items=(take delete restore restorecurrent edit list showvminfo)
             if [[ ${prev} == ${cmd} ]]; then
-                _vms_comp vms ${cur}
+                _vms_comp vms
             else
                 _find_item_name 2
                 subcommand=${COMP_WORDS[$((index+1))]}
@@ -1602,7 +1573,7 @@ _VBoxManage() {
                             COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
                             ;;
                         delete|restore|showvminfo)
-                            _snapshot_comp ${cur}
+                            _snapshot_comp
                             ;;
                         restorecurrent)
                             COMPREPLY=()
@@ -1610,7 +1581,7 @@ _VBoxManage() {
                         edit)
                             if [[ ${prev} == "edit" &&
                                 ${#COMP_WORDS[@]} == 5 ]]; then
-                                _snapshot_comp ${cur}
+                                _snapshot_comp
                                 COMPREPLY+=("--current")
                             else
                                 items=(--name --description)
@@ -1632,7 +1603,7 @@ _VBoxManage() {
             ;;
         startvm)
             if [[ ${prev} == ${cmd} ]]; then
-                _vms_comp vms ${cur}
+                _vms_comp vms
             elif [[ "${prev}" == "--type" ]]; then
                 COMPREPLY=( $(compgen -W "gui sdl headless" -- ${cur}) )
             else
@@ -1643,7 +1614,7 @@ _VBoxManage() {
             ;;
         storageattach)
             if [[ ${prev} == ${cmd} ]]; then
-                _vms_comp vms ${cur}
+                _vms_comp vms
             else
                 _find_item_name 2
                 local items=(--storagectl --port --device --type --medium --mtype
@@ -1661,9 +1632,9 @@ _VBoxManage() {
                     --medium)
                         COMPREPLY=()
                         local tmp=(none emptydrive additions)
-                        _hdd_comp ${cur}
-                        _floppy_comp ${cur}
-                        _dvds_comp ${cur}
+                        _hdd_comp
+                        _floppy_comp
+                        _dvds_comp
                         for item in "${tmp[@]}"
                         do
                             [[ ${item^^} == ${cur^^}* ]] && COMPREPLY+=("$item")
@@ -1683,7 +1654,7 @@ _VBoxManage() {
             local items=(--name --add --controller --portcount --hostiocache
             --bootable --remove)
             if [[ ${prev} == ${cmd} ]]; then
-                _vms_comp vms ${cur}
+                _vms_comp vms
             else
                 _get_excluded_items "${items[@]}"
                 COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
@@ -1704,7 +1675,7 @@ _VBoxManage() {
             ;;
         unregistervm)
             if [[ ${prev} == ${cmd} ]]; then
-                _vms_comp vms ${cur}
+                _vms_comp vms
             else
                 local items=(--delete)
                 _get_excluded_items "${items[@]}"
@@ -1724,7 +1695,7 @@ _VBoxManage() {
             else
                 case "${prev}" in
                     --target)
-                        _vms_comp vms ${cur}
+                        _vms_comp vms
                         COMPREPLY+=( $(compgen -W "global" -- ${cur}) )
                         ;;
                     --action)
