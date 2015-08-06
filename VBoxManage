@@ -877,7 +877,8 @@ _VBoxManage() {
                                 " ${COMP_WORDS[@]} " == *" --passwordfile "* ]] &&
                                 items=(--image --username --domain  --verbose
                                 --timeout --environment --wait-exit --wait-stdout
-                                --wait-stderr --dos2unix --unix2dos)
+                                --wait-stderr --dos2unix --unquoted-args
+                                --unix2dos)
 
                             _get_excluded_items "${items[@]}"
                             COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
@@ -1392,7 +1393,7 @@ _VBoxManage() {
                         file" -- ${cur}) )
                         ;;
                     --audio)
-                        COMPREPLY+=( $(compgen -W "none null oss alsa" \
+                        COMPREPLY+=( $(compgen -W "none null oss alsa pulse" \
                             -- ${cur}) )
                         ;;
 
