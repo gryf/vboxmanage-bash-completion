@@ -1,6 +1,7 @@
 # bash command-line completion for VBoxManage command
 #
 # Author: Roman 'gryf' Dobosz <gryf73@gmail.com>
+# License: 3-clause BSD-style license (see LICENSE file)
 
 _VBoxManage() {
     local cur prev opts cmd subcommand tmp items name index result

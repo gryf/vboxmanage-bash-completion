@@ -1,8 +1,0 @@
-VBoxManage bash completion script.
-
-This version of the completion was initially based on Sebastian T. Hafner
-script. However, in some point of time I've decided to rewrite it almost from
-scratch.
-
-Current version of script was written and tested against VBoxManage in version
-4.3.28, and supports all commands (in some extent ;)).
