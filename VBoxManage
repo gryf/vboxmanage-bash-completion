@@ -102,10 +102,24 @@ _VBoxManage() {
     # Issues are the same as in above function.
     _vms_comp() {
         local command=$1
+        local exclude_running=false
         local vms
+        local running_vms
         local item
 
+
         compopt -o filenames
+        if [[ $# == 2 ]]
+        then
+            exclude_running=true
+            running_vms=$(VBoxManage list runningvms | \
+                awk -F ' {' '{ print $1 }' | \
+                tr '\n' '|' | \
+                sed 's/|$//' | \
+                sed 's/"//g')
+            IFS='|' read -ra running_vms <<< "$running_vms"
+        fi
+
         vms=$(VBoxManage list $command | \
             awk -F ' {' '{ print $1 }' | \
             tr '\n' '|' | \
@@ -114,6 +128,12 @@ _VBoxManage() {
         IFS='|' read -ra vms <<< "$vms"
         for item in "${vms[@]}"
         do
+            if $exclude_running
+            then
+                _is_in_array "$item" "${running_vms[@]}"
+                [[ $? == 0 ]] && continue
+            fi
+
             [[ ${item^^} == ${cur^^}* ]] && COMPREPLY+=("$item")
         done
     }
@@ -368,6 +388,15 @@ _VBoxManage() {
         do
             [[ ${item^^} == ${cur^^}* ]] && COMPREPLY+=("$item")
         done
+    }
+
+    _is_in_array() {
+        local element
+        for element in "${@:2}"
+        do
+            [[ "$element" == "$1" ]] && return 0
+        done
+        return 1
     }
 
 
@@ -1605,7 +1634,7 @@ _VBoxManage() {
             ;;
         startvm)
             if [[ ${prev} == ${cmd} ]]; then
-                _vms_comp vms
+                _vms_comp vms 1
             elif [[ "${prev}" == "--type" ]]; then
                 COMPREPLY=( $(compgen -W "gui sdl headless" -- ${cur}) )
             else
