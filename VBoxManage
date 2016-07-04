@@ -901,7 +901,7 @@ _VBoxManage() {
                             items=(--image --username --passwordfile --password
                             --domain --verbose --timeout --environment
                             --wait-exit --wait-stdout --wait-stderr --dos2unix
-                            --unix2dos)
+                            --unquoted-args --unix2dos)
 
                             [[ " ${COMP_WORDS[@]} " == *" --password "* ||
                                 " ${COMP_WORDS[@]} " == *" --passwordfile "* ]] &&
@@ -1500,7 +1500,7 @@ _VBoxManage() {
         setproperty)
             items=(machinefolder hwvirtexclusive vrdeauthlibrary
             websrvauthlibrary vrdeextpack autostartdbpath loghistorycount
-            defaultfrontend)
+            defaultfrontend logginglevel)
             subcommand=${COMP_WORDS[2]}
             if [[ "${prev}" == "${cmd}" ]]; then
                 COMPREPLY=( $(compgen -W "${items[*]}" -- ${cur}) )
