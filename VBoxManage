@@ -533,6 +533,9 @@ _VBoxManage() {
         closemedium)
             if [[ ${prev} == ${cmd} ]]; then
                 COMPREPLY=( $(compgen -W "disk dvd floppy" -- ${cur}) )
+                _hdd_comp
+                _dvds_comp
+                _floppy_comp
             else
                 case "${prev}" in
                     disk)
@@ -557,7 +560,7 @@ _VBoxManage() {
                 _vms_comp runningvms
             else
                 local items=(acpipowerbutton acpisleepbutton clipboard
-                cpuexecutioncap draganddrop guestmemoryballoon
+                cpuexecutioncap draganddrop guestmemoryballoon usbattach
                 keyboardputscancode natpf1 nic1 nicpromisc1 nicproperty1
                 nictrace1 nictracefile1 natpf2 nic2 nicpromisc2 nicproperty2
                 nictrace2 nictracefile2 natpf3 nic3 nicpromisc3 nicproperty3
@@ -570,8 +573,12 @@ _VBoxManage() {
                 screenshotpng setcredentials setlinkstate1 setlinkstate2
                 setlinkstate3 setlinkstate4 setlinkstate5 setlinkstate6
                 setlinkstate7 setlinkstate8 setvideomodehint teleport unplugcpu
-                usbattach usbdetach vcpenabled vcpscreens vrde vrdeport
-                vrdeproperty vrdevideochannelquality webcam)
+                usbattach usbdetach vrde vrdeport vrdeproperty
+                vrdevideochannelquality webcam videocap videocapscreens
+                videocapfile videocapres videocaprate videocapfps
+                videocapmaxtime videocapmaxsize addencpassword removeencpassword
+                removeallencpasswords)
+
 
                 _find_item_name 2
                 subcommand=${COMP_WORDS[$((index+1))]}
@@ -615,13 +622,13 @@ _VBoxManage() {
                                 COMPREPLY=( $(compgen -W "disabled
                                 hosttoguest" -- ${cur}) )
                             ;;
-                        vrde|vcpenabled)
+                        vrde|videocap)
                             [[ ${prev} == "vrde" ||
-                            ${prev} == "vcpenabled" ]] && \
+                            ${prev} == "videocap" ]] && \
                                 COMPREPLY=( $(compgen -W "on off" -- ${cur}) )
                             ;;
-                        vcpscreens)
-                            [[ ${prev} == "vcpscreens" ]] && \
+                        videocapscreens)
+                            [[ ${prev} == "videocapscreens" ]] && \
                                 COMPREPLY=( $(compgen -W "all none" -- ${cur}) )
                             ;;
                         setcredentials)
@@ -643,6 +650,22 @@ _VBoxManage() {
                                 _webcam_comp
                             [[ ${prev} == "attach" ]] && \
                                 _webcam_avail_comp
+                            ;;
+                        usbattach)
+                            tmp=(--capturefile)
+                            _get_excluded_items "${tmp[@]}"
+                            COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+                            ;;
+
+                        --removeonsuspend)
+                            COMPREPLY=( $(compgen -W "yes no" -- ${cur}) )
+                            ;;
+
+                        addencpassword)
+                            tmp=(--host --port --maxdowntime --passwordfile
+                            --password)
+                            _get_excluded_items "${tmp[@]}"
+                            COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
                             ;;
                     esac
                 else
@@ -1123,8 +1146,8 @@ _VBoxManage() {
             else
                 case "${prev}" in
                     --options)
-                        COMPREPLY=( $(compgen -W "keepallmacs keepnatmacs" \
-                            -- ${cur}) )
+                        COMPREPLY=( $(compgen -W "keepallmacs keepnatmacs
+                        importtovdi" -- ${cur}) )
                         ;;
                 esac
                 [[ " ${COMP_WORDS[@]} " != *" --dry-run"* &&
@@ -1230,7 +1253,7 @@ _VBoxManage() {
             items=(--name --groups --description --ostype --iconfile --memory
             --pagefusion --vram --acpi --pciattach --pcidetach --ioapic --hpet
             --triplefaultreset --hwvirtex --nestedpaging --largepages --vtxvpid
-            --vtxux --pae --longmode --synthcpu --cpuidset --cpuidremove
+            --vtxux --pae --longmode --cpuidset --cpuidremove
             --cpuidremoveall --hardwareuuid --cpus --cpuhotplug --plugcpu
             --unplugcpu --cpuexecutioncap --rtcuseutc --graphicscontroller
             --monitorcount --accelerate3d --accelerate2dvideo --firmware
@@ -1294,9 +1317,11 @@ _VBoxManage() {
             --teleporter --teleporterport --teleporteraddress
             --teleporterpassword --teleporterpasswordfile --tracing-enabled
             --tracing-config --tracing-allow-vm-access --usbcardreader
-            --autostart-enabled --autostart-delay --vcpenabled --vcpscreens
-            --vcpfile --vcpwidth --vcpheight --vcprate --vcpfps
-            --defaultfrontend)
+            --autostart-enabled --autostart-delay --videocap --videocapscreens
+            --videocapfile --videocapres --vcpwidth --videocaprate --videocapfps
+            --videocapmaxtime --videocapmaxsize --videocapopts --defaultfrontend
+            --cpuid-portability-level --paravirtprovider --audiocodec --usbxhci
+            --usbrename)
 
             if [[ ${prev} == ${cmd} ]]; then
                 _vms_comp vms
@@ -1314,7 +1339,7 @@ _VBoxManage() {
                         ;;
                     --pagefusion|--acpi|--ioapic|--hpet|--triplefaultreset|\
                     --hwvirtex|--nestedpaging|--largepages|--vtxvpid|--vtxux|\
-                    --pae|--longmode|--synthcpu|--cpuhotplug|--rtcuseutc|\
+                    --pae|--longmode|--cpuhotplug|--rtcuseutc|\
                     --accelerate3d|--accelerate2dvideo|--bioslogofadein|\
                     --bioslogofadeout|--biospxedebug|--cableconnected1|\
                     --cableconnected2|--cableconnected3|--cableconnected4|\
@@ -1333,7 +1358,7 @@ _VBoxManage() {
                     --vrdemulticon|--vrdereusecon|--vrdevideochannel|--usb|\
                     --usbehci|--teleporter|--tracing-enabled|\
                     --tracing-allow-vm-access|--usbcardreader|\
-                    --autostart-enabled|--vcpenabled)
+                    --autostart-enabled|--videocap|--usbxhci)
                         COMPREPLY=( $(compgen -W "on off" -- ${cur}) )
                         ;;
                     --graphicscontroller)
@@ -1420,7 +1445,7 @@ _VBoxManage() {
                         ;;
                     --uartmode[1-2])
                         COMPREPLY+=( $(compgen -W "disconnected server client
-                        file" -- ${cur}) )
+                        tcpserver tcpclient file" -- ${cur}) )
                         ;;
                     --audio)
                         COMPREPLY+=( $(compgen -W "none null oss alsa pulse" \
@@ -1429,6 +1454,11 @@ _VBoxManage() {
 
                     --audiocontroller)
                         COMPREPLY+=( $(compgen -W "ac97 hda sb16" -- ${cur}) )
+                        ;;
+
+                    --audiocodec)
+                        COMPREPLY+=( $(compgen -W "stac9700 ad1980 stac9221
+                        sb16" -- ${cur}) )
                         ;;
 
                     --clipboard)
@@ -1447,6 +1477,13 @@ _VBoxManage() {
                     --vrdeauthtype)
                         COMPREPLY+=( $(compgen -W "null external guest" \
                             -- ${cur}) )
+                        ;;
+                    --paravirtprovider)
+                        COMPREPLY=( $(compgen -W "none default legacy minimal
+                        hyperv kvm" -- ${cur}) )
+                        ;;
+                    --cpuid-portability-level)
+                        COMPREPLY=( $(compgen -W "0 1 2 3" -- ${cur}) )
                         ;;
                 esac
             fi
@@ -1599,7 +1636,7 @@ _VBoxManage() {
                 if [[ " ${items[@]} " == *" $subcommand "* ]]; then
                     case "${subcommand}" in
                         take)
-                            items=(--description --live)
+                            items=(--description --live --uniquename)
                             _get_excluded_items "${items[@]}"
                             COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
                             ;;
@@ -1636,7 +1673,7 @@ _VBoxManage() {
             if [[ ${prev} == ${cmd} ]]; then
                 _vms_comp vms 1
             elif [[ "${prev}" == "--type" ]]; then
-                COMPREPLY=( $(compgen -W "gui sdl headless" -- ${cur}) )
+                COMPREPLY=( $(compgen -W "gui sdl headless separate" -- ${cur}) )
             else
                 local items=(--type)
                 _get_excluded_items "${items[@]}"
