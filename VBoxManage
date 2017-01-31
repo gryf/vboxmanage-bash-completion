@@ -1,6 +1,8 @@
 # bash command-line completion for VBoxManage command
 #
 # Author: Roman 'gryf' Dobosz <gryf73@gmail.com>
+# URL: https://bitbucket.org/gryf/vboxmanage-bash-completion 
+# URL: https://github.com/gryf/vboxmanage-bash-completion
 # License: 3-clause BSD-style license (see LICENSE file)
 
 _VBoxManage() {
@@ -2088,5 +2090,6 @@ _VBoxManage() {
     esac
 }
 complete -o default -F _VBoxManage VBoxManage
+complete -o default -F _VBoxManage vboxmanage
 
 # vim: set ft=sh tw=80 sw=4 et :
