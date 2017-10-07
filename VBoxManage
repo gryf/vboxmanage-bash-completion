@@ -2027,11 +2027,11 @@ _VBoxManage() {
                 case "${prev}" in
                     --add)
                         COMPREPLY=( $(compgen -W "ide sata scsi floppy
-                        sas" -- ${cur}) )
+                        sas usb pcie" -- ${cur}) )
                         ;;
                     --controller)
                         COMPREPLY=( $(compgen -W "LSILogic LSILogicSAS BusLogic
-                        IntelAHCI PIIX3 PIIX4 ICH6 I82078" -- ${cur}) )
+                        IntelAHCI PIIX3 PIIX4 ICH6 I82078 USB NVMe" -- ${cur}) )
                         ;;
                     --bootable|--hostiocache)
                         COMPREPLY=( $(compgen -W "on off" -- ${cur}) )
