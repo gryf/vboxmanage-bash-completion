@@ -1495,7 +1495,8 @@ _VBoxManage() {
                         ;;
                     *)
                         _find_item_name 2
-                        items=(--type --autoreset --property --compact --resize)
+                        items=(--type --autoreset --property --compact --resize
+                        --move)
                         _get_excluded_items "${items[@]}"
                         COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
                         case "${prev}" in
@@ -1506,6 +1507,9 @@ _VBoxManage() {
                                 ;;
                             --autoreset)
                                 COMPREPLY=( $(compgen -W "on off" -- ${cur}) )
+                                ;;
+                            --move)
+                                COMPREPLY=( $(compgen -o dirnames -- ${cur}) )
                                 ;;
                         esac
                     ;;
