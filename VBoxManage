@@ -1007,7 +1007,7 @@ _VBoxManage() {
                     case "${subcommand}" in
                         run)
                             items=(--exe --timeout --unquoted-args
-                            --ignore-operhaned-processes --no-profile
+                            --ignore-operhaned-processes --profile
                             --dos2unix --unix2dos --username --domain --)
 
                             [[ " ${comp_words[@]} " != *" --password "* ||
@@ -1035,7 +1035,7 @@ _VBoxManage() {
 
                         start)
                             items=(--exe --timeout --unquoted-args
-                            --ignore-operhaned-processes --no-profile
+                            --ignore-operhaned-processes --profile
                             --username --domain --passwordfile --password --)
 
                             [[ " ${comp_words[@]} " != *" --password "* ||
