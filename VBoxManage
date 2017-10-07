@@ -1762,7 +1762,7 @@ _VBoxManage() {
             ;;
 
         natnetwork)
-            items=(add remove modify start stop)
+            items=(add remove modify start stop list)
             subcommand=${COMP_WORDS[2]}
             if [[ "${prev}" == "--netname" ]]; then
                 _natnet_comp
