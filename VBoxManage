@@ -1585,7 +1585,8 @@ _VBoxManage() {
             --videocapfile --videocapres --videocaprate --videocapfps
             --videocapmaxtime --videocapmaxsize --videocapopts --defaultfrontend
             --cpuid-portability-level --paravirtprovider --audiocodec --usbxhci
-            --usbrename)
+            --usbrename --apic --x2apic --paravirtdebug --cpu-profile
+            --biosapic --videocapopts)
 
             if [[ ${prev} == ${cmd} ]]; then
                 _vms_comp vms
@@ -1622,7 +1623,7 @@ _VBoxManage() {
                     --vrdemulticon|--vrdereusecon|--vrdevideochannel|--usb|\
                     --usbehci|--teleporter|--tracing-enabled|\
                     --tracing-allow-vm-access|--usbcardreader|\
-                    --autostart-enabled|--videocap|--usbxhci)
+                    --autostart-enabled|--videocap|--usbxhci|--apic|--x2apic)
                         COMPREPLY=( $(compgen -W "on off" -- ${cur}) )
                         ;;
                     --graphicscontroller)
@@ -1703,7 +1704,6 @@ _VBoxManage() {
                     --keyboard)
                         COMPREPLY+=( $(compgen -W "ps2 usb" -- ${cur}) )
                         ;;
-
                     --uart[1-2]|--lpt[1-2])
                         COMPREPLY+=( $(compgen -W "off" -- ${cur}) )
                         ;;
@@ -1715,16 +1715,13 @@ _VBoxManage() {
                         COMPREPLY+=( $(compgen -W "none null oss alsa pulse" \
                             -- ${cur}) )
                         ;;
-
                     --audiocontroller)
                         COMPREPLY+=( $(compgen -W "ac97 hda sb16" -- ${cur}) )
                         ;;
-
                     --audiocodec)
                         COMPREPLY+=( $(compgen -W "stac9700 ad1980 stac9221
                         sb16" -- ${cur}) )
                         ;;
-
                     --clipboard)
                         COMPREPLY+=( $(compgen -W "disabled hosttoguest
                         guesttohost bidirectional" -- ${cur}) )
@@ -1733,7 +1730,6 @@ _VBoxManage() {
                         COMPREPLY+=( $(compgen -W "disabled hosttoguest" \
                             -- ${cur}) )
                         ;;
-
                     --vrdeextpack|--vrdeauthlibrary|--snapshotfolder|\
                         --defaultfrontend)
                         COMPREPLY+=( $(compgen -W "default" -- ${cur}) )
@@ -1748,6 +1744,14 @@ _VBoxManage() {
                         ;;
                     --cpuid-portability-level)
                         COMPREPLY=( $(compgen -W "0 1 2 3" -- ${cur}) )
+                        ;;
+                    --cpu-profile)
+                        COMPREPLY=( $(compgen -W "host 8086 80286 80386" \
+                            -- ${cur}) )
+                        ;;
+                    --biosapic)
+                        COMPREPLY=( $(compgen -W "disabled apic x2apic" \
+                            -- ${cur}) )
                         ;;
                 esac
             fi
