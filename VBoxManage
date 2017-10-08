@@ -2127,6 +2127,29 @@ _VBoxManage() {
                 fi
             fi
             ;;
+
+        usbdevsource)
+            if [[ COMP_CWORD -ge 3 ]]; then
+                subcommand="${COMP_WORDS[2]}"
+                if [[ $subcommand == "${cmd}" ]]; then
+                    subcommand="${COMP_WORDS[3]}"
+                fi
+            fi
+
+            if [[ ${prev} == ${cmd} ]]; then
+                COMPREPLY=( $(compgen -W "add remove" -- ${cur}) )
+            else
+                if [[ ${#COMPREPLY[@]} -eq 0 ]]; then
+                    case "${subcommand}" in
+                        add)
+                            local items=(--address --backend)
+                            _get_excluded_items "${items[@]}"
+                            COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+                            ;;
+                    esac
+                fi
+            fi
+            ;;
     esac
 }
 complete -o default -F _VBoxManage VBoxManage
