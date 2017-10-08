@@ -499,6 +499,7 @@ _VBoxManage() {
                 fi
             fi
             ;;
+
         checkmediumpwd)
             if [[ ${prev} == ${cmd} ]]; then
                 _hdd_comp
@@ -625,7 +626,6 @@ _VBoxManage() {
                 videocapmaxtime videocapmaxsize addencpassword removeencpassword
                 removeallencpasswords)
 
-
                 _find_item_name 2
                 subcommand=${COMP_WORDS[$((index+1))]}
 
@@ -702,11 +702,9 @@ _VBoxManage() {
                             _get_excluded_items "${tmp[@]}"
                             COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
                             ;;
-
                         --removeonsuspend)
                             COMPREPLY=( $(compgen -W "yes no" -- ${cur}) )
                             ;;
-
                         addencpassword)
                             tmp=(--host --port --maxdowntime --passwordfile
                             --password)
@@ -921,7 +919,6 @@ _VBoxManage() {
             else
                 COMPREPLY=( $(compgen -W "--newpassword --oldpassword --cipher
                 --newpasswordid" -- ${cur}) )
-
             fi
             ;;
 
@@ -1246,6 +1243,7 @@ _VBoxManage() {
                                 COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
                             fi
                             ;;
+
                         updatega|updateguestadditions|updateadditions)
                             items=(--source --wait-start)
                             [[ " ${COMP_WORDS[@]} " != *" --verbose "* &&
@@ -1258,6 +1256,7 @@ _VBoxManage() {
                             _get_excluded_items "${items[@]}"
                             COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
                             ;;
+
                         watch)
                             items=()
                             [[ " ${COMP_WORDS[@]} " != *" --verbose "* &&
@@ -1271,6 +1270,7 @@ _VBoxManage() {
                             COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
                             ;;
                     esac
+
                     case "${prev}" in
                         close)
                             items=(--verbose)
@@ -1469,14 +1469,12 @@ _VBoxManage() {
                             _get_excluded_items "${items[@]}"
                             COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
                         fi
-
                         ;;
                 esac
             else
                 [[ ${#COMPREPLY[@]} -eq 0 ]] && \
                     COMPREPLY=( $(compgen -W "${items[*]}" -- ${cur}) )
             fi
-
             ;;
 
         modifymedium)
@@ -1602,10 +1600,12 @@ _VBoxManage() {
                         COMPREPLY=()
                         _group_comp
                         ;;
+
                     --ostype)
                         COMPREPLY=()
                         _os_comp
                         ;;
+
                     --pagefusion|--acpi|--ioapic|--hpet|--triplefaultreset|\
                     --hwvirtex|--nestedpaging|--largepages|--vtxvpid|--vtxux|\
                     --pae|--longmode|--cpuhotplug|--rtcuseutc|\
@@ -1630,70 +1630,86 @@ _VBoxManage() {
                     --autostart-enabled|--videocap|--usbxhci|--apic|--x2apic)
                         COMPREPLY=( $(compgen -W "on off" -- ${cur}) )
                         ;;
+
                     --graphicscontroller)
                         COMPREPLY=( $(compgen -W "none vboxvga vmsvga" \
                             -- ${cur}) )
                         ;;
+
                     --firmware)
                         COMPREPLY=( $(compgen -W "bios efi efi32 efi64" \
                             -- ${cur}) )
                         ;;
+
                     --chipset)
                         COMPREPLY=( $(compgen -W "ich9 piix3" -- ${cur}) )
                         ;;
+
                     --biosbootmenu)
                         COMPREPLY=( $(compgen -W "disabled menuonly
                         messageandmenu" -- ${cur}) )
                         ;;
+
                     --boot[1-4])
                         COMPREPLY=( $(compgen -W "none floppy dvd disk net" \
                             -- ${cur}) )
                         ;;
+
                     --nic[1-8])
                         COMPREPLY=( $(compgen -W "none null nat bridged intnet
                         hostonly generic natnetwork" -- ${cur}) )
                         ;;
+
                     --nictype[1-8])
                         COMPREPLY=( $(compgen -W "Am79C970A Am79C973 82540EM
                         82543GC 82545EM virtio" -- ${cur}) )
                         ;;
+
                     --nicpromisc[1-8])
                         COMPREPLY=( $(compgen -W "deny allow-vms allow-all" \
                             -- ${cur}) )
                         ;;
+
                     --nicbandwidthgroup[1-8])
                         COMPREPLY=()
                         _bandwidthctl_comp
                         _get_excluded_items "none"
                         COMPREPLY+=( $(compgen -W "$result" -- ${cur}) )
                         ;;
+
                     --bridgeadapter[1-8])
                         COMPREPLY=()
                         _bridgedif_comp
                         _get_excluded_items "none"
                         COMPREPLY+=( $(compgen -W "$result" -- ${cur}) )
                         ;;
+
                     --hostonlyadapter[1-8])
                         COMPREPLY=()
                         _hostonlyif_comp
                         _get_excluded_items "none"
                         COMPREPLY+=( $(compgen -W "$result" -- ${cur}) )
                         ;;
+
                     --intnet[1-8])
                         COMPREPLY=()
                         _intnet_comp
                         ;;
+
                     --nat-network[1-8])
                         COMPREPLY=()
                         _natnet_comp
                         ;;
+
                     --natnet[1-8])
                         COMPREPLY=()
                         _natnet_comp
                         ;;
+
                     --natpf[1-8])
                         COMPREPLY+=( $(compgen -W "delete" -- ${cur}) )
                         ;;
+
                     --nataliasmode[1-8])
                         COMPREPLY+=( $(compgen -W "default" -- ${cur}) )
                         ;;
@@ -1701,58 +1717,73 @@ _VBoxManage() {
                     --macaddress[1-8])
                         COMPREPLY+=( $(compgen -W "auto" -- ${cur}) )
                         ;;
+
                     --mouse)
                         COMPREPLY+=( $(compgen -W "ps2 usb usbtablet
                         usbmultitouch" -- ${cur}) )
                         ;;
+
                     --keyboard)
                         COMPREPLY+=( $(compgen -W "ps2 usb" -- ${cur}) )
                         ;;
+
                     --uart[1-2]|--lpt[1-2])
                         COMPREPLY+=( $(compgen -W "off" -- ${cur}) )
                         ;;
+
                     --uartmode[1-2])
                         COMPREPLY+=( $(compgen -W "disconnected server client
                         tcpserver tcpclient file" -- ${cur}) )
                         ;;
+
                     --audio)
                         COMPREPLY+=( $(compgen -W "none null oss alsa pulse" \
                             -- ${cur}) )
                         ;;
+
                     --audiocontroller)
                         COMPREPLY+=( $(compgen -W "ac97 hda sb16" -- ${cur}) )
                         ;;
+
                     --audiocodec)
                         COMPREPLY+=( $(compgen -W "stac9700 ad1980 stac9221
                         sb16" -- ${cur}) )
                         ;;
+
                     --clipboard)
                         COMPREPLY+=( $(compgen -W "disabled hosttoguest
                         guesttohost bidirectional" -- ${cur}) )
                         ;;
+
                     --draganddrop)
                         COMPREPLY+=( $(compgen -W "disabled hosttoguest" \
                             -- ${cur}) )
                         ;;
+
                     --vrdeextpack|--vrdeauthlibrary|--snapshotfolder|\
                         --defaultfrontend)
                         COMPREPLY+=( $(compgen -W "default" -- ${cur}) )
                         ;;
+
                     --vrdeauthtype)
                         COMPREPLY+=( $(compgen -W "null external guest" \
                             -- ${cur}) )
                         ;;
+
                     --paravirtprovider)
                         COMPREPLY=( $(compgen -W "none default legacy minimal
                         hyperv kvm" -- ${cur}) )
                         ;;
+
                     --cpuid-portability-level)
                         COMPREPLY=( $(compgen -W "0 1 2 3" -- ${cur}) )
                         ;;
+
                     --cpu-profile)
                         COMPREPLY=( $(compgen -W "host 8086 80286 80386" \
                             -- ${cur}) )
                         ;;
+
                     --biosapic)
                         COMPREPLY=( $(compgen -W "disabled apic x2apic" \
                             -- ${cur}) )
@@ -1880,6 +1911,7 @@ _VBoxManage() {
             [[ ${#COMPREPLY[@]} -eq 0 ]] && \
                 COMPREPLY=( $(compgen -W "${items[*]}" -- ${cur}) )
             ;;
+
         showmediuminfo)
             if [[ ${prev} == ${cmd} ]]; then
                 COMPREPLY=( $(compgen -W "disk dvd floppy" -- ${cur}) )
