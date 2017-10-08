@@ -2054,7 +2054,7 @@ _VBoxManage() {
             fi
             ;;
 
-        usbfilte)
+        usbfilter)
             if [[ COMP_CWORD -ge 3 ]]; then
                 subcommand="${COMP_WORDS[2]}"
                 if [[ $subcommand == "${cmd}" ]]; then
