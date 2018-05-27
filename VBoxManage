@@ -4,7 +4,7 @@
 # URL: https://bitbucket.org/gryf/vboxmanage-bash-completion
 # URL: https://github.com/gryf/vboxmanage-bash-completion
 # License: 3-clause BSD-style license (see LICENSE file)
-# Version: 5.1.32
+# Version: 5.1.36
 
 _VBoxManage() {
     local cur prev opts cmd subcommand tmp items name index result
@@ -1592,7 +1592,8 @@ _VBoxManage() {
             --videocapmaxtime --videocapmaxsize --videocapopts --defaultfrontend
             --cpuid-portability-level --paravirtprovider --audiocodec --usbxhci
             --usbrename --apic --x2apic --paravirtdebug --cpu-profile
-            --biosapic --videocapopts --ibpb-on-vm-entry --ibpb-on-vm-exit)
+            --biosapic --videocapopts --ibpb-on-vm-entry --ibpb-on-vm-exit
+            --spec-ctrl)
 
             if [[ ${prev} == ${cmd} ]]; then
                 _vms_comp vms
@@ -1632,7 +1633,7 @@ _VBoxManage() {
                     --usbehci|--teleporter|--tracing-enabled|\
                     --tracing-allow-vm-access|--usbcardreader|\
                     --autostart-enabled|--videocap|--usbxhci|--apic|--x2apic|\
-                    --ibpb-on-vm-entry|--ibpb-on-vm-exit)
+                    --ibpb-on-vm-entry|--ibpb-on-vm-exit|--spec-ctrl)
                         COMPREPLY=( $(compgen -W "on off" -- ${cur}) )
                         ;;
 
