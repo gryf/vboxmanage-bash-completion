@@ -42,6 +42,18 @@ _VBoxManage() {
         done
     }
 
+    _is_any_item_used() {
+        local i
+
+        result=""
+        for i in $@; do
+            if [[ " ${COMP_WORDS[@]} " == *" $i "* ]]; then
+                result="ITIS"
+                break
+            fi
+        done
+    }
+
     # Generate registered hard disk files.
     # NOTE: This function may introduce some quirks, if there is a space or
     # other characters which usually are treated as IFS - like space. Pipe
@@ -629,7 +641,8 @@ _VBoxManage() {
                 vrdevideochannelquality webcam videocap videocapscreens
                 videocapfile videocapres videocaprate videocapfps
                 videocapmaxtime videocapmaxsize addencpassword removeencpassword
-                removeallencpasswords)
+                removeallencpasswords keyboardputstring keyboardputfile audioin
+                audioout)
 
                 _find_item_name 2
                 subcommand=${COMP_WORDS[$((index+1))]}
@@ -659,7 +672,7 @@ _VBoxManage() {
                                 COMPREPLY=( $(compgen -W "delete tcp
                                 udp" -- ${cur}) )
                             ;;
-                        setlinkstate[1-8])
+                        audioin|audioout|setlinkstate[1-8])
                             [[ ${prev} == "setlinkstate"* ]] && \
                                 COMPREPLY=( $(compgen -W "on off" -- ${cur}) )
                             ;;
@@ -937,8 +950,9 @@ _VBoxManage() {
                 [[ " ${COMP_WORDS[@]} " != *" --legacy09 "* &&
                     " ${COMP_WORDS[@]} " != *" --ovf09 "* &&
                     " ${COMP_WORDS[@]} " != *" --ovf10 "* &&
-                    " ${COMP_WORDS[@]} " != *" --ovf20 "* ]] &&
-                    items+=(--legacy09 --ovf09 --ovf10 --ovf20)
+                    " ${COMP_WORDS[@]} " != *" --ovf20 "* &&
+                    " ${COMP_WORDS[@]} " != *" --opc20 "* ]] &&
+                    items+=(--legacy09 --ovf09 --ovf10 --ovf20 --opc10)
                 [[ " ${COMP_WORDS[@]} " == *" --vsys "* ]] &&
                     items+=(--product --producturl --vendor --vendorurl
                     --version --description --eula --eulafile)
@@ -1401,11 +1415,14 @@ _VBoxManage() {
                 _list_comp ${cur}
             else
                 case "${prev}" in
+                    --sorted|-s)
+                        COMPREPLY=( $(compgen -W "-l --long" -- ${cur}) )
+                        ;;
                     --long|-l)
-                        COMPREPLY=()
+                        COMPREPLY=( $(compgen -W "-s --sorted" -- ${cur}) )
                         ;;
                     *)
-                        COMPREPLY=( $(compgen -W "-l --long" -- ${cur}) )
+                        COMPREPLY=( $(compgen -W "-l --long -s --sorted" -- ${cur}) )
                         ;;
                 esac
             fi
@@ -1498,7 +1515,7 @@ _VBoxManage() {
                     *)
                         _find_item_name 2
                         items=(--type --autoreset --property --compact --resize
-                        --move)
+                        --move --description)
                         _get_excluded_items "${items[@]}"
                         COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
                         case "${prev}" in
@@ -1523,7 +1540,7 @@ _VBoxManage() {
             items=(--name --groups --description --ostype --iconfile --memory
             --pagefusion --vram --acpi --pciattach --pcidetach --ioapic --hpet
             --triplefaultreset --hwvirtex --nestedpaging --largepages --vtxvpid
-            --vtxux --pae --longmode --cpuidset --cpuidremove
+            --vtxux --pae --longmode --cpuid-set --cpuid-remove
             --cpuidremoveall --hardwareuuid --cpus --cpuhotplug --plugcpu
             --unplugcpu --cpuexecutioncap --rtcuseutc --graphicscontroller
             --monitorcount --accelerate3d --accelerate2dvideo --firmware
@@ -1593,7 +1610,7 @@ _VBoxManage() {
             --cpuid-portability-level --paravirtprovider --audiocodec --usbxhci
             --usbrename --apic --x2apic --paravirtdebug --cpu-profile
             --biosapic --videocapopts --ibpb-on-vm-entry --ibpb-on-vm-exit
-            --spec-ctrl)
+            --spec-ctrl --audioin --audioout)
 
             if [[ ${prev} == ${cmd} ]]; then
                 _vms_comp vms
@@ -1633,7 +1650,8 @@ _VBoxManage() {
                     --usbehci|--teleporter|--tracing-enabled|\
                     --tracing-allow-vm-access|--usbcardreader|\
                     --autostart-enabled|--videocap|--usbxhci|--apic|--x2apic|\
-                    --ibpb-on-vm-entry|--ibpb-on-vm-exit|--spec-ctrl)
+                    --ibpb-on-vm-entry|--ibpb-on-vm-exit|--spec-ctrl|--audioin|\
+                    --audioout)
                         COMPREPLY=( $(compgen -W "on off" -- ${cur}) )
                         ;;
 
@@ -2013,7 +2031,13 @@ _VBoxManage() {
             elif [[ "${prev}" == "--type" ]]; then
                 COMPREPLY=( $(compgen -W "gui sdl headless separate" -- ${cur}) )
             else
-                local items=(--type)
+                local items=(--putenv -E)
+                _is_any_item_used "${items[@]}"
+                if [[ "${result}" == "ITIS" ]]; then
+                    local items=(--type)
+                else
+                    local items=(--type -E --putenv)
+                fi
                 _get_excluded_items "${items[@]}"
                 COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
             fi
@@ -2028,7 +2052,7 @@ _VBoxManage() {
                 --comment --setuuid --setparentuuid --passthrough --tempeject
                 --nonrotational --discard --hotpluggable --bandwidthgroup
                 --forceunmount --server --target --tport --lun --encodedlun
-                --username --password --initiator --intnet)
+                --username --password --initiator --intnet --passwordfile)
                 _get_excluded_items "${items[@]}"
                 COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
 
