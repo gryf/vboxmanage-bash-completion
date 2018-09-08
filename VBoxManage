@@ -649,7 +649,7 @@ _VBoxManage() {
 
                 if [[ " ${items[@]} " == *" $subcommand "* ]]; then
                     case "${subcommand}" in
-                        nictracefile[1-8])
+                        videocapfile|keyboardputfile|nictracefile[1-8])
                             [[ ${prev} == "nictracefile"* ]] && \
                                 COMPREPLY=( $(compgen -f -- ${cur}) )
                             ;;
@@ -730,6 +730,8 @@ _VBoxManage() {
                             COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
                             ;;
                     esac
+                elif [[ ${prev} == "--passwordfile" || ${prev} == "--capturefile" ]]; then
+                    COMPREPLY=( $(compgen -f -- ${cur}) )
                 else
                     [[ ${#COMPREPLY[@]} -eq 0 ]] && \
                             COMPREPLY=( $(compgen -W "${items[*]}" -- ${cur}) )
@@ -775,7 +777,7 @@ _VBoxManage() {
 
                         case "${prev}" in
                             --filename)
-                                COMPREPLY=( $(compgen -- ${cur}) )
+                                COMPREPLY=( $(compgen -f -- ${cur}) )
                                 ;;
                             --diffparent)
                                 COMPREPLY=()
@@ -869,7 +871,7 @@ _VBoxManage() {
                     COMPREPLY+=( $(compgen -W "$result" -- ${cur}) )
                 else
                     [[ "${prev}" == "--filename" ]] && \
-                        COMPREPLY=( $(compgen -- ${cur}) )
+                        COMPREPLY=( $(compgen -f -- ${cur}) )
                     [[ ${#COMPREPLY[@]} -eq 0 ]] && \
                         COMPREPLY=( $(compgen -W "${items[*]}" -- ${cur}) )
                 fi
@@ -943,6 +945,8 @@ _VBoxManage() {
             items=( --manifest --iso --options --vsys)
             if [[ ${prev} == ${cmd} ]]; then
                 _vms_comp vms
+            elif [[ ${prev} == "--eulafile" ]]; then 
+                COMPREPLY=( $(compgen -f -- ${cur}) )
             else
                 [[ " ${COMP_WORDS[@]} " != *" -o "* &&
                     " ${COMP_WORDS[@]} " != *" --output "* ]] &&
@@ -965,8 +969,8 @@ _VBoxManage() {
                         nomacsbutnat" -- ${cur}) )
                         ;;
                esac
-                [[ ${#COMPREPLY[@]} -eq 0 ]] && \
-                    COMPREPLY=( $(compgen -W "${items[*]}" -- ${cur}) )
+               [[ ${#COMPREPLY[@]} -eq 0 ]] && \
+                   COMPREPLY=( $(compgen -W "${items[*]}" -- ${cur}) )
             fi
             ;;
 
@@ -1302,7 +1306,7 @@ _VBoxManage() {
                         --image)
                             COMPREPLY=( $(compgen -- ${cur}) )
                             ;;
-                        --tmpdir)
+                        --target-directory|--tmpdir)
                             COMPREPLY=( $(compgen -o dirnames -- ${cur}) )
                             ;;
                         --source)
@@ -1312,6 +1316,9 @@ _VBoxManage() {
                             [[ ${#COMPREPLY[@]} = 1 && \
                                 "${COMPREPLY[0]}" != *".iso" ]] && \
                                 COMPREPLY[0]="${COMPREPLY[0]}/"
+                            ;;
+                        --passwordfile)
+                            COMPREPLY=( $(compgen -f -- ${cur}) )
                             ;;
                     esac
                 else
@@ -1812,6 +1819,15 @@ _VBoxManage() {
                         COMPREPLY=( $(compgen -W "disabled apic x2apic" \
                             -- ${cur}) )
                         ;;
+                    --teleporterpasswordfile|--iconfile|--videocapfile)
+                        COMPREPLY=( $(compgen -f -- ${cur}) )
+                        ;;
+                    --nictracefile[1-8])
+                        COMPREPLY=( $(compgen -f -- ${cur}) )
+                        ;;
+                    --nattftpfile[1-8])
+                        COMPREPLY=( $(compgen -f -- ${cur}) )
+                        ;;
                 esac
             fi
             ;;
@@ -2077,6 +2093,9 @@ _VBoxManage() {
                         ;;
                     --passthrough|--tempeject|--nonrotational|--discard)
                         COMPREPLY=( $(compgen -W "on off" -- ${cur}) )
+                        ;;
+                    --passwordfile)
+                        COMPREPLY=( $(compgen -f -- ${cur}) )
                         ;;
                 esac
             fi
