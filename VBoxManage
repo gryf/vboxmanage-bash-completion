@@ -4,7 +4,7 @@
 # URL: https://bitbucket.org/gryf/vboxmanage-bash-completion
 # URL: https://github.com/gryf/vboxmanage-bash-completion
 # License: 3-clause BSD-style license (see LICENSE file)
-# Version: 5.1.36
+# Version: 5.2.14
 
 _VBoxManage() {
     local cur prev opts cmd subcommand tmp items name index result
@@ -455,7 +455,7 @@ _VBoxManage() {
 
     # add debugvm command manually, since it's described differently in
     # vboxmanage help
-    opts="${opts} debugvm"
+    opts="${opts} debugvm unattended"
 
     if [[ ${cur} == "-q" || ${COMP_CWORD} -eq 1 ]] ; then
         COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
@@ -2199,6 +2199,66 @@ _VBoxManage() {
                 fi
             fi
             ;;
+
+        unattended)
+            if [[ COMP_CWORD -ge 3 ]]; then
+                subcommand="${COMP_WORDS[2]}"
+                if [[ $subcommand == "${cmd}" ]]; then
+                    subcommand="${COMP_WORDS[3]}"
+                fi
+            fi
+
+            if [[ ${prev} == ${cmd} ]]; then
+                COMPREPLY=( $(compgen -W "detect install" -- ${cur}) )
+            else
+                case "${prev}" in
+                    --iso|--password-file|--additions-iso|--validation-kit-iso|\
+                        --script-template|--post-install-template)
+                        COMPREPLY+=( $(compgen -f -- ${cur}) )
+                        ;;
+                    --auxiliary-base-path)
+                        COMPREPLY+=( $(compgen -o dirnames -- ${cur}) )
+                        ;;
+                    --start-vm)
+                        COMPREPLY=( $(compgen -W "gui sdl headless separate" \
+                            -- ${cur}) )
+                        ;;
+                esac
+
+                if [[ ${#COMPREPLY[@]} -eq 0 ]]; then
+                    case "${subcommand}" in
+                        detect)
+                            local items=(--iso --machine-readable)
+                            _get_excluded_items "${items[@]}"
+                            COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+                            ;;
+                        install)
+                            if [[ ${prev} == ${subcommand} ]]; then
+                                _vms_comp vms
+                            else
+                                local items=(--iso --user=login 
+                                --password=password --password-file 
+                                --full-user-name --key 
+                                --install-additions --no-install-additions 
+                                --additions-iso --install-txs --no-install-txs 
+                                --validation-kit-iso --locale --country
+                                --time-zone --hostname 
+                                --package-selection-adjustment --dry-run
+                                --auxiliary-base-path=path --image-index 
+                                --script-template --post-install-template 
+                                --post-install-command 
+                                --extra-install-kernel-parameters --language
+                                --start-vm)
+                                _get_excluded_items "${items[@]}"
+                                COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+                            fi
+                            ;;
+                    esac
+                fi
+
+            fi
+            ;;
+
     esac
 }
 complete -o default -F _VBoxManage VBoxManage
