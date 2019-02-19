@@ -1032,8 +1032,8 @@ _VBoxManage() {
                             --ignore-operhaned-processes --profile
                             --dos2unix --unix2dos --username --domain --)
 
-                            [[ " ${comp_words[@]} " != *" --password "* ||
-                                " ${comp_words[@]} " != *" --passwordfile "* ]] &&
+                            [[ " ${COMP_WORDS[@]} " != *" --password "* ||
+                                " ${COMP_WORDS[@]} " != *" --passwordfile "* ]] &&
                                 items+=(--passwordfile --password)
                             [[ " ${COMP_WORDS[@]} " != *" --putenv "* &&
                                 " ${COMP_WORDS[@]} " != *" -E "* ]] &&
@@ -1060,8 +1060,8 @@ _VBoxManage() {
                             --ignore-operhaned-processes --profile
                             --username --domain --passwordfile --password --)
 
-                            [[ " ${comp_words[@]} " != *" --password "* ||
-                                " ${comp_words[@]} " != *" --passwordfile "* ]] &&
+                            [[ " ${COMP_WORDS[@]} " != *" --password "* ||
+                                " ${COMP_WORDS[@]} " != *" --passwordfile "* ]] &&
                                 items+=(--passwordfile --password)
                             [[ " ${COMP_WORDS[@]} " != *" --verbose "* &&
                                 " ${COMP_WORDS[@]} " != *" -v "* ]] &&
@@ -1081,8 +1081,8 @@ _VBoxManage() {
                             [[ " ${COMP_WORDS[@]} " != *" --recursive "* &&
                                 " ${COMP_WORDS[@]} " != *" -R "* ]] &&
                                 items+=(--recursive -R)
-                            [[ " ${comp_words[@]} " != *" --password "* ||
-                                " ${comp_words[@]} " != *" --passwordfile "* ]] &&
+                            [[ " ${COMP_WORDS[@]} " != *" --password "* ||
+                                " ${COMP_WORDS[@]} " != *" --passwordfile "* ]] &&
                                 items+=(--passwordfile --password)
                             [[ " ${COMP_WORDS[@]} " != *" --verbose "* &&
                                 " ${COMP_WORDS[@]} " != *" -v "* ]] &&
