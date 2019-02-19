@@ -271,11 +271,14 @@ _VBoxManage() {
         snap=$(VBoxManage snapshot "${name//\\/}" \
             list | \
             grep UUID |
-            awk -F ': ' '{print $2}' | \
-            sed 's/ (.*//' | \
-            tr '\n' '|' | \
-            sed 's/|$//' | \
-            sed 's/\s/\\ /g')
+            awk -F ': *' -v ORS='|' '/UUID: / {
+              n=$2; u=$3
+              sub(/..UUID/, "", n)
+              gsub(/ /, "\\ ", n);
+              sub(/[)].*/, "", u)
+              print n; print u
+              }'
+        )
         IFS='|' read -ra snap <<< "$snap"
 
         for item in "${snap[@]}"
