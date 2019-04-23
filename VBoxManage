@@ -4,7 +4,7 @@
 # URL: https://bitbucket.org/gryf/vboxmanage-bash-completion
 # URL: https://github.com/gryf/vboxmanage-bash-completion
 # License: 3-clause BSD-style license (see LICENSE file)
-# Version: 5.2.22
+# Version: 5.2.26
 
 _VBoxManage() {
     local cur prev opts cmd subcommand tmp items name index result
@@ -686,8 +686,8 @@ _VBoxManage() {
                             ;;
                         draganddrop)
                             [[ ${prev} == "draganddrop" ]] && \
-                                COMPREPLY=( $(compgen -W "disabled
-                                hosttoguest" -- ${cur}) )
+                                COMPREPLY=( $(compgen -W "disabled hosttoguest 
+                                guesttohost bidirectional" -- ${cur}) )
                             ;;
                         vrde|videocap)
                             [[ ${prev} == "vrde" ||
@@ -1791,8 +1791,8 @@ _VBoxManage() {
                         ;;
 
                     --draganddrop)
-                        COMPREPLY+=( $(compgen -W "disabled hosttoguest" \
-                            -- ${cur}) )
+                        COMPREPLY+=( $(compgen -W "disabled hosttoguest 
+                        guesttohost bidirectional" -- ${cur}) )
                         ;;
 
                     --vrdeextpack|--vrdeauthlibrary|--snapshotfolder|\
