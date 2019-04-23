@@ -1619,8 +1619,8 @@ _VBoxManage() {
             --videocapmaxtime --videocapmaxsize --videocapopts --defaultfrontend
             --cpuid-portability-level --paravirtprovider --audiocodec --usbxhci
             --usbrename --apic --x2apic --paravirtdebug --cpu-profile
-            --biosapic --videocapopts --ibpb-on-vm-entry --ibpb-on-vm-exit
-            --spec-ctrl --audioin --audioout --l1d-flush-on-sched 
+            --biosapic --ibpb-on-vm-entry --ibpb-on-vm-exit --spec-ctrl 
+            --audioin --audioout --l1d-flush-on-sched 
             --l1d-flush-on-vm-entry)
 
             if [[ ${prev} == ${cmd} ]]; then
