@@ -452,9 +452,9 @@ _VBoxManage() {
         sort | \
         uniq)
 
-    # add debugvm and mediumio commands manually, since it's described
-    # differently in vboxmanage help
-    opts="${opts} mediumio debugvm unattended"
+    # Add some commands manually, since they are listed differently in
+    # vboxmanage help.
+    opts="${opts} mediumio debugvm unattended extpack"
 
     if [[ ${cur} == "-q" || ${COMP_CWORD} -eq 1 ]] ; then
         COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
