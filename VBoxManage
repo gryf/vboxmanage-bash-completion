@@ -1801,32 +1801,32 @@ _VBoxManage() {
                         ;;
 
                     --natpf[1-8])
-                        COMPREPLY+=( $(compgen -W "delete" -- ${cur}) )
+                        COMPREPLY=( $(compgen -W "delete" -- ${cur}) )
                         ;;
 
                     --nataliasmode[1-8])
-                        COMPREPLY+=( $(compgen -W "default" -- ${cur}) )
+                        COMPREPLY=( $(compgen -W "default" -- ${cur}) )
                         ;;
 
                     --macaddress[1-8])
-                        COMPREPLY+=( $(compgen -W "auto" -- ${cur}) )
+                        COMPREPLY=( $(compgen -W "auto" -- ${cur}) )
                         ;;
 
                     --mouse)
-                        COMPREPLY+=( $(compgen -W "ps2 usb usbtablet
+                        COMPREPLY=( $(compgen -W "ps2 usb usbtablet
                         usbmultitouch" -- ${cur}) )
                         ;;
 
                     --keyboard)
-                        COMPREPLY+=( $(compgen -W "ps2 usb" -- ${cur}) )
+                        COMPREPLY=( $(compgen -W "ps2 usb" -- ${cur}) )
                         ;;
 
                     --uart[1-2]|--lpt[1-2])
-                        COMPREPLY+=( $(compgen -W "off" -- ${cur}) )
+                        COMPREPLY=( $(compgen -W "off" -- ${cur}) )
                         ;;
 
                     --uartmode[1-2])
-                        COMPREPLY+=( $(compgen -W "disconnected server client
+                        COMPREPLY=( $(compgen -W "disconnected server client
                         tcpserver tcpclient file" -- ${cur}) )
                         ;;
 
@@ -1836,36 +1836,36 @@ _VBoxManage() {
                         ;;
 
                     --audio)
-                        COMPREPLY+=( $(compgen -W "none null oss alsa pulse" \
+                        COMPREPLY=( $(compgen -W "none null oss alsa pulse" \
                             -- ${cur}) )
                         ;;
 
                     --audiocontroller)
-                        COMPREPLY+=( $(compgen -W "ac97 hda sb16" -- ${cur}) )
+                        COMPREPLY=( $(compgen -W "ac97 hda sb16" -- ${cur}) )
                         ;;
 
                     --audiocodec)
-                        COMPREPLY+=( $(compgen -W "stac9700 ad1980 stac9221
+                        COMPREPLY=( $(compgen -W "stac9700 ad1980 stac9221
                         sb16" -- ${cur}) )
                         ;;
 
                     --clipboard)
-                        COMPREPLY+=( $(compgen -W "disabled hosttoguest
+                        COMPREPLY=( $(compgen -W "disabled hosttoguest
                         guesttohost bidirectional" -- ${cur}) )
                         ;;
 
                     --draganddrop)
-                        COMPREPLY+=( $(compgen -W "disabled hosttoguest
+                        COMPREPLY=( $(compgen -W "disabled hosttoguest
                         guesttohost bidirectional" -- ${cur}) )
                         ;;
 
                     --vrdeextpack|--vrdeauthlibrary|--snapshotfolder|\
                         --defaultfrontend)
-                        COMPREPLY+=( $(compgen -W "default" -- ${cur}) )
+                        COMPREPLY=( $(compgen -W "default" -- ${cur}) )
                         ;;
 
                     --vrdeauthtype)
-                        COMPREPLY+=( $(compgen -W "null external guest" \
+                        COMPREPLY=( $(compgen -W "null external guest" \
                             -- ${cur}) )
                         ;;
 
