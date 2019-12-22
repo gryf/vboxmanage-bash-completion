@@ -323,14 +323,10 @@ _VBoxManage() {
 
     _list_comp() {
         local list
-        list=$(VBoxManage list | \
-            grep '|' | \
-            sed 's/\[.*\]//g'| \
-            sed 's/VBoxManage list//' | \
-            tr "\\n" " " | \
-            sed 's/$/\n/' | \
-            sed 's/\s\+//g' | \
-            sed 's/|/ /g')
+        list=$(VBoxManage list | sed -e '1,2d' \
+            -e 's/VBoxManage list //' \
+            -e 's/[\[\]\|]/ /g' \
+            -e 's/|/ /g'|xargs echo)
         COMPREPLY=( $(compgen -W "$list" -- ${cur}) )
     }
 
