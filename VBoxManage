@@ -4,7 +4,7 @@
 # URL: https://bitbucket.org/gryf/vboxmanage-bash-completion
 # URL: https://github.com/gryf/vboxmanage-bash-completion
 # License: 3-clause BSD-style license (see LICENSE file)
-# Version: 5.2.32
+# Version: 6.0.12
 
 _VBoxManage() {
     local cur prev opts cmd subcommand tmp items name index result
@@ -456,9 +456,9 @@ _VBoxManage() {
         sort | \
         uniq)
 
-    # add debugvm command manually, since it's described differently in
-    # vboxmanage help
-    opts="${opts} debugvm unattended"
+    # add debugvm and mediumio commands manually, since it's described
+    # differently in vboxmanage help
+    opts="${opts} mediumio debugvm unattended"
 
     if [[ ${cur} == "-q" || ${COMP_CWORD} -eq 1 ]] ; then
         COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
@@ -583,7 +583,7 @@ _VBoxManage() {
                         ;;
                     --options)
                         COMPREPLY=( $(compgen -W "link keepallmacs keepnatmacs
-                        keepdisknames" -- ${cur}) )
+                        keepdisknames keephwuuids" -- ${cur}) )
                         ;;
                     --groups)
                         COMPREPLY=()
@@ -641,18 +641,17 @@ _VBoxManage() {
                 setlinkstate3 setlinkstate4 setlinkstate5 setlinkstate6
                 setlinkstate7 setlinkstate8 setvideomodehint teleport unplugcpu
                 usbattach usbdetach vrde vrdeport vrdeproperty
-                vrdevideochannelquality webcam videocap videocapscreens
-                videocapfile videocapres videocaprate videocapfps
-                videocapmaxtime videocapmaxsize addencpassword removeencpassword
-                removeallencpasswords keyboardputstring keyboardputfile audioin
-                audioout)
+                vrdevideochannelquality webcam recording addencpassword
+                removeencpassword removeallencpasswords keyboardputstring
+                keyboardputfile audioin audioout setscreenlayout changeuartmode1
+                changeuartmode2)
 
                 _find_item_name 2
                 subcommand=${COMP_WORDS[$((index+1))]}
 
                 if [[ " ${items[@]} " == *" $subcommand "* ]]; then
                     case "${subcommand}" in
-                        videocapfile|keyboardputfile|nictracefile[1-8])
+                        keyboardputfile|nictracefile[1-8])
                             [[ ${prev} == "nictracefile"* ]] && \
                                 COMPREPLY=( $(compgen -f -- ${cur}) )
                             ;;
@@ -686,13 +685,27 @@ _VBoxManage() {
                             ;;
                         draganddrop)
                             [[ ${prev} == "draganddrop" ]] && \
-                                COMPREPLY=( $(compgen -W "disabled hosttoguest 
+                                COMPREPLY=( $(compgen -W "disabled hosttoguest
                                 guesttohost bidirectional" -- ${cur}) )
                             ;;
-                        vrde|videocap)
-                            [[ ${prev} == "vrde" ||
-                            ${prev} == "videocap" ]] && \
+                        vrde)
+                            [[ ${prev} == "vrde" ]] && \
                                 COMPREPLY=( $(compgen -W "on off" -- ${cur}) )
+                            ;;
+                        recording)
+                            [[ ${prev} == "recording" ]] && \
+                                COMPREPLY=( $(compgen -W "on off screens
+                                    filename videores videorate videofps maxtime
+                                    maxfilesize"  -- ${cur}) )
+                            case "${prev}" in
+                                screens)
+                                    COMPREPLY=( $(compgen -W "all none
+                                        <screen>" -- ${cur}) )
+                                    ;;
+                                filename)
+                                    COMPREPLY=( $(compgen -f -- ${cur}) )
+                                    ;;
+                            esac
                             ;;
                         videocapscreens)
                             [[ ${prev} == "videocapscreens" ]] && \
@@ -729,6 +742,12 @@ _VBoxManage() {
                         addencpassword)
                             tmp=(--host --port --maxdowntime --passwordfile
                             --password)
+                            _get_excluded_items "${tmp[@]}"
+                            COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+                            ;;
+                        changeuartmode[1-2])
+                            tmp=(disconnected server client tcpserver tcpclient
+                                file "<devicename>")
                             _get_excluded_items "${tmp[@]}"
                             COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
                             ;;
@@ -792,7 +811,7 @@ _VBoxManage() {
                                 ;;
                             --variant)
                                 COMPREPLY=( $(compgen -W "Standard Fixed Split2G
-                                Stream ESX" -- ${cur}) )
+                                Stream ESX Formatted" -- ${cur}) )
                                 ;;
                         esac
                         ;;
@@ -801,7 +820,8 @@ _VBoxManage() {
             ;;
 
         createvm)
-            items=(--name --groups --ostype --register --basefolder --uuid)
+            items=(--name --groups --ostype --register --basefolder --uuid
+                --default)
             if [[ ${prev} == ${cmd} ]]; then
                 COMPREPLY=( $(compgen -W "${items[*]}" -- ${cur}) )
             else
@@ -887,7 +907,7 @@ _VBoxManage() {
             if [[ " ${items[@]} " == *" $subcommand "* ]]; then
                 case "${subcommand}" in
                     add|modify)
-                        items=(--ip --netmask --lowerip --upperip)
+                        items=(--ip --netmask --lowerip --upperip --options)
 
                         [[ " ${COMP_WORDS[@]} " != *" --ifname"* &&
                             " ${COMP_WORDS[@]} " != *" --netname"* ]] &&
@@ -896,6 +916,9 @@ _VBoxManage() {
                         [[ " ${COMP_WORDS[@]} " != *" --enable"* &&
                             " ${COMP_WORDS[@]} " != *" --disable"* ]] &&
                             items+=(--enable --disable)
+
+                        [[ " ${COMP_WORDS[@]} " == *" --options"* ]] &&
+                            items+=(--vm --nic --id --value --remove)
 
                         _get_excluded_items "${items[@]}"
                         COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
@@ -945,11 +968,15 @@ _VBoxManage() {
             ;;
 
         "export")
-            items=( --manifest --iso --options --vsys)
+            items=( --manifest --iso --options --vsys --cloud)
             if [[ ${prev} == ${cmd} ]]; then
                 _vms_comp vms
-            elif [[ ${prev} == "--eulafile" ]]; then 
+            elif [[ ${prev} == "--eulafile" ]]; then
                 COMPREPLY=( $(compgen -f -- ${cur}) )
+            elif [[ ${prev} == "--cloudkeepobject" ||
+                    ${prev} == "--cloudlaunchinstance" ||
+                    ${prev} == "--cloudpublicip" ]]; then
+                COMPREPLY=( $(compgen -W "true false" -- ${cur}) )
             else
                 [[ " ${COMP_WORDS[@]} " != *" -o "* &&
                     " ${COMP_WORDS[@]} " != *" --output "* ]] &&
@@ -962,7 +989,11 @@ _VBoxManage() {
                     items+=(--legacy09 --ovf09 --ovf10 --ovf20 --opc10)
                 [[ " ${COMP_WORDS[@]} " == *" --vsys "* ]] &&
                     items+=(--product --producturl --vendor --vendorurl
-                    --version --description --eula --eulafile)
+                    --version --description --eula --eulafile --vmname)
+                [[ " ${COMP_WORDS[@]} " == *" --cloud"* ]] &&
+                    items+=(--vmname --cloudprofile --cloudshape --clouddomain
+                    --clouddisksize --cloudbucket --cloudocivcn --cloudocisubnet
+                    --cloudkeepobject --cloudlaunchinstance --cloudpublicip)
                 _get_excluded_items "${items[@]}"
                 COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
 
@@ -971,6 +1002,7 @@ _VBoxManage() {
                         COMPREPLY=( $(compgen -W "manifest iso nomacs
                         nomacsbutnat" -- ${cur}) )
                         ;;
+
                esac
                [[ ${#COMPREPLY[@]} -eq 0 ]] && \
                    COMPREPLY=( $(compgen -W "${items[*]}" -- ${cur}) )
@@ -1075,8 +1107,8 @@ _VBoxManage() {
                             ;;
 
                         copyfrom|copyto)
-                            items=(--dryrun --follow --target-directory
-                            --username --domain)
+                            items=(--follow --target-directory --username
+                                --domain)
 
                             [[ " ${COMP_WORDS[@]} " != *" --recursive "* &&
                                 " ${COMP_WORDS[@]} " != *" -R "* ]] &&
@@ -1438,6 +1470,31 @@ _VBoxManage() {
             fi
             ;;
 
+        mediumio)
+            if [[ ${prev} == ${cmd} ]]; then
+                _hdd_comp
+                _floppy_comp
+                _dvds_comp
+            else
+                case "${prev}" in
+                    formatfat)
+                        COMPREPLY=( $(compgen -W "--quick" -- ${cur}) )
+                        ;;
+                    cat)
+                        COMPREPLY=( $(compgen -W "--hex --offset --size
+                            --output" -- ${cur}) )
+                            ;;
+                    stream)
+                            COMPREPLY=( $(compgen -W "--forma --variant
+                                --output" -- ${cur}) )
+                                ;;
+                    *)
+                        COMPREPLY=( $(compgen -W "--password-file cat formatfat
+                            stream" -- ${cur}) )
+                esac
+            fi
+            ;;
+
         mediumproperty)
             if [[ ${prev} == ${cmd} ]]; then
                 COMPREPLY=( $(compgen -W "disk dvd floppy" -- ${cur}) )
@@ -1525,7 +1582,7 @@ _VBoxManage() {
                     *)
                         _find_item_name 2
                         items=(--type --autoreset --property --compact --resize
-                        --move --description)
+                        --move --description --setlocation)
                         _get_excluded_items "${items[@]}"
                         COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
                         case "${prev}" in
@@ -1539,6 +1596,9 @@ _VBoxManage() {
                                 ;;
                             --move)
                                 COMPREPLY=( $(compgen -o dirnames -- ${cur}) )
+                                ;;
+                            --setlocation)
+                                COMPREPLY=( $(compgen -f -- ${cur}) )
                                 ;;
                         esac
                     ;;
@@ -1610,18 +1670,19 @@ _VBoxManage() {
             --audiocontroller --clipboard --draganddrop --vrde --vrdeextpack
             --vrdeproperty --vrdeport --vrdeaddress --vrdeauthtype
             --vrdeauthlibrary --vrdemulticon --vrdereusecon --vrdevideochannel
-            --vrdevideochannelquality --usb --usbehci --snapshotfolder
+            --vrdevideochannelquality --usbohci --usbehci --snapshotfolder
             --teleporter --teleporterport --teleporteraddress
             --teleporterpassword --teleporterpasswordfile --tracing-enabled
             --tracing-config --tracing-allow-vm-access --usbcardreader
-            --autostart-enabled --autostart-delay --videocap --videocapscreens
-            --videocapfile --videocapres --videocaprate --videocapfps
-            --videocapmaxtime --videocapmaxsize --videocapopts --defaultfrontend
-            --cpuid-portability-level --paravirtprovider --audiocodec --usbxhci
-            --usbrename --apic --x2apic --paravirtdebug --cpu-profile
-            --biosapic --ibpb-on-vm-entry --ibpb-on-vm-exit --spec-ctrl 
-            --audioin --audioout --l1d-flush-on-sched 
-            --l1d-flush-on-vm-entry --mds-clear-on-sched --mds-clear-on-vm-entry)
+            --autostart-enabled --autostart-delay --recording --recordingscreens
+            --recordingfile --recordingvideores --recordingvideorate
+            --recordingvideofps --recordingmaxtime --recordingmaxsize
+            --recordingopts --defaultfrontend --cpuid-portability-level
+            --paravirtprovider --audiocodec --usbxhci --usbrename --apic
+            --x2apic --paravirtdebug --cpu-profile --biosapic --ibpb-on-vm-entry
+            --ibpb-on-vm-exit --spec-ctrl --audioin --audioout
+            --l1d-flush-on-sched --l1d-flush-on-vm-entry --mds-clear-on-sched
+            --mds-clear-on-vm-entry --nested-hw-virt --uarttype1 --uarttype2)
 
             if [[ ${prev} == ${cmd} ]]; then
                 _vms_comp vms
@@ -1657,18 +1718,19 @@ _VBoxManage() {
                     --natdnshostresolver3|--natdnshostresolver4|\
                     --natdnshostresolver5|--natdnshostresolver6|\
                     --natdnshostresolver7|--natdnshostresolver8|--vrde|\
-                    --vrdemulticon|--vrdereusecon|--vrdevideochannel|--usb|\
+                    --vrdemulticon|--vrdereusecon|--vrdevideochannel|--usbohci|\
                     --usbehci|--teleporter|--tracing-enabled|\
                     --tracing-allow-vm-access|--usbcardreader|\
-                    --autostart-enabled|--videocap|--usbxhci|--apic|--x2apic|\
+                    --autostart-enabled|--recording|--usbxhci|--apic|--x2apic|\
                     --ibpb-on-vm-entry|--ibpb-on-vm-exit|--spec-ctrl|--audioin|\
                     --audioout|--l1d-flush-on-sched|--l1d-flush-on-vm-entry|\
-                    --mds-clear-on-sched|--mds-clear-on-vm-entry)
+                    --mds-clear-on-sched|--mds-clear-on-vm-entry|\
+                    --nested-hw-virt)
                         COMPREPLY=( $(compgen -W "on off" -- ${cur}) )
                         ;;
 
                     --graphicscontroller)
-                        COMPREPLY=( $(compgen -W "none vboxvga vmsvga" \
+                        COMPREPLY=( $(compgen -W "none vboxvga vmsvga vboxsvga" \
                             -- ${cur}) )
                         ;;
 
@@ -1772,6 +1834,11 @@ _VBoxManage() {
                         tcpserver tcpclient file" -- ${cur}) )
                         ;;
 
+                    --uarttype[1-2])
+                        COMPREPLY=( $(compgen -W "16450 16550A
+                        16750" -- ${cur}) )
+                        ;;
+
                     --audio)
                         COMPREPLY+=( $(compgen -W "none null oss alsa pulse" \
                             -- ${cur}) )
@@ -1792,7 +1859,7 @@ _VBoxManage() {
                         ;;
 
                     --draganddrop)
-                        COMPREPLY+=( $(compgen -W "disabled hosttoguest 
+                        COMPREPLY+=( $(compgen -W "disabled hosttoguest
                         guesttohost bidirectional" -- ${cur}) )
                         ;;
 
@@ -1824,13 +1891,33 @@ _VBoxManage() {
                         COMPREPLY=( $(compgen -W "disabled apic x2apic" \
                             -- ${cur}) )
                         ;;
-                    --teleporterpasswordfile|--iconfile|--videocapfile)
+                    --teleporterpasswordfile|--iconfile|--recordingfile)
                         COMPREPLY=( $(compgen -f -- ${cur}) )
                         ;;
                     --nictracefile[1-8])
                         COMPREPLY=( $(compgen -f -- ${cur}) )
                         ;;
                     --nattftpfile[1-8])
+                        COMPREPLY=( $(compgen -f -- ${cur}) )
+                        ;;
+                esac
+            fi
+            ;;
+
+        movevm)
+            if [[ ${prev} == ${cmd} ]]; then
+                _vms_comp vms
+            else
+                _find_item_name 2
+                items=(--type --folder)
+                _get_excluded_items "${items[@]}"
+                COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+                case "${prev}" in
+                    --type)
+                        COMPREPLY=( $(compgen -W "basic" -- ${cur}) )
+                        _snapshot_comp
+                        ;;
+                    --folder)
                         COMPREPLY=( $(compgen -f -- ${cur}) )
                         ;;
                 esac
@@ -1889,7 +1976,7 @@ _VBoxManage() {
         setproperty)
             items=(machinefolder hwvirtexclusive vrdeauthlibrary
             websrvauthlibrary vrdeextpack autostartdbpath loghistorycount
-            defaultfrontend logginglevel)
+            defaultfrontend logginglevel proxymode proxyurl)
             subcommand=${COMP_WORDS[2]}
             if [[ "${prev}" == "${cmd}" ]]; then
                 COMPREPLY=( $(compgen -W "${items[*]}" -- ${cur}) )
@@ -1915,6 +2002,10 @@ _VBoxManage() {
                         ;;
                     defaultfrontend)
                         COMPREPLY=( $(compgen -W "null" -- ${cur}) )
+                        ;;
+                    proxymode)
+                        COMPREPLY=( $(compgen -W "system noproxy
+                            manual" -- ${cur}) )
                         ;;
                 esac
             fi
@@ -2241,17 +2332,17 @@ _VBoxManage() {
                             if [[ ${prev} == ${subcommand} ]]; then
                                 _vms_comp vms
                             else
-                                local items=(--iso --user=login 
-                                --password=password --password-file 
-                                --full-user-name --key 
-                                --install-additions --no-install-additions 
-                                --additions-iso --install-txs --no-install-txs 
+                                local items=(--iso --user=login
+                                --password=password --password-file
+                                --full-user-name --key
+                                --install-additions --no-install-additions
+                                --additions-iso --install-txs --no-install-txs
                                 --validation-kit-iso --locale --country
-                                --time-zone --hostname 
+                                --time-zone --hostname
                                 --package-selection-adjustment --dry-run
-                                --auxiliary-base-path=path --image-index 
-                                --script-template --post-install-template 
-                                --post-install-command 
+                                --auxiliary-base-path=path --image-index
+                                --script-template --post-install-template
+                                --post-install-command
                                 --extra-install-kernel-parameters --language
                                 --start-vm)
                                 _get_excluded_items "${items[@]}"
