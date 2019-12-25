@@ -4,7 +4,7 @@
 # URL: https://bitbucket.org/gryf/vboxmanage-bash-completion
 # URL: https://github.com/gryf/vboxmanage-bash-completion
 # License: 3-clause BSD-style license (see LICENSE file)
-# Version: 6.0.12
+# Version: 6.1.0
 
 _VBoxManage() {
     local cur prev opts cmd subcommand tmp items name index result
@@ -432,6 +432,42 @@ _VBoxManage() {
         esac
     }
 
+    _cloudproviders_comp() {
+        local providers
+        local item
+
+        providers=$(VBoxManage list cloudproviders | \
+            grep "Short Name:" | \
+            sed 's/Short Name:\s\+//' | \
+            sed 's/\s/\\ /g' | \
+            tr '\n' '|' | \
+            sed 's/|$//')
+        IFS='|' read -ra providers <<< "$providers"
+
+        for item in "${providers[@]}"
+        do
+            [[ ${item^^} == ${cur^^}* ]] && COMPREPLY+=("$item")
+        done
+    }
+    
+    _cloudprofiles_comp() {
+        local profiles
+        local item
+
+        profiles=$(VBoxManage list cloudprofiles | \
+            grep "Name:" | \
+            sed 's/Name:\s\+//' | \
+            sed 's/\s/\\ /g' | \
+            tr '\n' '|' | \
+            sed 's/|$//')
+        IFS='|' read -ra profiles <<< "$profiles"
+
+        for item in "${profiles[@]}"
+        do
+            [[ ${item^^} == ${cur^^}* ]] && COMPREPLY+=("$item")
+        done
+    }
+
     COMP_WORDBREAKS=${COMP_WORDBREAKS//|/}  # remove pipe from comp word breaks
     COMPREPLY=()
 
@@ -454,7 +490,8 @@ _VBoxManage() {
 
     # Add some commands manually, since they are listed differently in
     # vboxmanage help.
-    opts="${opts} mediumio debugvm unattended extpack"
+    opts="${opts} mediumio debugvm unattended extpack clonevm snapshot
+    dhcpserver cloudprofile cloud"
 
     if [[ ${cur} == "-q" || ${COMP_CWORD} -eq 1 ]] ; then
         COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
@@ -565,7 +602,7 @@ _VBoxManage() {
             else
                 _find_item_name 2
                 items=(--snapshot --mode --options --name --groups --basefolder
-                --uuid --register)
+                --uuid --register --snapshot)
                 _get_excluded_items "${items[@]}"
                 COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
                 case "${prev}" in
@@ -618,6 +655,125 @@ _VBoxManage() {
             fi
             ;;
 
+        cloudprofile)
+            if [[ " ${COMP_WORDS[@]} " != *" --provider"* ||
+                " ${COMP_WORDS[@]} " != *" --profile"* ]]; then
+                items=(--provider --profile)
+            else
+            [[ " ${COMP_WORDS[@]} " != *" add"* &&
+                " ${COMP_WORDS[@]} " != *" update"* &&
+                " ${COMP_WORDS[@]} " != *" delete"* &&
+                " ${COMP_WORDS[@]} " != *" show"* ]] &&
+                items=(add update delete show)
+            fi
+            _get_excluded_items "${items[@]}"
+            COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+
+            case "${prev}" in
+                --provider)
+                    COMPREPLY=()
+                    _cloudproviders_comp
+                    ;;
+                --profile)
+                    COMPREPLY=()
+                    _cloudprofiles_comp
+                    ;;
+            esac
+            if [[ " ${COMP_WORDS[@]} " == *" add"* ||
+                " ${COMP_WORDS[@]} " == *" update"* ]]; then
+                COMPREPLY=( $(compgen -W "--clouduser --fingerprint --keyfile
+                    --passphrase --tenancy --compartment" -- ${cur}) )
+            fi
+            ;;
+
+        cloud)
+            if [[ " ${COMP_WORDS[@]} " != *" --provider"* ||
+                " ${COMP_WORDS[@]} " != *" --profile"* ]]; then
+                items=(--provider --profile)
+            else
+            [[ " ${COMP_WORDS[@]} " != *" list"* &&
+                " ${COMP_WORDS[@]} " != *" instance"* &&
+                " ${COMP_WORDS[@]} " != *" image"* ]] &&
+                items=(list instance image)
+            fi
+            _get_excluded_items "${items[@]}"
+            COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+            case "${prev}" in
+                --provider)
+                    COMPREPLY=()
+                    _cloudproviders_comp
+                    ;;
+                --profile)
+                    COMPREPLY=()
+                    _cloudprofiles_comp
+                    ;;
+                list)
+                    COMPREPLY=( $(compgen -W "instances images" -- ${cur}) )
+                    ;;
+                instance)
+                    COMPREPLY=( $(compgen -W "create info terminate start 
+                        pause" -- ${cur}) )
+                    ;;
+                image)
+                    COMPREPLY=( $(compgen -W "create info delete import
+                        export" -- ${cur}) )
+                    ;;
+
+            esac
+            if [[ " ${COMP_WORDS[@]} " == *" list images"* ]]; then
+
+                items=(--state --compartment-id)
+                _get_excluded_items "${items[@]}"
+                COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+            fi
+
+            if [[ " ${COMP_WORDS[@]} " == *" instance create"* ]]; then
+                items=(--domain-name  --display-name --shape --subnet --publicip
+                    --boot-disk-size --privateip --public-ssh-key --launch-mode)
+                [[ " ${COMP_WORDS[@]} " != *" --image-id"* &&
+                    " ${COMP_WORDS[@]} " != *" --boot-volume-id"* ]] &&
+                    items+=(--image-id --boot-volume-id)
+
+                _get_excluded_items "${items[@]}"
+                COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+
+                case "${prev}" in
+                    --publicip)
+                        COMPREPLY=( $(compgen -W "true false" -- ${cur}) )
+                        ;;
+                    --launch-mode)
+                        COMPREPLY=( $(compgen -W "NATIVE EMULATED 
+                            PARAVIRTUALIZED" -- ${cur}) )
+                        ;;
+                esac
+            fi
+            if [[ " ${COMP_WORDS[@]} " == *" instance info"* ||
+                " ${COMP_WORDS[@]} " == *" instance terminate"* ||
+                " ${COMP_WORDS[@]} " == *" instance start"* ||
+                " ${COMP_WORDS[@]} " == *" instance pause"* ]]; then
+                COMPREPLY=( $(compgen -W "--id" -- ${cur}) )
+            fi
+ 
+            if [[ " ${COMP_WORDS[@]} " == *" image create"* ]]; then
+                items=(--display-name --bucket-name --object-name --instance-id)
+
+                _get_excluded_items "${items[@]}"
+                COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+            fi
+            if [[ " ${COMP_WORDS[@]} " == *" image info"* ||
+                " ${COMP_WORDS[@]} " == *" image delete"* ]]; then
+                COMPREPLY=( $(compgen -W "--id" -- ${cur}) )
+            fi
+            if [[ " ${COMP_WORDS[@]} " == *" image import"* ]]; then
+                COMPREPLY=( $(compgen -W "--id --bucket-name 
+                    --object-name" -- ${cur}) )
+            fi
+            if [[ " ${COMP_WORDS[@]} " == *" image export"* ]]; then
+                COMPREPLY=( $(compgen -W "--id --display-name --bucket-name 
+                    --object-name" -- ${cur}) )
+            fi
+            ;;
+
         controlvm)
             if [[ ${prev} == ${cmd} ]]; then
                 _vms_comp runningvms
@@ -640,7 +796,7 @@ _VBoxManage() {
                 vrdevideochannelquality webcam recording addencpassword
                 removeencpassword removeallencpasswords keyboardputstring
                 keyboardputfile audioin audioout setscreenlayout changeuartmode1
-                changeuartmode2)
+                changeuartmode2 vm-process-priority)
 
                 _find_item_name 2
                 subcommand=${COMP_WORDS[$((index+1))]}
@@ -747,6 +903,11 @@ _VBoxManage() {
                             _get_excluded_items "${tmp[@]}"
                             COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
                             ;;
+                        vm-process-priority)
+                            COMPREPLY=( $(compgen -W "default flat low normal
+                                high" -- ${cur}) )
+                        ;;
+
                     esac
                 elif [[ ${prev} == "--passwordfile" || ${prev} == "--capturefile" ]]; then
                     COMPREPLY=( $(compgen -f -- ${cur}) )
@@ -898,16 +1059,15 @@ _VBoxManage() {
             ;;
 
         dhcpserver)
-            items=(add modify remove)
+            items=(add modify remove restart findlease)
             subcommand=${COMP_WORDS[2]}
             if [[ " ${items[@]} " == *" $subcommand "* ]]; then
                 case "${subcommand}" in
-                    add|modify)
-                        items=(--ip --netmask --lowerip --upperip --options)
-
-                        [[ " ${COMP_WORDS[@]} " != *" --ifname"* &&
-                            " ${COMP_WORDS[@]} " != *" --netname"* ]] &&
-                            items+=(--netname --ifname)
+                    add)
+                        items=(--server-ip --netmask --lower-ip --upper-ip)
+                        [[ " ${COMP_WORDS[@]} " != *" --interface"* &&
+                            " ${COMP_WORDS[@]} " != *" --network"* ]] &&
+                            items+=(--network --interface)
 
                         [[ " ${COMP_WORDS[@]} " != *" --enable"* &&
                             " ${COMP_WORDS[@]} " != *" --disable"* ]] &&
@@ -916,24 +1076,126 @@ _VBoxManage() {
                         [[ " ${COMP_WORDS[@]} " == *" --options"* ]] &&
                             items+=(--vm --nic --id --value --remove)
 
+                        [[ " ${COMP_WORDS[@]} " != *" --global"* &&
+                            " ${COMP_WORDS[@]} " != *" --group"* &&
+                            " ${COMP_WORDS[@]} " != *" --vm"* &&
+                            " ${COMP_WORDS[@]} " != *" --mac-address"* ]] &&
+                            items+=(--global --group --vm --mac-address)
+
+                        [[ " ${COMP_WORDS[@]} " == *" --global"* ]] &&
+                            items+=(--set-opt --set-opt-hex --force-opt
+                            --supress-opt --min-lease-time --default-lease-time
+                            --max-lease-time)
+
+                        [[ " ${COMP_WORDS[@]} " == *" --group"* ]] &&
+                            items+=(--set-opt --set-opt-hex --force-opt
+                            --supress-opt --incl-mac --excl-mac --incl-mac-wild
+                            --excl-mac-wild --incl-vendor --excl-vendor
+                            --incl-vendor-wild --excl-vendor-wild --incl-user
+                            --excl-user --incl-user-wild --excl-user-wild
+                            --min-lease-time --default-lease-time
+                            --max-lease-time)
+
+                        [[ " ${COMP_WORDS[@]} " == *" --vm"* ]] &&
+                            items+=(--nic --set-opt --set-opt-hex --force-opt
+                            --supress-opt --min-lease-time --default-lease-time
+                            --max-lease-time --fixed-address)
+
+                        [[ " ${COMP_WORDS[@]} " == *" --mac-address"* ]] &&
+                            items+=(--set-opt --set-opt-hex --force-opt
+                            --supress-opt --min-lease-time --default-lease-time
+                            --max-lease-time --fixed-address)
+
                         _get_excluded_items "${items[@]}"
                         COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
                         ;;
-                    remove)
+                    modify)
+                        items=(--server-ip --netmask --lower-ip --upper-ip)
+                        [[ " ${COMP_WORDS[@]} " != *" --interface"* &&
+                            " ${COMP_WORDS[@]} " != *" --network"* ]] &&
+                            items+=(--network --interface)
+
+                        [[ " ${COMP_WORDS[@]} " != *" --enable"* &&
+                            " ${COMP_WORDS[@]} " != *" --disable"* ]] &&
+                            items+=(--enable --disable)
+
+                        [[ " ${COMP_WORDS[@]} " == *" --options"* ]] &&
+                            items+=(--vm --nic --id --value --remove)
+
+                        [[ " ${COMP_WORDS[@]} " != *" --global"* &&
+                            " ${COMP_WORDS[@]} " != *" --group"* &&
+                            " ${COMP_WORDS[@]} " != *" --vm"* &&
+                            " ${COMP_WORDS[@]} " != *" --mac-address"* ]] &&
+                            items+=(--global --group --vm --mac-address)
+
+                        [[ " ${COMP_WORDS[@]} " == *" --global"* ]] &&
+                            items+=(--del-opt --set-opt --set-opt-hex --force-opt
+                            --unforce-opt --supress-opt --unsupress-opt
+                            --min-lease-time --default-lease-time
+                            --max-lease-time --remove-config)
+
+                        [[ " ${COMP_WORDS[@]} " == *" --group"* ]] &&
+                            items+=(--set-opt-hex --force-opt --unforce-opt
+                            --supress-opt --unsupress-opt --del-mac --incl-mac
+                            --excl-mac --del-mac-wild --incl-mac-wild
+                            --excl-mac-wild --del-vendor --incl-vendor
+                            --excl-vendor --del-vendor-wild --incl-vendor-wild
+                            --excl-vendor-wild --del-user --incl-user
+                            --excl-user --del-user-wild --incl-user-wild
+                            --excl-user-wild --zap-conditions --min-lease-time
+                            --default-lease-time --max-lease-time
+                            --remove-config)
+
+                        [[ " ${COMP_WORDS[@]} " == *" --vm"* ]] &&
+                            items+=(--del-opt --set-opt --set-opt-hex --force-opt
+                            --unforce-opt --supress-opt --unsupress-opt
+                            --min-lease-time --default-lease-time
+                            --max-lease-time --fixed-address --remove-config)
+
+                        [[ " ${COMP_WORDS[@]} " == *" --mac-address"* ]] &&
+                            items+=(--set-opt --set-opt-hex --force-opt
+                            --unforce-opt --supress-opt --unsupress-opt
+                            --min-lease-time --default-lease-time
+                            --max-lease-time --fixed-address --remove-config)
+
+                        _get_excluded_items "${items[@]}"
+                        COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+                        ;;
+                    remove|restart)
                         case "${prev}" in
-                            --netname)
+                            --network)
                                 COMPREPLY=()
                                 _dhcp_comp
                                 ;;
-                            --ifname)
+                            --interface)
                                 COMPREPLY=()
                                 _hostonlyif_comp
                                 ;;
                         esac
 
-                        if [[ " ${COMP_WORDS[@]} " != *" --ifname"* &&
-                            " ${COMP_WORDS[@]} " != *" --netname"* ]]; then
-                            items=(--netname --ifname)
+                        if [[ " ${COMP_WORDS[@]} " != *" --interface"* &&
+                            " ${COMP_WORDS[@]} " != *" --network"* ]]; then
+                            items=(--network --interface)
+                            _get_excluded_items "${items[@]}"
+                            COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+                        fi
+                        ;;
+                    findlease)
+                        items=(--mac-address)
+                        case "${prev}" in
+                            --network)
+                                COMPREPLY=()
+                                _dhcp_comp
+                                ;;
+                            --interface)
+                                COMPREPLY=()
+                                _hostonlyif_comp
+                                ;;
+                        esac
+
+                        if [[ " ${COMP_WORDS[@]} " != *" --interface"* &&
+                            " ${COMP_WORDS[@]} " != *" --network"* ]]; then
+                            items+=(--network --interface)
                             _get_excluded_items "${items[@]}"
                             COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
                         fi
@@ -964,7 +1226,7 @@ _VBoxManage() {
             ;;
 
         "export")
-            items=( --manifest --iso --options --vsys --cloud)
+            items=( --manifest --iso --options --vsys --cloud )
             if [[ ${prev} == ${cmd} ]]; then
                 _vms_comp vms
             elif [[ ${prev} == "--eulafile" ]]; then
@@ -989,7 +1251,8 @@ _VBoxManage() {
                 [[ " ${COMP_WORDS[@]} " == *" --cloud"* ]] &&
                     items+=(--vmname --cloudprofile --cloudshape --clouddomain
                     --clouddisksize --cloudbucket --cloudocivcn --cloudocisubnet
-                    --cloudkeepobject --cloudlaunchinstance --cloudpublicip)
+                    --cloudkeepobject --cloudlaunchinstance --cloudpublicip
+                    --cloudprivateip --cloudlaunchmode)
                 _get_excluded_items "${items[@]}"
                 COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
 
@@ -998,7 +1261,10 @@ _VBoxManage() {
                         COMPREPLY=( $(compgen -W "manifest iso nomacs
                         nomacsbutnat" -- ${cur}) )
                         ;;
-
+                    --cloudlaunchmode)
+                        COMPREPLY=( $(compgen -W "EMULATED PARAVIRTUALIZED" \
+                        -- ${cur}) )
+                        ;;
                esac
                [[ ${#COMPREPLY[@]} -eq 0 ]] && \
                    COMPREPLY=( $(compgen -W "${items[*]}" -- ${cur}) )
@@ -1426,7 +1692,8 @@ _VBoxManage() {
             ;;
 
         import)
-            items=(--options)
+            items=(--options --dry-run -n --vmname --cloud --cloudprofile
+                --cloudinstanceid --cloudbucket)
             if [[ "${prev}" == "import" ]]; then
                 COMPREPLY=( $(compgen -o plusdirs -f -X '!@(*.ovf|*.ova)' \
                     -- ${cur}) )
@@ -1604,7 +1871,7 @@ _VBoxManage() {
 
         modifyvm)
             items=(--name --groups --description --ostype --iconfile --memory
-            --pagefusion --vram --acpi --pciattach --pcidetach --ioapic --hpet
+            --pagefusion --vram --acpi --ioapic --hpet
             --triplefaultreset --hwvirtex --nestedpaging --largepages --vtxvpid
             --vtxux --pae --longmode --cpuid-set --cpuid-remove
             --cpuidremoveall --hardwareuuid --cpus --cpuhotplug --plugcpu
@@ -1663,7 +1930,7 @@ _VBoxManage() {
             --macaddress3 --macaddress4 --macaddress5 --macaddress6
             --macaddress7 --macaddress8 --mouse --keyboard --uart1 --uartmode1
             --uart2 --uartmode2 --lpt1 --lptmode1 --guestmemoryballoon --audio
-            --audiocontroller --clipboard --draganddrop --vrde --vrdeextpack
+            --audiocontroller --clipboard-mode --draganddrop --vrde --vrdeextpack
             --vrdeproperty --vrdeport --vrdeaddress --vrdeauthtype
             --vrdeauthlibrary --vrdemulticon --vrdereusecon --vrdevideochannel
             --vrdevideochannelquality --usbohci --usbehci --snapshotfolder
@@ -1678,7 +1945,8 @@ _VBoxManage() {
             --x2apic --paravirtdebug --cpu-profile --biosapic --ibpb-on-vm-entry
             --ibpb-on-vm-exit --spec-ctrl --audioin --audioout
             --l1d-flush-on-sched --l1d-flush-on-vm-entry --mds-clear-on-sched
-            --mds-clear-on-vm-entry --nested-hw-virt --uarttype1 --uarttype2)
+            --mds-clear-on-vm-entry --nested-hw-virt --uarttype1 --uarttype2
+            --system-uuid-le --vm-process-priority)
 
             if [[ ${prev} == ${cmd} ]]; then
                 _vms_comp vms
@@ -1721,7 +1989,7 @@ _VBoxManage() {
                     --ibpb-on-vm-entry|--ibpb-on-vm-exit|--spec-ctrl|--audioin|\
                     --audioout|--l1d-flush-on-sched|--l1d-flush-on-vm-entry|\
                     --mds-clear-on-sched|--mds-clear-on-vm-entry|\
-                    --nested-hw-virt)
+                    --nested-hw-virt|--system-uuid-le)
                         COMPREPLY=( $(compgen -W "on off" -- ${cur}) )
                         ;;
 
@@ -1755,8 +2023,8 @@ _VBoxManage() {
                         ;;
 
                     --nictype[1-8])
-                        COMPREPLY=( $(compgen -W "Am79C970A Am79C973 82540EM
-                        82543GC 82545EM virtio" -- ${cur}) )
+                        COMPREPLY=( $(compgen -W "Am79C970A Am79C973 Am79C960
+                            82540EM 82543GC 82545EM virtio" -- ${cur}) )
                         ;;
 
                     --nicpromisc[1-8])
@@ -1849,7 +2117,7 @@ _VBoxManage() {
                         sb16" -- ${cur}) )
                         ;;
 
-                    --clipboard)
+                    --clipboard-mode)
                         COMPREPLY=( $(compgen -W "disabled hosttoguest
                         guesttohost bidirectional" -- ${cur}) )
                         ;;
@@ -1895,6 +2163,10 @@ _VBoxManage() {
                         ;;
                     --nattftpfile[1-8])
                         COMPREPLY=( $(compgen -f -- ${cur}) )
+                        ;;
+                    --vm-process-priority)
+                        COMPREPLY=( $(compgen -W "default flat low normal high" \
+                            -- ${cur}) )
                         ;;
                 esac
             fi
@@ -2127,8 +2399,16 @@ _VBoxManage() {
                             ;;
                     esac
                 else
-                    [[ ${#COMPREPLY[@]} -eq 0 ]] && \
-                        COMPREPLY=( $(compgen -W "${items[*]}" -- ${cur}) )
+                    case "$prev" in
+                        --uniquename)
+                            COMPREPLY=( $(compgen -W "Number Timestamp Space
+                                Force" -- ${cur}) )
+                            ;;
+                        *)
+                            [[ ${#COMPREPLY[@]} -eq 0 ]] && \
+                                COMPREPLY=( $(compgen -W "${items[*]}" \
+                                    -- ${cur}) )
+                    esac
                 fi
             fi
             ;;
