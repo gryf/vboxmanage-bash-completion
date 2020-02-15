@@ -8,7 +8,7 @@
 
 # define the real sed command to use. GNU sed is needed
 _vbmc_sed() {
-  sed "$ @"
+  sed "$@"
 }
 
 _VBoxManage() {
