@@ -6,13 +6,12 @@
 # License: 3-clause BSD-style license (see LICENSE file)
 # Version: 6.1.0
 
-# define the real sed command to use. GNU sed is needed
-_vbmc_sed() {
-  sed "$@"
-}
 
 _VBoxManage() {
     local cur prev opts cmd subcommand tmp items name index result
+
+    # env var GNUSED is either empty or points to a gnu sed executable
+    VBMC_SED=${GNUSED:-sed}
 
     # Check the COMP_WORDS looking for name of the vm. If name contain space or
     # is enclosed in quotes, glue name together in variable name. Variable index
@@ -70,10 +69,10 @@ _VBoxManage() {
         hdds=$(VBoxManage list hdds | \
             grep -A 1 'normal (base)' | \
             grep "Location:" | \
-            _vbmc_sed 's/Location:\s\+//' | \
-            _vbmc_sed 's/\s/\\ /g' | \
+            $VBMC_SED 's/Location:\s\+//' | \
+            $VBMC_SED 's/\s/\\ /g' | \
             tr '\n' '|' | \
-            _vbmc_sed 's/|$//')
+            $VBMC_SED 's/|$//')
         IFS='|' read -ra hdds <<< "$hdds"
 
         for item in "${hdds[@]}"
@@ -88,10 +87,10 @@ _VBoxManage() {
 
         floppies=$(VBoxManage list floppies | \
             grep "Location:" | \
-            _vbmc_sed 's/Location:\s\+//' | \
-            _vbmc_sed 's/\s/\\ /g' | \
+            $VBMC_SED 's/Location:\s\+//' | \
+            $VBMC_SED 's/\s/\\ /g' | \
             tr '\n' '|' | \
-            _vbmc_sed 's/|$//')
+            $VBMC_SED 's/|$//')
         IFS='|' read -ra floppies <<< "$floppies"
 
         for item in "${floppies[@]}"
@@ -106,10 +105,10 @@ _VBoxManage() {
 
         dvds=$(VBoxManage list dvds | \
             grep "Location:" | \
-            _vbmc_sed 's/Location:\s\+//' | \
-            _vbmc_sed 's/\s/\\ /g' | \
+            $VBMC_SED 's/Location:\s\+//' | \
+            $VBMC_SED 's/\s/\\ /g' | \
             tr '\n' '|' | \
-            _vbmc_sed 's/|$//')
+            $VBMC_SED 's/|$//')
         IFS='|' read -ra dvds <<< "$dvds"
 
         for item in "${dvds[@]}"
@@ -135,16 +134,16 @@ _VBoxManage() {
             running_vms=$(VBoxManage list runningvms | \
                 awk -F ' {' '{ print $1 }' | \
                 tr '\n' '|' | \
-                _vbmc_sed 's/|$//' | \
-                _vbmc_sed 's/"//g')
+                $VBMC_SED 's/|$//' | \
+                $VBMC_SED 's/"//g')
             IFS='|' read -ra running_vms <<< "$running_vms"
         fi
 
         vms=$(VBoxManage list $command | \
             awk -F ' {' '{ print $1 }' | \
             tr '\n' '|' | \
-            _vbmc_sed 's/|$//' | \
-            _vbmc_sed 's/"//g')
+            $VBMC_SED 's/|$//' | \
+            $VBMC_SED 's/"//g')
         IFS='|' read -ra vms <<< "$vms"
         for item in "${vms[@]}"
         do
@@ -167,10 +166,10 @@ _VBoxManage() {
         vms=$(VBoxManage list vms -l | \
             egrep '^Name|State' | \
             egrep -B1 'State:\s+saved' | \
-            grep Name |_vbmc_sed 's/Name:\s\+//' | \
+            grep Name |$VBMC_SED 's/Name:\s\+//' | \
             tr '\n' '|' | \
-            _vbmc_sed 's/|$//' | \
-            _vbmc_sed 's/"//g')
+            $VBMC_SED 's/|$//' | \
+            $VBMC_SED 's/"//g')
         IFS='|' read -ra vms <<< "$vms"
         for item in "${vms[@]}"
         do
@@ -184,9 +183,9 @@ _VBoxManage() {
 
         list=$(VBoxManage list groups | \
             tr '\n' '|' | \
-            _vbmc_sed 's/|$//' | \
-            _vbmc_sed 's/\s/\\ /g'| \
-            _vbmc_sed 's/"//g')
+            $VBMC_SED 's/|$//' | \
+            $VBMC_SED 's/\s/\\ /g'| \
+            $VBMC_SED 's/"//g')
         IFS='|' read -ra list <<< "$list"
 
         for item in "${list[@]}"
@@ -201,9 +200,9 @@ _VBoxManage() {
 
         list=$(VBoxManage list ostypes | \
             egrep ^ID: | \
-            _vbmc_sed 's/ID:\s\+//' | \
+            $VBMC_SED 's/ID:\s\+//' | \
             tr '\n' '|' | \
-            _vbmc_sed 's/|$//')
+            $VBMC_SED 's/|$//')
         IFS='|' read -ra list <<< "$list"
 
         for item in "${list[@]}"
@@ -218,10 +217,10 @@ _VBoxManage() {
 
         list=$(VBoxManage list dhcpservers | \
             grep NetworkName: | \
-            _vbmc_sed 's/NetworkName:\s\+//' | \
-            _vbmc_sed 's/\s/\\ /g'| \
+            $VBMC_SED 's/NetworkName:\s\+//' | \
+            $VBMC_SED 's/\s/\\ /g'| \
             tr '\n' '|' | \
-            _vbmc_sed 's/|$//')
+            $VBMC_SED 's/|$//')
         IFS='|' read -ra list <<< "$list"
 
         for item in "${list[@]}"
@@ -236,10 +235,10 @@ _VBoxManage() {
 
         list=$(VBoxManage list hostonlyifs | \
             egrep ^Name: | \
-            _vbmc_sed 's/Name:\s\+//' | \
-            _vbmc_sed 's/\s/\\ /g'| \
+            $VBMC_SED 's/Name:\s\+//' | \
+            $VBMC_SED 's/\s/\\ /g'| \
             tr '\n' '|' | \
-            _vbmc_sed 's/|$//')
+            $VBMC_SED 's/|$//')
         IFS='|' read -ra list <<< "$list"
 
         for item in "${list[@]}"
@@ -258,8 +257,8 @@ _VBoxManage() {
             awk -F ',' '{print $1}' | \
             awk -F '=' '{print $2}' | \
             tr '\n' '|' | \
-            _vbmc_sed 's/|$//' | \
-            _vbmc_sed 's/\s/\\ /g')
+            $VBMC_SED 's/|$//' | \
+            $VBMC_SED 's/\s/\\ /g')
         IFS='|' read -ra rules <<< "$rules"
 
         for item in "${rules[@]}"
@@ -300,7 +299,7 @@ _VBoxManage() {
         devs=$(VBoxManage controlvm "${name//\\/}" \
             webcam list | \
             tr '\n' ' ' | \
-            _vbmc_sed 's/|s$//')
+            $VBMC_SED 's/|s$//')
         read -ra devs <<< "$devs"
 
         for item in "${devs[@]}"
@@ -317,7 +316,7 @@ _VBoxManage() {
         devs=$(VBoxManage list webcams | \
             grep dev | \
             tr '\n' ' ' | \
-            _vbmc_sed 's/|s$//')
+            $VBMC_SED 's/|s$//')
         read -ra devs <<< "$devs"
 
         for item in "${devs[@]}"
@@ -328,7 +327,7 @@ _VBoxManage() {
 
     _list_comp() {
         local list
-        list=$(VBoxManage list | _vbmc_sed -e '1,2d' \
+        list=$(VBoxManage list | $VBMC_SED -e '1,2d' \
             -e 's/VBoxManage list //' \
             -e 's/[\[\]\|]/ /g' \
             -e 's/|/ /g'|xargs echo)
@@ -343,10 +342,10 @@ _VBoxManage() {
         folders=$(VBoxManage showvminfo ${vm} --machinereadable | \
             grep SharedFolderName | \
             awk -F= '{print $2}' | \
-            _vbmc_sed 's/\s/\\ /g'| \
+            $VBMC_SED 's/\s/\\ /g'| \
             tr '\n' '|' | \
-            _vbmc_sed 's/|$//' | \
-            _vbmc_sed 's/"//g')
+            $VBMC_SED 's/|$//' | \
+            $VBMC_SED 's/"//g')
         IFS='|' read -ra folders <<< "$folders"
 
         for item in "${folders[@]}"
@@ -361,10 +360,10 @@ _VBoxManage() {
 
         list=$(VBoxManage list natnets | \
             grep NetworkName: | \
-            _vbmc_sed 's/NetworkName:\s\+//' | \
-            _vbmc_sed 's/\s/\\ /g'| \
+            $VBMC_SED 's/NetworkName:\s\+//' | \
+            $VBMC_SED 's/\s/\\ /g'| \
             tr '\n' '|' | \
-            _vbmc_sed 's/|$//')
+            $VBMC_SED 's/|$//')
         IFS='|' read -ra list <<< "$list"
 
         for item in "${list[@]}"
@@ -379,10 +378,10 @@ _VBoxManage() {
 
         list=$(VBoxManage list bridgedifs | \
             egrep ^Name: | \
-            _vbmc_sed 's/Name:\s\+//' | \
-            _vbmc_sed 's/\s/\\ /g'| \
+            $VBMC_SED 's/Name:\s\+//' | \
+            $VBMC_SED 's/\s/\\ /g'| \
             tr '\n' '|' | \
-            _vbmc_sed 's/|$//')
+            $VBMC_SED 's/|$//')
         IFS='|' read -ra list <<< "$list"
 
         for item in "${list[@]}"
@@ -397,10 +396,10 @@ _VBoxManage() {
 
         list=$(VBoxManage list intnets| \
             egrep ^Name: | \
-            _vbmc_sed 's/Name:\s\+//' | \
-            _vbmc_sed 's/\s/\\ /g'| \
+            $VBMC_SED 's/Name:\s\+//' | \
+            $VBMC_SED 's/\s/\\ /g'| \
             tr '\n' '|' | \
-            _vbmc_sed 's/|$//')
+            $VBMC_SED 's/|$//')
         IFS='|' read -ra list <<< "$list"
 
         for item in "${list[@]}"
@@ -443,10 +442,10 @@ _VBoxManage() {
 
         providers=$(VBoxManage list cloudproviders | \
             grep "Short Name:" | \
-            _vbmc_sed 's/Short Name:\s\+//' | \
-            _vbmc_sed 's/\s/\\ /g' | \
+            $VBMC_SED 's/Short Name:\s\+//' | \
+            $VBMC_SED 's/\s/\\ /g' | \
             tr '\n' '|' | \
-            _vbmc_sed 's/|$//')
+            $VBMC_SED 's/|$//')
         IFS='|' read -ra providers <<< "$providers"
 
         for item in "${providers[@]}"
@@ -461,10 +460,10 @@ _VBoxManage() {
 
         profiles=$(VBoxManage list cloudprofiles | \
             grep "Name:" | \
-            _vbmc_sed 's/Name:\s\+//' | \
-            _vbmc_sed 's/\s/\\ /g' | \
+            $VBMC_SED 's/Name:\s\+//' | \
+            $VBMC_SED 's/\s/\\ /g' | \
             tr '\n' '|' | \
-            _vbmc_sed 's/|$//')
+            $VBMC_SED 's/|$//')
         IFS='|' read -ra profiles <<< "$profiles"
 
         for item in "${profiles[@]}"
