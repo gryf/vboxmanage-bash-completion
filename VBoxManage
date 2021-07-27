@@ -486,16 +486,18 @@ _VBoxManage() {
 
     # all possible commands for the VBoxManage
     opts=$(VBoxManage -q help | \
-        egrep -o "^\s\s[a-z]+ " | \
+        grep -E -o "^\s\s[a-z]+ " | \
         grep -v VBoxManage | \
         awk '{print $1}'| \
         sort | \
         uniq)
 
-    # Add some commands manually, since they are listed differently in
-    # vboxmanage help.
-    opts="${opts} mediumio debugvm unattended extpack clonevm snapshot
-    dhcpserver cloudprofile cloud"
+    # Add commands which are defined as `  VBoxManage commandname ` in a help.
+    opts="${opts} $(VBoxManage -q help | \
+        grep -E -o '^\s\s[a-zA-Z]+\s[a-z]+' | \
+        awk '{print $2}'| \
+        sort | \
+        uniq)"
 
     if [[ ${cur} == "-q" || ${COMP_CWORD} -eq 1 ]] ; then
         COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
@@ -2304,7 +2306,7 @@ _VBoxManage() {
                 case "${subcommand}" in
                     add)
                         items=(--name --hostpath --transient --readonly
-                        --automount)
+                        --automount --auto-mount-point)
                         _get_excluded_items "${items[@]}"
                         COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
                         ;;
