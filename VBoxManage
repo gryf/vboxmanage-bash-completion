@@ -693,14 +693,19 @@ _VBoxManage() {
             ;;
 
         cloud)
-            if [[ " ${COMP_WORDS[@]} " != *" --provider"* ||
+            if [ "${prev}" == "cloud" ]; then
+                items=(--provider --profile network)
+            elif [[ " ${COMP_WORDS[@]} " == *" network"* ]]; then
+                items=(update delete info)
+            elif [[ " ${COMP_WORDS[@]} " != *" --provider"* ||
                 " ${COMP_WORDS[@]} " != *" --profile"* ]]; then
                 items=(--provider --profile)
             else
             [[ " ${COMP_WORDS[@]} " != *" list"* &&
                 " ${COMP_WORDS[@]} " != *" instance"* &&
+                " ${COMP_WORDS[@]} " != *" network"* &&
                 " ${COMP_WORDS[@]} " != *" image"* ]] &&
-                items=(list instance image)
+                items=(list instance image network)
             fi
             _get_excluded_items "${items[@]}"
             COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
@@ -724,7 +729,11 @@ _VBoxManage() {
                     COMPREPLY=( $(compgen -W "create info delete import
                         export" -- ${cur}) )
                     ;;
-
+                network)  # TODO: differentiate between setup/create and update/delete/info
+                    if [[ " ${COMP_WORDS[@]} " == *" --provider"* ]]; then
+                        COMPREPLY=( $(compgen -W "setup create" -- ${cur}) )
+                    fi
+                    ;;
             esac
             if [[ " ${COMP_WORDS[@]} " == *" list images"* ]]; then
 
@@ -734,8 +743,9 @@ _VBoxManage() {
             fi
 
             if [[ " ${COMP_WORDS[@]} " == *" instance create"* ]]; then
-                items=(--domain-name  --display-name --shape --subnet --publicip
-                    --boot-disk-size --privateip --public-ssh-key --launch-mode)
+                items=( --domain-name  --display-name --shape --subnet
+                    --publicip --boot-disk-size --privateip --public-ssh-key
+                    --launch-mode --cloud-init-script-path )
                 [[ " ${COMP_WORDS[@]} " != *" --image-id"* &&
                     " ${COMP_WORDS[@]} " != *" --boot-volume-id"* ]] &&
                     items+=(--image-id --boot-volume-id)
@@ -777,6 +787,34 @@ _VBoxManage() {
             if [[ " ${COMP_WORDS[@]} " == *" image export"* ]]; then
                 COMPREPLY=( $(compgen -W "--id --display-name --bucket-name
                     --object-name" -- ${cur}) )
+            fi
+            if [[ " ${COMP_WORDS[@]} " == *" network setup"* ]]; then
+                items=( --local-gateway-iso --gateway-os-name
+                    --gateway-os-version --gateway-shape --tunnel-network-name
+                    --tunnel-network-range --guest-additions-iso --proxy
+                    --compartment-id )
+                _get_excluded_items "${items[@]}"
+                COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+            fi
+            if [[ " ${COMP_WORDS[@]} " == *" network create"* ]]; then
+                items=( --name --network-id )
+                [[ " ${COMP_WORDS[@]} " != *" --enable"* &&
+                    " ${COMP_WORDS[@]} " != *" --disable"* ]] &&
+                    items+=(--enable --disable)
+                _get_excluded_items "${items[@]}"
+                COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+            fi
+            if [[ " ${COMP_WORDS[@]} " == *" network update"* ]]; then
+                items=( --name --network-id )
+                [[ " ${COMP_WORDS[@]} " != *" --enable"* &&
+                    " ${COMP_WORDS[@]} " != *" --disable"* ]] &&
+                    items+=(--enable --disable)
+                _get_excluded_items "${items[@]}"
+                COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+            fi
+            if [[ " ${COMP_WORDS[@]} " == *" network info"* ||
+                " ${COMP_WORDS[@]} " == *" network delete"* ]]; then
+                COMPREPLY=( $(compgen -W "--name" -- ${cur}) )
             fi
             ;;
 
@@ -1232,7 +1270,8 @@ _VBoxManage() {
             ;;
 
         "export")
-            items=( --manifest --iso --options --vsys --cloud )
+            items=( --manifest --iso --options --vsys --cloud
+                --cloudinitscriptpath )
             if [[ ${prev} == ${cmd} ]]; then
                 _vms_comp vms
             elif [[ ${prev} == "--eulafile" ]]; then
@@ -1258,7 +1297,7 @@ _VBoxManage() {
                     items+=(--vmname --cloudprofile --cloudshape --clouddomain
                     --clouddisksize --cloudbucket --cloudocivcn --cloudocisubnet
                     --cloudkeepobject --cloudlaunchinstance --cloudpublicip
-                    --cloudprivateip --cloudlaunchmode)
+                    --cloudprivateip --cloudlaunchmode --cloudinitscriptpath )
                 _get_excluded_items "${items[@]}"
                 COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
 
