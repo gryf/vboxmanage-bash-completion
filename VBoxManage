@@ -453,7 +453,7 @@ _VBoxManage() {
             [[ ${item^^} == ${cur^^}* ]] && COMPREPLY+=("$item")
         done
     }
-    
+
     _cloudprofiles_comp() {
         local profiles
         local item
@@ -717,7 +717,7 @@ _VBoxManage() {
                     COMPREPLY=( $(compgen -W "instances images" -- ${cur}) )
                     ;;
                 instance)
-                    COMPREPLY=( $(compgen -W "create info terminate start 
+                    COMPREPLY=( $(compgen -W "create info terminate start
                         pause" -- ${cur}) )
                     ;;
                 image)
@@ -748,7 +748,7 @@ _VBoxManage() {
                         COMPREPLY=( $(compgen -W "true false" -- ${cur}) )
                         ;;
                     --launch-mode)
-                        COMPREPLY=( $(compgen -W "NATIVE EMULATED 
+                        COMPREPLY=( $(compgen -W "NATIVE EMULATED
                             PARAVIRTUALIZED" -- ${cur}) )
                         ;;
                 esac
@@ -759,7 +759,7 @@ _VBoxManage() {
                 " ${COMP_WORDS[@]} " == *" instance pause"* ]]; then
                 COMPREPLY=( $(compgen -W "--id" -- ${cur}) )
             fi
- 
+
             if [[ " ${COMP_WORDS[@]} " == *" image create"* ]]; then
                 items=(--display-name --bucket-name --object-name --instance-id)
 
@@ -771,11 +771,11 @@ _VBoxManage() {
                 COMPREPLY=( $(compgen -W "--id" -- ${cur}) )
             fi
             if [[ " ${COMP_WORDS[@]} " == *" image import"* ]]; then
-                COMPREPLY=( $(compgen -W "--id --bucket-name 
+                COMPREPLY=( $(compgen -W "--id --bucket-name
                     --object-name" -- ${cur}) )
             fi
             if [[ " ${COMP_WORDS[@]} " == *" image export"* ]]; then
-                COMPREPLY=( $(compgen -W "--id --display-name --bucket-name 
+                COMPREPLY=( $(compgen -W "--id --display-name --bucket-name
                     --object-name" -- ${cur}) )
             fi
             ;;
