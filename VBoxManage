@@ -1270,8 +1270,7 @@ _VBoxManage() {
             ;;
 
         "export")
-            items=( --manifest --iso --options --vsys --cloud
-                --cloudinitscriptpath )
+            items=( --manifest --options --vsys --cloud --cloudinitscriptpath )
             if [[ ${prev} == ${cmd} ]]; then
                 _vms_comp vms
             elif [[ ${prev} == "--eulafile" ]]; then
