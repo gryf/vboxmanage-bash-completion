@@ -6,7 +6,7 @@ script. However, in some point of time I've decided to rewrite it almost from
 scratch.
 
 Current version of script was written and tested against VBoxManage in version
-6.1.34, and should contain all commands and their options.
+6.1.36, and should contain all commands and their options.
 
 Unlike other attempts, I've tried to make the script context aware. See the
 simple session with the VBoxManage command below, to have an idea how it works:
