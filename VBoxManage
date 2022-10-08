@@ -4,7 +4,7 @@
 # URL: https://bitbucket.org/gryf/vboxmanage-bash-completion
 # URL: https://github.com/gryf/vboxmanage-bash-completion
 # License: 3-clause BSD-style license (see LICENSE file)
-# Version: 6.1.36
+# Version: 6.1.38
 
 
 _VBoxManage() {
@@ -2212,6 +2212,12 @@ _VBoxManage() {
                         COMPREPLY=( $(compgen -W "default flat low normal high" \
                             -- ${cur}) )
                         ;;
+
+                    --recordingscreens)
+                        COMPREPLY=( $(compgen -W "all none" \
+                            -- ${cur}) )
+                        ;;
+
                 esac
             fi
             ;;
