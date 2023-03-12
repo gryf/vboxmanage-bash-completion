@@ -484,20 +484,14 @@ _VBoxManage() {
         fi
     fi
 
-    # all possible commands for the VBoxManage
+    # all possible commands for the VBoxManage. Starting from VirtualBox 7.x all
+    # commands are listed as `  VBoxManage commandname ` in a help.
     opts=$(VBoxManage -q help | \
-        grep -E -o "^\s\s[a-z]+ " | \
-        grep -v VBoxManage | \
-        awk '{print $1}'| \
+        grep VBoxManage | \
+        awk '{print $2}'| \
+        grep -v '\[' | \
         sort | \
         uniq)
-
-    # Add commands which are defined as `  VBoxManage commandname ` in a help.
-    opts="${opts} $(VBoxManage -q help | \
-        grep -E -o '^\s\s[a-zA-Z]+\s[a-z]+' | \
-        awk '{print $2}'| \
-        sort | \
-        uniq)"
 
     if [[ ${cur} == "-q" || ${COMP_CWORD} -eq 1 ]] ; then
         COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
