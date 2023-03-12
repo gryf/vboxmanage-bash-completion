@@ -1015,8 +1015,8 @@ _VBoxManage() {
             ;;
 
         createvm)
-            items=(--name --groups --ostype --register --basefolder --uuid
-                --default)
+            items=( --basefolder --ciphercipher --default --group --name --ostype
+                --password-idpassword-id --passwordfile --register --uuid )
             if [[ ${prev} == ${cmd} ]]; then
                 COMPREPLY=( $(compgen -W "${items[*]}" -- ${cur}) )
             else
@@ -1024,7 +1024,7 @@ _VBoxManage() {
                 COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
 
                 case "${prev}" in
-                    --groups)
+                    --group)
                         COMPREPLY=()
                         _group_comp
                         ;;
@@ -1035,9 +1035,8 @@ _VBoxManage() {
                     --basefolder)
                         COMPREPLY=( $(compgen -o dirnames -- ${cur}) )
                         ;;
-                    --variant)
-                        COMPREPLY=( $(compgen -W "Standard Fixed Split2G Stream
-                        ESX" -- ${cur}) )
+                    --passwordfile)
+                        COMPREPLY=( $(compgen -f -- ${cur}) )
                         ;;
                 esac
             fi
