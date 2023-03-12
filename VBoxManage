@@ -1907,83 +1907,109 @@ _VBoxManage() {
             ;;
 
         modifyvm)
-            items=(--name --groups --description --ostype --iconfile --memory
-            --pagefusion --vram --acpi --ioapic --hpet
-            --triplefaultreset --hwvirtex --nestedpaging --largepages --vtxvpid
-            --vtxux --pae --longmode --cpuid-set --cpuid-remove
-            --cpuidremoveall --hardwareuuid --cpus --cpuhotplug --plugcpu
-            --unplugcpu --cpuexecutioncap --rtcuseutc --graphicscontroller
-            --monitorcount --accelerate3d --accelerate2dvideo --firmware
-            --chipset --bioslogofadein --bioslogofadeout --bioslogodisplaytime
-            --bioslogoimagepath --biosbootmenu --biossystemtimeoffset
-            --biospxedebug --boot1 --boot2 --boot3 --boot4 --nicbootprio1
-            --nicbandwidthgroup1 --bridgeadapter1 --bridgeadapter2
-            --bridgeadapter3 --bridgeadapter4 --bridgeadapter5 --bridgeadapter6
-            --bridgeadapter7 --bridgeadapter8 --hostonlyadapter1
-            --hostonlyadapter2 --hostonlyadapter3 --hostonlyadapter4
-            --hostonlyadapter5 --hostonlyadapter6 --hostonlyadapter7
-            --hostonlyadapter8 --intnet1 --intnet2 --intnet3 --intnet4 --intnet5
-            --intnet6 --intnet7 --intnet8 --nat-network1 --nicgenericdrv1
-            --natnet1 --natsettings1 --nat-network2 --nicgenericdrv2 --natnet2
-            --natsettings2 --nat-network3 --nicgenericdrv3 --natnet3
-            --natsettings3 --nat-network4 --nicgenericdrv4 --natnet4
-            --natsettings4 --nat-network5 --nicgenericdrv5 --natnet5
-            --natsettings5 --nat-network6 --nicgenericdrv6 --natnet6
-            --natsettings6 --nat-network7 --nicgenericdrv7 --natnet7
-            --natsettings7 --nat-network8 --nicgenericdrv8 --natnet8
-            --natsettings8 --natpf1 --nic1 --nicpromisc1 --nicproperty1
-            --nictrace1 --nictracefile1 --natpf2 --nic2 --nicpromisc2
-            --nicproperty2 --nictrace2 --nictracefile2 --natpf3 --nic3
-            --nicpromisc3 --nicproperty3 --nictrace3 --nictracefile3 --natpf4
-            --nic4 --nicpromisc4 --nicproperty4 --nictrace4 --nictracefile4
-            --natpf5 --nic5 --nicpromisc5 --nicproperty5 --nictrace5
-            --nictracefile5 --natpf6 --nic6 --nicpromisc6 --nicproperty6
-            --nictrace6 --nictracefile6 --natpf7 --nic7 --nicpromisc7
-            --nicproperty7 --nictrace7 --nictracefile7 --natpf8 --nic8
-            --nicpromisc8 --nicproperty8 --nictrace8 --nictype1 --nictype2
-            --nictype3 --nictype4 --nictype5 --nictype6 --nictype7 --nictype8
-            --cableconnected1 --cableconnected2 --cableconnected3
-            --cableconnected4 --cableconnected5 --cableconnected6
-            --cableconnected7 --cableconnected8 --nicspeed1 --nicspeed2
-            --nicspeed3 --nicspeed4 --nicspeed5 --nicspeed6 --nicspeed7
-            --nicspeed8 --nattftpprefix1 --nattftpprefix2 --nattftpprefix3
-            --nattftpprefix4 --nattftpprefix5 --nattftpprefix6 --nattftpprefix7
-            --nattftpprefix8 --nattftpfile1 --nattftpfile2 --nattftpfile3
-            --nattftpfile4 --nattftpfile5 --nattftpfile6 --nattftpfile7
-            --nattftpfile8 --nattftpserver1 --nattftpserver2 --nattftpserver3
-            --nattftpserver4 --nattftpserver5 --nattftpserver6 --nattftpserver7
-            --nattftpserver8 --natbindip1 --natbindip2 --natbindip3 --natbindip4
-            --natbindip5 --natbindip6 --natbindip7 --natbindip8
-            --natdnspassdomain1 --natdnspassdomain2 --natdnspassdomain3
-            --natdnspassdomain4 --natdnspassdomain5 --natdnspassdomain6
-            --natdnspassdomain7 --natdnspassdomain8 --natdnsproxy1
-            --natdnsproxy2 --natdnsproxy3 --natdnsproxy4 --natdnsproxy5
-            --natdnsproxy6 --natdnsproxy7 --natdnsproxy8 --natdnshostresolver1
-            --natdnshostresolver2 --natdnshostresolver3 --natdnshostresolver4
-            --natdnshostresolver5 --natdnshostresolver6 --natdnshostresolver7
-            --natdnshostresolver8 --nataliasmode1 --nataliasmode2
-            --nataliasmode3 --nataliasmode4 --nataliasmode5 --nataliasmode6
-            --nataliasmode7 --nataliasmode8 --macaddress1 --macaddress2
-            --macaddress3 --macaddress4 --macaddress5 --macaddress6
-            --macaddress7 --macaddress8 --mouse --keyboard --uart1 --uartmode1
-            --uart2 --uartmode2 --lpt1 --lptmode1 --guestmemoryballoon --audio
-            --audiocontroller --clipboard-mode --draganddrop --vrde --vrdeextpack
-            --vrdeproperty --vrdeport --vrdeaddress --vrdeauthtype
-            --vrdeauthlibrary --vrdemulticon --vrdereusecon --vrdevideochannel
-            --vrdevideochannelquality --usbohci --usbehci --snapshotfolder
-            --teleporter --teleporterport --teleporteraddress
-            --teleporterpassword --teleporterpasswordfile --tracing-enabled
-            --tracing-config --tracing-allow-vm-access --usbcardreader
-            --autostart-enabled --autostart-delay --recording --recordingscreens
-            --recordingfile --recordingvideores --recordingvideorate
-            --recordingvideofps --recordingmaxtime --recordingmaxsize
-            --recordingopts --defaultfrontend --cpuid-portability-level
-            --paravirtprovider --audiocodec --usbxhci --usbrename --apic
-            --x2apic --paravirtdebug --cpu-profile --biosapic --ibpb-on-vm-entry
-            --ibpb-on-vm-exit --spec-ctrl --audioin --audioout
-            --l1d-flush-on-sched --l1d-flush-on-vm-entry --mds-clear-on-sched
-            --mds-clear-on-vm-entry --nested-hw-virt --uarttype1 --uarttype2
-            --system-uuid-le --vm-process-priority)
+            items=( --accelerate-2d-video --accelerate-3d --acpi --apic --audio
+                --audio-codec --audio-controller --audio-in --audio-out
+                --autostart-delay --autostart-enabled --bios-apic
+                --bios-bootm-enu --bios-logo-display-time --bios-logo-fade-in
+                --bios-logo-fade-out --bios-logo-image-path --bios-pxe-debug
+                --bios-system-time-offset --boot1 --boot2 --boot3 --boot4
+                --bridge-adapter1 --bridge-adapter2 --bridge-adapter3
+                --bridge-adapter4 --bridge-adapter5 --bridge-adapter6
+                --bridge-adapter7 --bridge-adapter8 --cable-connected1
+                --cable-connected2 --cable-connected3 --cable-connected4
+                --cable-connected5 --cable-connected6 --cable-connected7
+                --cloud-network1 --cloud-network2 --cloud-network3
+                --cloud-network4 --cable-connected8 --chipset --clipboard-mode
+                --cpu-profile --cpu-execution-cap --cpu-hotplug
+                --cpuid-portability-level --cpuid-remove --cpuid-set
+                --cpuid-remove-all --cpus --default-frontend --description
+                --drag-and-drop --firmware --graphicscontroller --groups
+                --guest-debug-address --guest-debug-io-provider
+                --guest-debug-port --guest-debug-provider --guest-memory-balloon
+                --hardware-uuid --host-only-adapter1 --host-only-adapter2
+                --host-only-adapter3 --host-only-adapter4 --host-only-adapter5
+                --host-only-adapter6 --host-only-adapter7 --host-only-adapter8
+                --host-only-net1 --host-only-net2 --host-only-net3
+                --host-only-net4 --host-only-net5 --host-only-net6
+                --host-only-net7 --host-only-net8 --hpet --hwvirtex
+                --ibpb-on-vm-entry --ibpb-on-vm-exit --icon-file --intnet1
+                --intnet2 --intnet3 --intnet4 --intnet5 --intnet6 --intnet7
+                --intnet8 --ioapic --iommu --keyboard --l1d-flush-on-sched
+                --l1d-flush-on-vm-entry --large-pages --long-mode --lpt1
+                --lpt-mode1 --mac-address1 --mac-address2 --mac-address3
+                --mac-address4 --mac-address5 --mac-address6 --mac-address7
+                --mac-address8 --mds-clear-on-sched --mds-clear-on-vm-entry
+                --memory --monitor-count --mouse --name --nat-alias-mode1
+                --nat-alias-mode2 --nat-alias-mode3 --nat-alias-mode4
+                --nat-alias-mode5 --nat-alias-mode6 --nat-alias-mode7
+                --nat-alias-mode8 --nat-bind-ip1 --nat-bind-ip2 --nat-bind-ip3
+                --nat-bind-ip4 --nat-bind-ip5 --nat-bind-ip6 --nat-bind-ip7
+                --nat-bind-ip8 --nat-dns-host-resolver1 --nat-dns-host-resolver2
+                --nat-dns-host-resolver3 --nat-dns-host-resolver4
+                --nat-dns-host-resolver5 --nat-dns-host-resolver6
+                --nat-dns-host-resolver7 --nat-dns-host-resolver8
+                --nat-dns-pass-domain1 --nat-dns-pass-domain2
+                --nat-dns-pass-domain3 --nat-dns-pass-domain4
+                --nat-dns-pass-domain5 --nat-dns-pass-domain6
+                --nat-dns-pass-domain7 --nat-dns-pass-domain8 --nat-dns-proxy1
+                --nat-dns-proxy2 --nat-dns-proxy3 --nat-dns-proxy4
+                --nat-dns-proxy5 --nat-dns-proxy6 --nat-dns-proxy7
+                --nat-dns-proxy8 --nat-localhostreachable1
+                --nat-localhostreachable2 --nat-localhostreachable3
+                --nat-localhostreachable4 --nat-localhostreachable5
+                --nat-localhostreachable6 --nat-localhostreachable7
+                --nat-localhostreachable8 --nat-net1 --nat-net2 --nat-net3
+                --nat-net4 --nat-net5 --nat-net6 --nat-net7 --nat-net8
+                --nat-network1 --nat-network2 --nat-network3 --nat-network4
+                --nat-network5 --nat-network6 --nat-network7 --nat-network8
+                --nat-pf1 --nat-pf2 --nat-pf3 --nat-pf4 --nat-pf5 --nat-pf6
+                --nat-pf7 --nat-pf8 --nat-settings1 --nat-settings2
+                --nat-settings3 --nat-settings4 --nat-settings5 --nat-settings6
+                --nat-settings7 --nat-settings8 --nat-tftp-file1 --nat-tftp-file2
+                --nat-tftp-file3 --nat-tftp-file4 --nat-tftp-file5
+                --nat-tftp-file6 --nat-tftp-file7 --nat-tftp-file8
+                --nat-tftp-prefix1 --nat-tftp-prefix2 --nat-tftp-prefix3
+                --nat-tftp-prefix4 --nat-tftp-prefix5 --nat-tftp-prefix6
+                --nat-tftp-prefix7 --nat-tftp-prefix8 --nat-tftp-server1
+                --nat-tftp-server2 --nat-tftp-server3 --nat-tftp-server4
+                --nat-tftp-server5 --nat-tftp-server6 --nat-tftp-server7
+                --nat-tftp-server8 --nested-hw-virt --nested-paging --nic1 --nic2
+                --nic3 --nic4 --nic5 --nic6 --nic7 --nic8 --nic-bandwidth-group1
+                --nic-boot-prio1 --nic-generic-drv1 --nic-generic-drv2
+                --nic-generic-drv3 --nic-generic-drv4 --nic-generic-drv5
+                --nic-generic-drv6 --nic-generic-drv7 --nic-generic-drv8
+                --nic-promisc1 --nic-promisc2 --nic-promisc3 --nic-promisc4
+                --nic-promisc5 --nic-promisc6 --nic-promisc7 --nic-promisc8
+                --nic-property1 --nic-property2 --nic-property3 --nic-property4
+                --nic-property5 --nic-property6 --nic-property7 --nic-property8
+                --nic-speed1 --nic-speed2 --nic-speed3 --nic-speed4 --nic-speed5
+                --nic-speed6 --nic-speed7 --nic-speed8 --nic-trace1 --nic-trace2
+                --nic-trace3 --nic-trace4 --nic-trace5 --nic-trace6 --nic-trace7
+                --nic-trace8 --nic-trace-file1 --nic-trace-file2
+                --nic-trace-file3 --nic-trace-file4 --nic-trace-file5
+                --nic-trace-file6 --nic-trace-file7 --nic-trace-file8 --nic-type1
+                --nic-type2 --nic-type3 --nic-type4 --nic-type5 --nic-type6
+                --nic-type7 --nic-type8 --os-type --pae --page-fusion
+                --paravirt-debug --paravirt-provider --pci-attach --pci-detach
+                --plug-cpu --recording --recording-file --recording-max-size
+                --recording-max-time --recording-opts --recording-screens
+                --recording-video-fps --recording-video-rate
+                --recording-video-res --rtc-use-utc --snapshot-folder --spec-ctrl
+                --system-uuid-le --teleporter --teleporter-address
+                --teleporter-password --teleporter-password-file
+                --teleporter-port --testing-cfg-dwordidx --testing-enabled
+                --testing-mmio --tpm-location --tpm-type
+                --tracing-allow-vm-access --tracing-config --tracing-enabled
+                --triple-fault-reset --uart1 --uart2 --uart-mode1 --uart-mode2
+                --uart-type1 --uart-type2 --unplug-cpu --usb-card-reader
+                --usb-ehci --usb-ohci --usb-rename --usb-xhci
+                --virt-vmsave-vmload --vm-process-priority --vram --vrde
+                --vrde-address --vrde-auth-library --vrde-auth-type
+                --vrde-extpack --vrde-multi-con --vrde-port --vrde-property
+                --vrde-reuse-con --vrde-video-channel
+                --vrde-video-channel-quality --vtx-ux --vtx-vpid --x2apic )
+
+
 
             if [[ ${prev} == ${cmd} ]]; then
                 _vms_comp vms
@@ -1996,37 +2022,30 @@ _VBoxManage() {
                         _group_comp
                         ;;
 
-                    --ostype)
+                    --os-type)
                         COMPREPLY=()
                         _os_comp
                         ;;
 
-                    --pagefusion|--acpi|--ioapic|--hpet|--triplefaultreset|\
-                    --hwvirtex|--nestedpaging|--largepages|--vtxvpid|--vtxux|\
-                    --pae|--longmode|--cpuhotplug|--rtcuseutc|\
-                    --accelerate3d|--accelerate2dvideo|--bioslogofadein|\
-                    --bioslogofadeout|--biospxedebug|--cableconnected1|\
-                    --cableconnected2|--cableconnected3|--cableconnected4|\
-                    --cableconnected5|--cableconnected6|--cableconnected7|\
-                    --cableconnected8|--nictrace1|--nictrace2|--nictrace3|\
-                    --nictrace4|--nictrace5|--nictrace6|--nictrace7|--nictrace8|\
-                    --natdnspassdomain1|--natdnspassdomain2|--natdnspassdomain3|\
-                    --natdnspassdomain4|--natdnspassdomain5|--natdnspassdomain6|\
-                    --natdnspassdomain7|--natdnspassdomain8|--natdnsproxy1|\
-                    --natdnsproxy2|--natdnsproxy3|--natdnsproxy4|--natdnsproxy5|\
-                    --natdnsproxy6|--natdnsproxy7|--natdnsproxy8|\
-                    --natdnshostresolver1|--natdnshostresolver2|\
-                    --natdnshostresolver3|--natdnshostresolver4|\
-                    --natdnshostresolver5|--natdnshostresolver6|\
-                    --natdnshostresolver7|--natdnshostresolver8|--vrde|\
-                    --vrdemulticon|--vrdereusecon|--vrdevideochannel|--usbohci|\
-                    --usbehci|--teleporter|--tracing-enabled|\
-                    --tracing-allow-vm-access|--usbcardreader|\
-                    --autostart-enabled|--recording|--usbxhci|--apic|--x2apic|\
-                    --ibpb-on-vm-entry|--ibpb-on-vm-exit|--spec-ctrl|--audioin|\
-                    --audioout|--l1d-flush-on-sched|--l1d-flush-on-vm-entry|\
-                    --mds-clear-on-sched|--mds-clear-on-vm-entry|\
-                    --nested-hw-virt|--system-uuid-le)
+                    --accelerate-2d-video|--accelerate-3d|--acpi|--apic|\
+                    --audio-in|--audio-out|--autostart-enabled|\
+                    --bios-logo-fade-in|--bios-logo-fade-out|--bios-pxe-debug|\
+                    --cable-connected1|--cable-connected2|--cable-connected3|\
+                    --cable-connected4|--cable-connected5|--cable-connected6|\
+                    --cable-connected7|--cable-connected8|--cpu-hotplug|--hpet|\
+                    --hwvirtex|--ibpb-on-vm-entry|--ibpb-on-vm-exit|--ioapic|\
+                    --l1d-flush-on-sched|--l1d-flush-on-vm-entry|--large-pages|\
+                    --long-mode|--mds-clear-on-sched|--mds-clear-on-vm-entry|\
+                    --nat-dns-host-resolver[1-8]|--nat-dns-pass-domain[1-8]|\
+                    --nat-dns-proxy[1-8]|--nat-localhostreachable[1-8]|\
+                    --nested-hw-virt|--nested-paging|--nic-trace[1-8]|--pae|\
+                    --page-fusion|--recording|--rtc-use-utc|--spec-ctrl|\
+                    --system-uuid-le|--teleporter|--testing-enabled|\
+                    --testing-mmio|--tracing-allow-vm-access|--tracing-enabled|\
+                    --triple-fault-reset|--usb-card-reader|--usb-ehci|\
+                    --usb-ohci|--usb-xhci|--virt-vmsave-vmload|--vrde-multi-con|\
+                    --vrde-reuse-con|--vrde-video-channel|--vrde|--vtx-ux|\
+                    --vtx-vpid|--x2apic)
                         COMPREPLY=( $(compgen -W "on off" -- ${cur}) )
                         ;;
 
@@ -2044,7 +2063,7 @@ _VBoxManage() {
                         COMPREPLY=( $(compgen -W "ich9 piix3" -- ${cur}) )
                         ;;
 
-                    --biosbootmenu)
+                    --bios-boot-menu)
                         COMPREPLY=( $(compgen -W "disabled menuonly
                         messageandmenu" -- ${cur}) )
                         ;;
@@ -2056,15 +2075,16 @@ _VBoxManage() {
 
                     --nic[1-8])
                         COMPREPLY=( $(compgen -W "none null nat bridged intnet
-                        hostonly generic natnetwork" -- ${cur}) )
+                        hostonly hostonlynet generic natnetwork cloud" \
+                            -- ${cur}) )
                         ;;
 
-                    --nictype[1-8])
-                        COMPREPLY=( $(compgen -W "Am79C970A Am79C973 Am79C960
-                            82540EM 82543GC 82545EM virtio" -- ${cur}) )
+                    --nic-type[1-8])
+                        COMPREPLY=( $(compgen -W "Am79C970A Am79C973 82540EM
+                            82543GC 82545EM virtio" -- ${cur}) )
                         ;;
 
-                    --nicpromisc[1-8])
+                    --nic-promisc[1-8])
                         COMPREPLY=( $(compgen -W "deny allow-vms allow-all" \
                             -- ${cur}) )
                         ;;
@@ -2076,7 +2096,7 @@ _VBoxManage() {
                         COMPREPLY+=( $(compgen -W "$result" -- ${cur}) )
                         ;;
 
-                    --bridgeadapter[1-8])
+                    --bridge-adapter[1-8])
                         COMPREPLY=()
                         _bridgedif_comp
                         _get_excluded_items "none"
@@ -2100,16 +2120,16 @@ _VBoxManage() {
                         _natnet_comp
                         ;;
 
-                    --natnet[1-8])
+                    --nat-net[1-8])
                         COMPREPLY=()
                         _natnet_comp
                         ;;
 
-                    --natpf[1-8])
+                    --nat-pf[1-8])
                         COMPREPLY=( $(compgen -W "delete" -- ${cur}) )
                         ;;
 
-                    --nataliasmode[1-8])
+                    --nat-alias-mode[1-8])
                         COMPREPLY=( $(compgen -W "default" -- ${cur}) )
                         ;;
 
@@ -2119,7 +2139,7 @@ _VBoxManage() {
 
                     --mouse)
                         COMPREPLY=( $(compgen -W "ps2 usb usbtablet
-                        usbmultitouch" -- ${cur}) )
+                        usbmultitouch usbmtscreenpluspad" -- ${cur}) )
                         ;;
 
                     --keyboard)
@@ -2130,36 +2150,32 @@ _VBoxManage() {
                         COMPREPLY=( $(compgen -W "off" -- ${cur}) )
                         ;;
 
-                    --uartmode[1-2])
-                        COMPREPLY=( $(compgen -W "disconnected server client
-                        tcpserver tcpclient file" -- ${cur}) )
+                    --uart-mode[1-2])
+                        COMPREPLY=( $(compgen -W "disconnected serverpipe
+                            clientpipe tcpserverport tcpclienthostname:port
+                            filefilename device-name" -- ${cur}) )
                         ;;
 
-                    --uarttype[1-2])
+                    --uart-type[1-2])
                         COMPREPLY=( $(compgen -W "16450 16550A
                         16750" -- ${cur}) )
                         ;;
 
                     --audio)
-                        COMPREPLY=( $(compgen -W "none null oss alsa pulse" \
-                            -- ${cur}) )
+                        COMPREPLY=( $(compgen -W "none null dsound was oss alsa
+                            pulse coreaudio" -- ${cur}) )
                         ;;
 
-                    --audiocontroller)
+                    --audio-controller)
                         COMPREPLY=( $(compgen -W "ac97 hda sb16" -- ${cur}) )
                         ;;
 
-                    --audiocodec)
+                    --audio-codec)
                         COMPREPLY=( $(compgen -W "stac9700 ad1980 stac9221
                         sb16" -- ${cur}) )
                         ;;
 
-                    --clipboard-mode)
-                        COMPREPLY=( $(compgen -W "disabled hosttoguest
-                        guesttohost bidirectional" -- ${cur}) )
-                        ;;
-
-                    --draganddrop)
+                    --clipboard-mode|--drag-and-drop)
                         COMPREPLY=( $(compgen -W "disabled hosttoguest
                         guesttohost bidirectional" -- ${cur}) )
                         ;;
@@ -2174,7 +2190,7 @@ _VBoxManage() {
                             -- ${cur}) )
                         ;;
 
-                    --paravirtprovider)
+                    --paravirt-provider)
                         COMPREPLY=( $(compgen -W "none default legacy minimal
                         hyperv kvm" -- ${cur}) )
                         ;;
@@ -2183,34 +2199,77 @@ _VBoxManage() {
                         COMPREPLY=( $(compgen -W "0 1 2 3" -- ${cur}) )
                         ;;
 
+                    # TODO: figure out right completion for:
+                    # host | Intel 8086 | Intel 80286 | Intel 80386
                     --cpu-profile)
                         COMPREPLY=( $(compgen -W "host 8086 80286 80386" \
                             -- ${cur}) )
                         ;;
 
-                    --biosapic)
+                    --bios-apic)
                         COMPREPLY=( $(compgen -W "disabled apic x2apic" \
                             -- ${cur}) )
                         ;;
-                    --teleporterpasswordfile|--iconfile|--recordingfile)
+
+                    --teleporter-password-file|--icon-file|--recording-file|\
+                        --bios-logo-image-path|--nic-trace-file[1-8]|\
+                        --nat-tftp-file[1-8])
                         COMPREPLY=( $(compgen -f -- ${cur}) )
                         ;;
-                    --nictracefile[1-8])
-                        COMPREPLY=( $(compgen -f -- ${cur}) )
-                        ;;
-                    --nattftpfile[1-8])
-                        COMPREPLY=( $(compgen -f -- ${cur}) )
-                        ;;
+
                     --vm-process-priority)
                         COMPREPLY=( $(compgen -W "default flat low normal high" \
                             -- ${cur}) )
                         ;;
 
-                    --recordingscreens)
-                        COMPREPLY=( $(compgen -W "all none" \
+                    --recording-screens)
+                        COMPREPLY=( $(compgen -W "all none" -- ${cur}) )
+                        ;;
+
+                    --cloud-network[1-4]=network-name)
+                        COMPREPLY=( )
+                        ;;
+
+                    --default-frontend)
+                        COMPREPLY=( $(compgen -W "default" -- ${cur}) )
+                        ;;
+
+                    --guest-debug-io-provider)
+                        COMPREPLY=( $(compgen -W "none tcp udp ipcdefault" \
                             -- ${cur}) )
                         ;;
 
+                    --guest-debug-provider)
+                        COMPREPLY=( $(compgen -W "none native gdb kd" \
+                            -- ${cur}) )
+                        ;;
+
+                    --iommu)
+                        COMPREPLY=( $(compgen -W "none automatic amd intel" \
+                            -- ${cur}) )
+                        ;;
+
+                    --snapshot-folder)
+                        COMPREPLY=( $(compgen -o dirnames -- ${cur}) )
+                        ;;
+
+                    --teleporter-address)
+                        COMPREPLY=( )
+                        ;;
+
+                    --tpm-type)
+                        COMPREPLY=( $(compgen -W "none 1.2 2.0 host swtpm" \
+                            -- ${cur}) )
+                        ;;
+
+                    --vrde-auth-type)
+                        COMPREPLY=( $(compgen -W "null external guest" \
+                            -- ${cur}) )
+                        ;;
+
+                    --vrde-extpack)
+                        COMPREPLY=( $(compgen -W "default" -- ${cur}) )
+                        ;;
                 esac
             fi
             ;;
