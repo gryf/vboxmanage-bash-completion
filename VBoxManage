@@ -2275,6 +2275,14 @@ _VBoxManage() {
                 COMPREPLY=( $(compgen -o plusdirs -f -X '!*.vbox' -- ${cur}) )
                 [[ ${#COMPREPLY[@]} = 1 && "${COMPREPLY[0]}" != *".vbox" ]] && \
                     COMPREPLY[0]="${COMPREPLY[0]}/"
+            else
+                if [[ $prev == "--passwordfile" ]]; then
+                    COMPREPLY=( $(compgen -f -- ${cur}) )
+                else
+                    local items=( --passwordfile )
+                    _get_excluded_items "${items[@]}"
+                    COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+                fi
             fi
             ;;
 
