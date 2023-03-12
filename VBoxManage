@@ -2390,18 +2390,16 @@ _VBoxManage() {
             if [[ ${prev} == ${cmd} ]]; then
                 _vms_comp vms
             else
-                if [[ " ${COMP_WORDS[@]} " == *" --log "* ]]; then
-                    COMPREPLY=()
-                elif [[ " ${COMP_WORDS[@]} " == *" --details "* ||
-                    " ${COMP_WORDS[@]} " == *" --machinereadable "*  ]]; then
-                    local items=(--details --machinereadable)
-                    _get_excluded_items "${items[@]}"
-                    COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
-                else
-                    local items=(--details --machinereadable --log)
-                    _get_excluded_items "${items[@]}"
-                    COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
-                fi
+                local items=( --details --machinereadable --log --password-id
+                --password --password-idid --passwordfile )
+                _get_excluded_items "${items[@]}"
+                COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+
+                case "${prev}" in
+                    --log|--passwordfile)
+                        COMPREPLY=( $(compgen -f -- ${cur}) )
+                        ;;
+                esac
             fi
             ;;
 
