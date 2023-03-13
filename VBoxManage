@@ -816,30 +816,34 @@ _VBoxManage() {
             if [[ ${prev} == ${cmd} ]]; then
                 _vms_comp runningvms
             else
-                local items=(acpipowerbutton acpisleepbutton clipboard
-                cpuexecutioncap draganddrop guestmemoryballoon
-                keyboardputscancode natpf1 nic1 nicpromisc1 nicproperty1
-                nictrace1 nictracefile1 natpf2 nic2 nicpromisc2 nicproperty2
-                nictrace2 nictracefile2 natpf3 nic3 nicpromisc3 nicproperty3
-                nictrace3 nictracefile3 natpf4 nic4 nicpromisc4 nicproperty4
-                nictrace4 nictracefile4 natpf5 nic5 nicpromisc5 nicproperty5
-                nictrace5 nictracefile5 natpf6 nic6 nicpromisc6 nicproperty6
-                nictrace6 nictracefile6 natpf7 nic7 nicpromisc7 nicproperty7
-                nictrace7 nictracefile7 natpf8 nic8 nicpromisc8 nicproperty8
-                nictrace8 pause plugcpu poweroff reset resume savestate
-                screenshotpng setcredentials setlinkstate1 setlinkstate2
-                setlinkstate3 setlinkstate4 setlinkstate5 setlinkstate6
-                setlinkstate7 setlinkstate8 setvideomodehint teleport unplugcpu
-                usbattach usbdetach vrde vrdeport vrdeproperty
-                vrdevideochannelquality webcam recording addencpassword
-                removeencpassword removeallencpasswords keyboardputstring
-                keyboardputfile audioin audioout setscreenlayout changeuartmode1
-                changeuartmode2 vm-process-priority)
+                local items=( acpipowerbutton acpisleepbutton addencpassword
+                audioin audioout autostart-delayseconds autostart-enabled1
+                autostart-enabled2 autostart-enabled3 autostart-enabled4
+                changeuartmode1 changeuartmode2 clipboard cpuexecutioncap
+                draganddrop guestmemoryballoon keyboardputfile
+                keyboardputscancode keyboardputstring natpf1 natpf2 natpf3
+                natpf4 natpf5 natpf6 natpf7 natpf8 natpf9 natpf1delete
+                natpf2delete natpf3delete natpf4delete natpf5delete natpf6delete
+                natpf7delete natpf8delete nic1 nic2 nic3 nic4 nic5 nic6 nic7
+                nic8 nicpromisc1 nicpromisc2 nicpromisc3 nicpromisc4 nicpromisc5
+                nicpromisc6 nicpromisc7 nicpromisc8 nicproperty1 nicproperty2
+                nicproperty3 nicproperty4 nicproperty5 nicproperty6 nicproperty7
+                nicproperty8 nictrace1 nictrace2 nictrace3 nictrace4 nictrace5
+                nictrace6 nictrace7 nictrace8 nictracefile1 nictracefile2
+                nictracefile3 nictracefile4 nictracefile5 nictracefile6
+                nictracefile7 nictracefile8 pause plugcpu poweroff reboot
+                recording removeallencpasswords removeencpassword reset resume
+                savestate screenshotpng setcredentials setlinkstate1
+                setlinkstate2 setlinkstate3 setlinkstate4 setlinkstate5
+                setlinkstate6 setlinkstate7 setlinkstate8 setscreenlayout
+                setvideomodehint shutdown teleport unplugcpu usbattach usbdetach
+                vm-process-priority vrde vrdeport vrdeproperty
+                vrdevideochannelquality webcam )
 
                 _find_item_name 2
                 subcommand=${COMP_WORDS[$((index+1))]}
 
-                if [[ " ${items[@]} " == *" $subcommand "* ]]; then
+                if [[ " ${items[*]} " == *" $subcommand "* ]]; then
                     case "${subcommand}" in
                         keyboardputfile|nictracefile[1-8])
                             [[ ${prev} == "nictracefile"* ]] && \
@@ -864,14 +868,10 @@ _VBoxManage() {
                                 COMPREPLY=( $(compgen -W "delete tcp
                                 udp" -- ${cur}) )
                             ;;
-                        audioin|audioout|setlinkstate[1-8])
-                            [[ ${prev} == "setlinkstate"* ]] && \
-                                COMPREPLY=( $(compgen -W "on off" -- ${cur}) )
-                            ;;
                         clipboard)
                             [[ ${prev} == "clipboard" ]] && \
-                                COMPREPLY=( $(compgen -W "disabled hosttoguest
-                                guesttohost bidirectional" -- ${cur}) )
+                                COMPREPLY=( $(compgen -W "mode filetransfers" \
+                                    -- ${cur}) )
                             ;;
                         draganddrop)
                             [[ ${prev} == "draganddrop" ]] && \
@@ -884,13 +884,13 @@ _VBoxManage() {
                             ;;
                         recording)
                             [[ ${prev} == "recording" ]] && \
-                                COMPREPLY=( $(compgen -W "on off screens
-                                    filename videores videorate videofps maxtime
-                                    maxfilesize"  -- ${cur}) )
+                                COMPREPLY=( $(compgen -W "filename maxfilesize
+                                    maxtime off on screens videofps videorate
+                                    videores"  -- ${cur}) )
                             case "${prev}" in
                                 screens)
                                     COMPREPLY=( $(compgen -W "all none
-                                        <screen>" -- ${cur}) )
+                                        <screen-ID>" -- ${cur}) )
                                     ;;
                                 filename)
                                     COMPREPLY=( $(compgen -f -- ${cur}) )
@@ -930,26 +930,54 @@ _VBoxManage() {
                             COMPREPLY=( $(compgen -W "yes no" -- ${cur}) )
                             ;;
                         addencpassword)
-                            tmp=(--host --port --maxdowntime --passwordfile
-                            --password)
+                            tmp=( --removeonsuspend )
                             _get_excluded_items "${tmp[@]}"
                             COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
                             ;;
                         changeuartmode[1-2])
-                            tmp=(disconnected server client tcpserver tcpclient
-                                file "<devicename>")
+                            tmp=(disconnected serverpipe-name clientpipe-name
+                                tcpserverport tcpclienthostname:port filefilename
+                                device-name)
                             _get_excluded_items "${tmp[@]}"
                             COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
                             ;;
                         vm-process-priority)
                             COMPREPLY=( $(compgen -W "default flat low normal
                                 high" -- ${cur}) )
-                        ;;
+                            ;;
+
+                        setscreenlayout)
+                            if [[ "${prev}" != "${subcommand}" ]]; then
+                                COMPREPLY=( $(compgen -W "on off" -- ${cur}) )
+                            fi
+                            ;;
+
+                        shutdown)
+                            COMPREPLY=( $(compgen -W "--force" -- ${cur}) )
+                            ;;
 
                     esac
-                elif [[ ${prev} == "--passwordfile" || ${prev} == "--capturefile" ]]; then
-                    COMPREPLY=( $(compgen -f -- ${cur}) )
                 else
+                    case "${prev}" in
+                        --passwordfile|--capturefile|screenshotpng|\
+                        keyboardputfile|nictracefile[1-8])
+                            COMPREPLY=( $(compgen -f -- ${cur}) )
+                            ;;
+
+                        audioin|audioout|autostart-enabled[1-4]|filetransfers|\
+                        nictrace[1-8]|setlinkstate[1-8]|vrde)
+                            COMPREPLY=( $(compgen -W "on off" -- ${cur}) )
+                            ;;
+
+                        --allowlocallogon)
+                            COMPREPLY=( $(compgen -W "yes no" -- ${cur}) )
+                            ;;
+
+                        mode)
+                            COMPREPLY=( $(compgen -W "disabled hosttoguest
+                                guesttohost bidirectional" -- ${cur}) )
+                            ;;
+                    esac
                     [[ ${#COMPREPLY[@]} -eq 0 ]] && \
                             COMPREPLY=( $(compgen -W "${items[*]}" -- ${cur}) )
                 fi
