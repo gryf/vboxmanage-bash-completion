@@ -1798,8 +1798,11 @@ _VBoxManage() {
             ;;
 
         import)
-            items=(--options --dry-run -n --vmname --cloud --cloudprofile
-                --cloudinstanceid --cloudbucket)
+            items=(--basefolder --cloud --cloudbucket --cloudinstanceid
+                --cloudprofile --controller --cpus --description --disk
+                --dry-run --eula --group --ignore --memory --options --ostype
+                --port --scsitype --settingsfile --unit --vmname --vsys)
+
             if [[ "${prev}" == "import" ]]; then
                 COMPREPLY=( $(compgen -o plusdirs -f -X '!@(*.ovf|*.ova)' \
                     -- ${cur}) )
@@ -1809,10 +1812,20 @@ _VBoxManage() {
                         COMPREPLY=( $(compgen -W "keepallmacs keepnatmacs
                         importtovdi" -- ${cur}) )
                         ;;
+                    --basefolder)
+                        COMPREPLY=( $(compgen -o dirnames -- ${cur}) )
+                        ;;
+
+                    --eula)=
+                        COMPREPLY=( $(compgen -W "show accept" -- ${cur}) )
+                        ;;
+                    --settingsfile)
+                        COMPREPLY=( $(compgen -f -- ${cur}) )
+                        ;;
+                    --scsitype)
+                        COMPREPLY=( $(compgen -W "BusLogic LsiLogic" -- ${cur}) )
+                        ;;
                 esac
-                [[ " ${COMP_WORDS[@]} " != *" --dry-run"* &&
-                    " ${COMP_WORDS[@]} " != *" -n"* ]] &&
-                    items+=(-n --dry-run)
 
                 if [[ ${#COMPREPLY[@]} -eq 0 ]]; then
                     _get_excluded_items "${items[@]}"
