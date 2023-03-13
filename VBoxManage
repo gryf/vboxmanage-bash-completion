@@ -1124,35 +1124,35 @@ _VBoxManage() {
             ;;
 
         dhcpserver)
-            items=(add modify remove restart findlease)
+            items=(add modify remove restart stop findlease)
             subcommand=${COMP_WORDS[2]}
-            if [[ " ${items[@]} " == *" $subcommand "* ]]; then
+            if [[ " ${items[*]} " == *" $subcommand "* ]]; then
                 case "${subcommand}" in
                     add)
                         items=(--server-ip --netmask --lower-ip --upper-ip)
-                        [[ " ${COMP_WORDS[@]} " != *" --interface"* &&
-                            " ${COMP_WORDS[@]} " != *" --network"* ]] &&
+                        [[ " ${COMP_WORDS[*]} " != *" --interface"* &&
+                            " ${COMP_WORDS[*]} " != *" --network"* ]] &&
                             items+=(--network --interface)
 
-                        [[ " ${COMP_WORDS[@]} " != *" --enable"* &&
-                            " ${COMP_WORDS[@]} " != *" --disable"* ]] &&
+                        [[ " ${COMP_WORDS[*]} " != *" --enable"* &&
+                            " ${COMP_WORDS[*]} " != *" --disable"* ]] &&
                             items+=(--enable --disable)
 
-                        [[ " ${COMP_WORDS[@]} " == *" --options"* ]] &&
+                        [[ " ${COMP_WORDS[*]} " == *" --options"* ]] &&
                             items+=(--vm --nic --id --value --remove)
 
-                        [[ " ${COMP_WORDS[@]} " != *" --global"* &&
-                            " ${COMP_WORDS[@]} " != *" --group"* &&
-                            " ${COMP_WORDS[@]} " != *" --vm"* &&
-                            " ${COMP_WORDS[@]} " != *" --mac-address"* ]] &&
+                        [[ " ${COMP_WORDS[*]} " != *" --global"* &&
+                            " ${COMP_WORDS[*]} " != *" --group"* &&
+                            " ${COMP_WORDS[*]} " != *" --vm"* &&
+                            " ${COMP_WORDS[*]} " != *" --mac-address"* ]] &&
                             items+=(--global --group --vm --mac-address)
 
-                        [[ " ${COMP_WORDS[@]} " == *" --global"* ]] &&
+                        [[ " ${COMP_WORDS[*]} " == *" --global"* ]] &&
                             items+=(--set-opt --set-opt-hex --force-opt
                             --supress-opt --min-lease-time --default-lease-time
                             --max-lease-time)
 
-                        [[ " ${COMP_WORDS[@]} " == *" --group"* ]] &&
+                        [[ " ${COMP_WORDS[*]} " == *" --group"* ]] &&
                             items+=(--set-opt --set-opt-hex --force-opt
                             --supress-opt --incl-mac --excl-mac --incl-mac-wild
                             --excl-mac-wild --incl-vendor --excl-vendor
@@ -1161,12 +1161,12 @@ _VBoxManage() {
                             --min-lease-time --default-lease-time
                             --max-lease-time)
 
-                        [[ " ${COMP_WORDS[@]} " == *" --vm"* ]] &&
+                        [[ " ${COMP_WORDS[*]} " == *" --vm"* ]] &&
                             items+=(--nic --set-opt --set-opt-hex --force-opt
                             --supress-opt --min-lease-time --default-lease-time
                             --max-lease-time --fixed-address)
 
-                        [[ " ${COMP_WORDS[@]} " == *" --mac-address"* ]] &&
+                        [[ " ${COMP_WORDS[*]} " == *" --mac-address"* ]] &&
                             items+=(--set-opt --set-opt-hex --force-opt
                             --supress-opt --min-lease-time --default-lease-time
                             --max-lease-time --fixed-address)
@@ -1176,30 +1176,30 @@ _VBoxManage() {
                         ;;
                     modify)
                         items=(--server-ip --netmask --lower-ip --upper-ip)
-                        [[ " ${COMP_WORDS[@]} " != *" --interface"* &&
-                            " ${COMP_WORDS[@]} " != *" --network"* ]] &&
+                        [[ " ${COMP_WORDS[*]} " != *" --interface"* &&
+                            " ${COMP_WORDS[*]} " != *" --network"* ]] &&
                             items+=(--network --interface)
 
-                        [[ " ${COMP_WORDS[@]} " != *" --enable"* &&
-                            " ${COMP_WORDS[@]} " != *" --disable"* ]] &&
+                        [[ " ${COMP_WORDS[*]} " != *" --enable"* &&
+                            " ${COMP_WORDS[*]} " != *" --disable"* ]] &&
                             items+=(--enable --disable)
 
-                        [[ " ${COMP_WORDS[@]} " == *" --options"* ]] &&
+                        [[ " ${COMP_WORDS[*]} " == *" --options"* ]] &&
                             items+=(--vm --nic --id --value --remove)
 
-                        [[ " ${COMP_WORDS[@]} " != *" --global"* &&
-                            " ${COMP_WORDS[@]} " != *" --group"* &&
-                            " ${COMP_WORDS[@]} " != *" --vm"* &&
-                            " ${COMP_WORDS[@]} " != *" --mac-address"* ]] &&
+                        [[ " ${COMP_WORDS[*]} " != *" --global"* &&
+                            " ${COMP_WORDS[*]} " != *" --group"* &&
+                            " ${COMP_WORDS[*]} " != *" --vm"* &&
+                            " ${COMP_WORDS[*]} " != *" --mac-address"* ]] &&
                             items+=(--global --group --vm --mac-address)
 
-                        [[ " ${COMP_WORDS[@]} " == *" --global"* ]] &&
+                        [[ " ${COMP_WORDS[*]} " == *" --global"* ]] &&
                             items+=(--del-opt --set-opt --set-opt-hex --force-opt
                             --unforce-opt --supress-opt --unsupress-opt
                             --min-lease-time --default-lease-time
                             --max-lease-time --remove-config)
 
-                        [[ " ${COMP_WORDS[@]} " == *" --group"* ]] &&
+                        [[ " ${COMP_WORDS[*]} " == *" --group"* ]] &&
                             items+=(--set-opt-hex --force-opt --unforce-opt
                             --supress-opt --unsupress-opt --del-mac --incl-mac
                             --excl-mac --del-mac-wild --incl-mac-wild
@@ -1211,13 +1211,13 @@ _VBoxManage() {
                             --default-lease-time --max-lease-time
                             --remove-config)
 
-                        [[ " ${COMP_WORDS[@]} " == *" --vm"* ]] &&
+                        [[ " ${COMP_WORDS[*]} " == *" --vm"* ]] &&
                             items+=(--del-opt --set-opt --set-opt-hex --force-opt
                             --unforce-opt --supress-opt --unsupress-opt
                             --min-lease-time --default-lease-time
                             --max-lease-time --fixed-address --remove-config)
 
-                        [[ " ${COMP_WORDS[@]} " == *" --mac-address"* ]] &&
+                        [[ " ${COMP_WORDS[*]} " == *" --mac-address"* ]] &&
                             items+=(--set-opt --set-opt-hex --force-opt
                             --unforce-opt --supress-opt --unsupress-opt
                             --min-lease-time --default-lease-time
@@ -1226,7 +1226,7 @@ _VBoxManage() {
                         _get_excluded_items "${items[@]}"
                         COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
                         ;;
-                    remove|restart)
+                    remove|restart|stop)
                         case "${prev}" in
                             --network)
                                 COMPREPLY=()
@@ -1238,8 +1238,8 @@ _VBoxManage() {
                                 ;;
                         esac
 
-                        if [[ " ${COMP_WORDS[@]} " != *" --interface"* &&
-                            " ${COMP_WORDS[@]} " != *" --network"* ]]; then
+                        if [[ " ${COMP_WORDS[*]} " != *" --interface"* &&
+                            " ${COMP_WORDS[*]} " != *" --network"* ]]; then
                             items=(--network --interface)
                             _get_excluded_items "${items[@]}"
                             COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
@@ -1258,8 +1258,8 @@ _VBoxManage() {
                                 ;;
                         esac
 
-                        if [[ " ${COMP_WORDS[@]} " != *" --interface"* &&
-                            " ${COMP_WORDS[@]} " != *" --network"* ]]; then
+                        if [[ " ${COMP_WORDS[*]} " != *" --interface"* &&
+                            " ${COMP_WORDS[*]} " != *" --network"* ]]; then
                             items+=(--network --interface)
                             _get_excluded_items "${items[@]}"
                             COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
