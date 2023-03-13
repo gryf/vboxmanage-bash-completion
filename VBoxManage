@@ -1262,6 +1262,47 @@ _VBoxManage() {
             fi
             ;;
 
+        encryptvm)
+            items=( addpassword checkpassword removepassword setencryption )
+            if [[ ${prev} == ${cmd} ]]; then
+                _vms_comp vms
+            else
+                _find_item_name 2
+                subcommand=${COMP_WORDS[$((index+1))]}
+                if [[ " ${items[*]} " == *" $subcommand "* ]]; then
+                    case "${subcommand}" in
+                        addpassword)
+                            items=( --passwordfile --password-id )
+                            _get_excluded_items "${items[@]}"
+                            COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+                            ;;
+                        checkpassword)
+                            COMPREPLY=( $(compgen -f -- ${cur}) )
+                            ;;
+                        removepassword)
+                            COMPREPLY=()
+                            ;;
+                        setencryption)
+                            items=( --old-passwordfile --ciphercipher-identifier
+                                --new-passwordfile --new-password-id --force )
+                            _get_excluded_items "${items[@]}"
+                            COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+                            ;;
+                    esac
+                else
+                    case "$prev" in
+                        --new-passwordfile|--old-passwordfile|--passwordfile)
+                            COMPREPLY=( $(compgen -f -- ${cur}) )
+                            ;;
+                        *)
+                            [[ ${#COMPREPLY[@]} -eq 0 ]] && \
+                                COMPREPLY=( $(compgen -W "${items[*]}" \
+                                    -- ${cur}) )
+                    esac
+                fi
+            fi
+            ;;
+
         "export")
             items=( --manifest --options --vsys --cloud --cloudinitscriptpath )
             if [[ ${prev} == ${cmd} ]]; then
