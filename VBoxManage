@@ -1071,16 +1071,17 @@ _VBoxManage() {
             ;;
 
         "debugvm")
-            items=(dumpguestcore info injectnmi log logdest logflags osdetect
-            osinfo osdmesg getregisters setregisters show statistics stack)
+            items=(dumpvmcore info injectnmi log logdest logflags osdetect
+            osinfo osdmesg getregisters setregisters show stack statistics
+            guestsample)
             if [[ ${prev} == ${cmd} ]]; then
                 _vms_comp runningvms
             else
                 _find_item_name 2
                 subcommand=${COMP_WORDS[$((index+1))]}
-                if [[ " ${items[@]} " == *" $subcommand "* ]]; then
+                if [[ " ${items[*]} " == *" $subcommand "* ]]; then
                     case "${subcommand}" in
-                        dumpguestcore)
+                        dumpvmcore)
                             _get_excluded_items "--filename"
                             COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
                             ;;
@@ -1105,10 +1106,13 @@ _VBoxManage() {
                             COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
                             ;;
                         osdmesg)
-                            items=()
-                            [[ " ${COMP_WORDS[@]} " != *" --lines "* &&
-                                " ${COMP_WORDS[@]} " != *" -n "* ]] &&
-                                items+=(--lines -n)
+                            items=(--lines)
+                            _get_excluded_items "${items[@]}"
+                            COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+                            ;;
+                        guestsample)
+                            items=(--filename --sample-interval-us
+                                --sample-time-us)
                             _get_excluded_items "${items[@]}"
                             COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
                             ;;
