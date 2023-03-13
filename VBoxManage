@@ -1868,12 +1868,16 @@ _VBoxManage() {
                             --output" -- ${cur}) )
                             ;;
                     stream)
-                            COMPREPLY=( $(compgen -W "--forma --variant
-                                --output" -- ${cur}) )
+                        COMPREPLY=( $(compgen -W "--format --variant
+                            --output" -- ${cur}) )
                                 ;;
+                    --password-file)
+                        COMPREPLY=( $(compgen -f -- ${cur}) )
+                        ;;
                     *)
                         COMPREPLY=( $(compgen -W "--password-file cat formatfat
                             stream" -- ${cur}) )
+                        ;;
                 esac
             fi
             ;;
