@@ -1385,7 +1385,7 @@ _VBoxManage() {
         extpack)
             items=(install uninstall cleanup)
             subcommand=${COMP_WORDS[2]}
-            if [[ " ${items[@]} " == *" $subcommand "* ]]; then
+            if [[ " ${items[*]} " == *" $subcommand "* ]]; then
                 case "${subcommand}" in
                     install)
                         _get_excluded_items "--replace --accept-license"
@@ -2803,19 +2803,17 @@ _VBoxManage() {
                             if [[ ${prev} == ${subcommand} ]]; then
                                 _vms_comp vms
                             else
-                                local items=(--iso --user=login
-                                --password=password --password-file
-                                --full-user-name --key
-                                --install-additions --no-install-additions
-                                --additions-iso --install-txs --no-install-txs
-                                --validation-kit-iso --locale --country
-                                --time-zone --hostname
-                                --package-selection-adjustment --dry-run
-                                --auxiliary-base-path=path --image-index
-                                --script-template --post-install-template
-                                --post-install-command
-                                --extra-install-kernel-parameters --language
-                                --start-vm)
+                                local items=(--additions-iso
+                                --auxiliary-base-path --country --dry-run
+                                --extra-install-kernel-parameters
+                                --full-user-name --hostname --image-index
+                                --install-additions --install-txs --iso --key
+                                --language --locale --no-install-additions
+                                --no-install-txs --package-selection-adjustment
+                                --password --password-file
+                                --post-install-command --post-install-template
+                                --script-template --start-vm --time-zone --user
+                                --validation-kit-iso)
                                 _get_excluded_items "${items[@]}"
                                 COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
                             fi
