@@ -2567,14 +2567,10 @@ _VBoxManage() {
                 _vms_comp vms 1
             elif [[ "${prev}" == "--type" ]]; then
                 COMPREPLY=( $(compgen -W "gui sdl headless separate" -- ${cur}) )
+            elif [[ "${prev}" == "--passwordfile" ]]; then
+                COMPREPLY=( $(compgen -f -- ${cur}) )
             else
-                local items=(--putenv -E)
-                _is_any_item_used "${items[@]}"
-                if [[ "${result}" == "ITIS" ]]; then
-                    local items=(--type)
-                else
-                    local items=(--type -E --putenv)
-                fi
+                items=( --type --putenv --passwordfile --password-id )
                 _get_excluded_items "${items[@]}"
                 COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
             fi
