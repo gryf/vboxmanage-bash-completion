@@ -1332,7 +1332,8 @@ _VBoxManage() {
             ;;
 
         "export")
-            items=( --manifest --options --vsys --cloud --cloudinitscriptpath )
+            items=( --manifest --options --vsys --cloud --cloudinitscriptpath
+                --output)
             if [[ ${prev} == ${cmd} ]]; then
                 _vms_comp vms
             elif [[ ${prev} == "--eulafile" ]]; then
@@ -1342,19 +1343,16 @@ _VBoxManage() {
                     ${prev} == "--cloudpublicip" ]]; then
                 COMPREPLY=( $(compgen -W "true false" -- ${cur}) )
             else
-                [[ " ${COMP_WORDS[@]} " != *" -o "* &&
-                    " ${COMP_WORDS[@]} " != *" --output "* ]] &&
-                    items+=(-o --output)
-                [[ " ${COMP_WORDS[@]} " != *" --legacy09 "* &&
-                    " ${COMP_WORDS[@]} " != *" --ovf09 "* &&
-                    " ${COMP_WORDS[@]} " != *" --ovf10 "* &&
-                    " ${COMP_WORDS[@]} " != *" --ovf20 "* &&
-                    " ${COMP_WORDS[@]} " != *" --opc20 "* ]] &&
+                [[ " ${COMP_WORDS[*]} " != *" --legacy09 "* &&
+                    " ${COMP_WORDS[*]} " != *" --ovf09 "* &&
+                    " ${COMP_WORDS[*]} " != *" --ovf10 "* &&
+                    " ${COMP_WORDS[*]} " != *" --ovf20 "* &&
+                    " ${COMP_WORDS[*]} " != *" --opc10 "* ]] &&
                     items+=(--legacy09 --ovf09 --ovf10 --ovf20 --opc10)
-                [[ " ${COMP_WORDS[@]} " == *" --vsys "* ]] &&
+                [[ " ${COMP_WORDS[*]} " == *" --vsys "* ]] &&
                     items+=(--product --producturl --vendor --vendorurl
                     --version --description --eula --eulafile --vmname)
-                [[ " ${COMP_WORDS[@]} " == *" --cloud"* ]] &&
+                [[ " ${COMP_WORDS[*]} " == *" --cloud"* ]] &&
                     items+=(--vmname --cloudprofile --cloudshape --clouddomain
                     --clouddisksize --cloudbucket --cloudocivcn --cloudocisubnet
                     --cloudkeepobject --cloudlaunchinstance --cloudpublicip
@@ -1371,6 +1369,9 @@ _VBoxManage() {
                         COMPREPLY=( $(compgen -W "EMULATED PARAVIRTUALIZED" \
                         -- ${cur}) )
                         ;;
+                    --cloudkeepobject|--cloudlaunchinstance|--cloudpublicip)
+                        COMPREPLY=( $(compgen -W "true false" -- ${cur}) )
+
                esac
                [[ ${#COMPREPLY[@]} -eq 0 ]] && \
                    COMPREPLY=( $(compgen -W "${items[*]}" -- ${cur}) )
