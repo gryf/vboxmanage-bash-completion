@@ -1974,15 +1974,18 @@ _VBoxManage() {
                         ;;
                     *)
                         _find_item_name 2
-                        items=(--type --autoreset --property --compact --resize
-                        --move --description --setlocation)
+                        items=( --autoreset --compact --description --move
+                            --property --setlocation --type )
+                        [[ " ${COMP_WORDS[*]} " != *" --resize "* &&
+                            " ${COMP_WORDS[*]} " != *" --resizebyte"* ]] &&
+                            items+=( --resizebyte --resize )
                         _get_excluded_items "${items[@]}"
                         COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
                         case "${prev}" in
                             --type)
                                 COMPREPLY=( $(compgen -W "normal writethrough
-                                immutable shareable readonly multiattach" --\
-                                    ${cur}) )
+                                immutable shareable readonly multiattach" \
+                                    -- ${cur}) )
                                 ;;
                             --autoreset)
                                 COMPREPLY=( $(compgen -W "on off" -- ${cur}) )
@@ -1996,6 +1999,55 @@ _VBoxManage() {
                         esac
                     ;;
                 esac
+            fi
+            ;;
+
+        modifynvram)
+            items=( changevar deletevar enrollmssignatures enrollorclpk
+                enrollpk inituefivarstore listvars queryvar )
+            # _get_excluded_items "${items[@]}"
+            # COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+
+            if [[ ${prev} == ${cmd} ]]; then
+                # COMPREPLY=( )
+                _vms_comp vms
+            else
+                _find_item_name 2
+                subcommand=${COMP_WORDS[$((index+1))]}
+                if [[ " ${items[*]} " == *" $subcommand "* ]]; then
+                    case "${subcommand}" in
+                        enrollpk)
+                            if [ "${prev}" = "--platform-key" ]; then
+                                COMPREPLY=( $(compgen -f -- ${cur}) )
+                            else
+                                items=( --platform-key --owner-uuid )
+                                _get_excluded_items "${items[@]}"
+                                COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+                            fi
+                            ;;
+                        queryvar|changevar)
+                            if [ "${prev}" = "--filename" ]; then
+                                COMPREPLY=( $(compgen -f -- ${cur}) )
+                            else
+                            items=( --name --filename )
+                            _get_excluded_items "${items[@]}"
+                            COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+                            fi
+                            ;;
+                        deletevar)
+                            items=( --name --owner-uuid )
+                            _get_excluded_items "${items[@]}"
+                            COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+                            ;;
+                        inituefivarstore|enrollmssignatures|enrollorclpk|\
+                        listvars)
+                            COMPREPLY=( )
+                            ;;
+                    esac
+                else
+                    [[ ${#COMPREPLY[@]} -eq 0 ]] && \
+                        COMPREPLY=( $(compgen -W "${items[*]}" -- ${cur}) )
+                fi
             fi
             ;;
 
