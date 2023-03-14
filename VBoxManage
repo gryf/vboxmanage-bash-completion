@@ -1459,7 +1459,7 @@ _VBoxManage() {
                                 items+=(--quiet -q)
 
                             _get_excluded_items "${items[@]}"
-                            compreply=( $(compgen -w "$result" -- ${cur}) )
+                            COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
                             ;;
 
                         start)
@@ -1478,7 +1478,7 @@ _VBoxManage() {
                                 items+=(--quiet -q)
 
                             _get_excluded_items "${items[@]}"
-                            compreply=( $(compgen -w "$result" -- ${cur}) )
+                            COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
                             ;;
 
                         copyfrom|copyto)
