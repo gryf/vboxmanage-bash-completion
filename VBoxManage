@@ -2562,6 +2562,43 @@ _VBoxManage() {
             fi
             ;;
 
+        signova)
+            COMPREPLY=()
+
+            if [[ "${prev}" == "${cmd}" ]]; then
+                COMPREPLY=( $(compgen -o plusdirs -f -X '!@(*.ovf|*.ova)' \
+                    -- ${cur}) )
+            else
+                if [[ " ${COMP_WORDS[*]} " != *" --certificate"* ||
+                    " ${COMP_WORDS[*]} " != *" --private-key"* ]]; then
+                        items=( --certificate --private-key )
+                        _get_excluded_items "${items[@]}"
+                        COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+                else
+                    items=( --digest-type --intermediate-cert --force --dry-run )
+                        [[ " ${COMP_WORDS[*]} " != *" --private-key-password "* &&
+                            " ${COMP_WORDS[*]} " != *" --private-key-password-file"* ]] &&
+                            items+=( --private-key-password-file
+                                     --private-key-password )
+                        [[ " ${COMP_WORDS[*]} " != *" --verbose"* &&
+                            " ${COMP_WORDS[*]} " != *" --quiet"* ]] &&
+                            items+=( --verbose --quiet )
+                        [[ " ${COMP_WORDS[*]} " != *" --pkcs7"* &&
+                            " ${COMP_WORDS[*]} " != *" --no-pkcs7"* ]] &&
+                            items+=( --pkcs7 --no-pkcs7 )
+                        _get_excluded_items "${items[@]}"
+                        COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+
+                    case "${prev}" in
+                        --certificate|--private-key|--private-key-password-file|\
+                        --intermediate-cert)
+                            COMPREPLY=( $(compgen -f -- ${cur}) )
+                            ;;
+                    esac
+                fi
+            fi
+            ;;
+
         snapshot)
             items=(take delete restore restorecurrent edit list showvminfo)
             if [[ ${prev} == ${cmd} ]]; then
