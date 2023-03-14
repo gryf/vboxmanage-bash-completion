@@ -656,49 +656,53 @@ _VBoxManage() {
             ;;
 
         cloudprofile)
-            if [[ " ${COMP_WORDS[@]} " != *" --provider"* ||
-                " ${COMP_WORDS[@]} " != *" --profile"* ]]; then
+            if [[ " ${COMP_WORDS[*]} " != *" --provider"* ||
+                " ${COMP_WORDS[*]} " != *" --profile"* ]]; then
                 items=(--provider --profile)
             else
-            [[ " ${COMP_WORDS[@]} " != *" add"* &&
-                " ${COMP_WORDS[@]} " != *" update"* &&
-                " ${COMP_WORDS[@]} " != *" delete"* &&
-                " ${COMP_WORDS[@]} " != *" show"* ]] &&
+            [[ " ${COMP_WORDS[*]} " != *" add"* &&
+                " ${COMP_WORDS[*]} " != *" update"* &&
+                " ${COMP_WORDS[*]} " != *" delete"* &&
+                " ${COMP_WORDS[*]} " != *" show"* ]] &&
                 items=(add update delete show)
             fi
             _get_excluded_items "${items[@]}"
             COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
 
-            case "${prev}" in
-                --provider)
-                    COMPREPLY=()
-                    _cloudproviders_comp
-                    ;;
-                --profile)
-                    COMPREPLY=()
-                    _cloudprofiles_comp
-                    ;;
-            esac
-            if [[ " ${COMP_WORDS[@]} " == *" add"* ||
-                " ${COMP_WORDS[@]} " == *" update"* ]]; then
+            if [[ " ${COMP_WORDS[*]} " == *" add"* ||
+                " ${COMP_WORDS[*]} " == *" update"* ]]; then
                 COMPREPLY=( $(compgen -W "--clouduser --fingerprint --keyfile
-                    --passphrase --tenancy --compartment" -- ${cur}) )
+                    --passphrase --tenancy --compartment --region" -- ${cur}) )
+            else
+                case "${prev}" in
+                    --provider)
+                        COMPREPLY=()
+                        _cloudproviders_comp
+                        ;;
+                    --profile)
+                        COMPREPLY=()
+                        _cloudprofiles_comp
+                        ;;
+                    --keyfile)
+                        COMPREPLY=( $(compgen -f -- ${cur}) )
+                        ;;
+                esac
             fi
             ;;
 
         cloud)
             if [ "${prev}" == "cloud" ]; then
                 items=(--provider --profile network)
-            elif [[ " ${COMP_WORDS[@]} " == *" network"* ]]; then
+            elif [[ " ${COMP_WORDS[*]} " == *" network"* ]]; then
                 items=(update delete info)
-            elif [[ " ${COMP_WORDS[@]} " != *" --provider"* ||
-                " ${COMP_WORDS[@]} " != *" --profile"* ]]; then
+            elif [[ " ${COMP_WORDS[*]} " != *" --provider"* ||
+                " ${COMP_WORDS[*]} " != *" --profile"* ]]; then
                 items=(--provider --profile)
             else
-            [[ " ${COMP_WORDS[@]} " != *" list"* &&
-                " ${COMP_WORDS[@]} " != *" instance"* &&
-                " ${COMP_WORDS[@]} " != *" network"* &&
-                " ${COMP_WORDS[@]} " != *" image"* ]] &&
+            [[ " ${COMP_WORDS[*]} " != *" list"* &&
+                " ${COMP_WORDS[*]} " != *" instance"* &&
+                " ${COMP_WORDS[*]} " != *" network"* &&
+                " ${COMP_WORDS[*]} " != *" image"* ]] &&
                 items=(list instance image network)
             fi
             _get_excluded_items "${items[@]}"
@@ -724,24 +728,24 @@ _VBoxManage() {
                         export" -- ${cur}) )
                     ;;
                 network)  # TODO: differentiate between setup/create and update/delete/info
-                    if [[ " ${COMP_WORDS[@]} " == *" --provider"* ]]; then
+                    if [[ " ${COMP_WORDS[*]} " == *" --provider"* ]]; then
                         COMPREPLY=( $(compgen -W "setup create" -- ${cur}) )
                     fi
                     ;;
             esac
-            if [[ " ${COMP_WORDS[@]} " == *" list images"* ]]; then
-
+            if [[ " ${COMP_WORDS[*]} " == *" list images"* ||
+                " ${COMP_WORDS[*]} " == *" list instances"* ]]; then
                 items=(--state --compartment-id)
                 _get_excluded_items "${items[@]}"
                 COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
             fi
 
-            if [[ " ${COMP_WORDS[@]} " == *" instance create"* ]]; then
+            if [[ " ${COMP_WORDS[*]} " == *" instance create"* ]]; then
                 items=( --domain-name  --display-name --shape --subnet
                     --publicip --boot-disk-size --privateip --public-ssh-key
                     --launch-mode --cloud-init-script-path )
-                [[ " ${COMP_WORDS[@]} " != *" --image-id"* &&
-                    " ${COMP_WORDS[@]} " != *" --boot-volume-id"* ]] &&
+                [[ " ${COMP_WORDS[*]} " != *" --image-id"* &&
+                    " ${COMP_WORDS[*]} " != *" --boot-volume-id"* ]] &&
                     items+=(--image-id --boot-volume-id)
 
                 _get_excluded_items "${items[@]}"
@@ -757,57 +761,55 @@ _VBoxManage() {
                         ;;
                 esac
             fi
-            if [[ " ${COMP_WORDS[@]} " == *" instance info"* ||
-                " ${COMP_WORDS[@]} " == *" instance terminate"* ||
-                " ${COMP_WORDS[@]} " == *" instance start"* ||
-                " ${COMP_WORDS[@]} " == *" instance pause"* ]]; then
+            if [[ " ${COMP_WORDS[*]} " == *" instance info"* ||
+                " ${COMP_WORDS[*]} " == *" instance terminate"* ||
+                " ${COMP_WORDS[*]} " == *" instance start"* ||
+                " ${COMP_WORDS[*]} " == *" instance pause"* ]]; then
                 COMPREPLY=( $(compgen -W "--id" -- ${cur}) )
             fi
 
-            if [[ " ${COMP_WORDS[@]} " == *" image create"* ]]; then
+            if [[ " ${COMP_WORDS[*]} " == *" image create"* ]]; then
                 items=(--display-name --bucket-name --object-name --instance-id)
-
                 _get_excluded_items "${items[@]}"
                 COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
             fi
-            if [[ " ${COMP_WORDS[@]} " == *" image info"* ||
-                " ${COMP_WORDS[@]} " == *" image delete"* ]]; then
+            if [[ " ${COMP_WORDS[*]} " == *" image info"* ||
+                " ${COMP_WORDS[*]} " == *" image delete"* ]]; then
                 COMPREPLY=( $(compgen -W "--id" -- ${cur}) )
             fi
-            if [[ " ${COMP_WORDS[@]} " == *" image import"* ]]; then
+            if [[ " ${COMP_WORDS[*]} " == *" image import"* ]]; then
                 COMPREPLY=( $(compgen -W "--id --bucket-name
                     --object-name" -- ${cur}) )
             fi
-            if [[ " ${COMP_WORDS[@]} " == *" image export"* ]]; then
+            if [[ " ${COMP_WORDS[*]} " == *" image export"* ]]; then
                 COMPREPLY=( $(compgen -W "--id --display-name --bucket-name
                     --object-name" -- ${cur}) )
             fi
-            if [[ " ${COMP_WORDS[@]} " == *" network setup"* ]]; then
-                items=( --local-gateway-iso --gateway-os-name
-                    --gateway-os-version --gateway-shape --tunnel-network-name
-                    --tunnel-network-range --guest-additions-iso --proxy
-                    --compartment-id )
+            if [[ " ${COMP_WORDS[*]} " == *" network setup"* ]]; then
+                items=( --compartment-id --gateway-os-name --gateway-os-version
+                    --gateway-shape --proxy --tunnel-network-name
+                    --tunnel-network-range )
                 _get_excluded_items "${items[@]}"
                 COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
             fi
-            if [[ " ${COMP_WORDS[@]} " == *" network create"* ]]; then
+            if [[ " ${COMP_WORDS[*]} " == *" network create"* ]]; then
                 items=( --name --network-id )
-                [[ " ${COMP_WORDS[@]} " != *" --enable"* &&
-                    " ${COMP_WORDS[@]} " != *" --disable"* ]] &&
+                [[ " ${COMP_WORDS[*]} " != *" --enable"* &&
+                    " ${COMP_WORDS[*]} " != *" --disable"* ]] &&
                     items+=(--enable --disable)
                 _get_excluded_items "${items[@]}"
                 COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
             fi
-            if [[ " ${COMP_WORDS[@]} " == *" network update"* ]]; then
+            if [[ " ${COMP_WORDS[*]} " == *" network update"* ]]; then
                 items=( --name --network-id )
-                [[ " ${COMP_WORDS[@]} " != *" --enable"* &&
-                    " ${COMP_WORDS[@]} " != *" --disable"* ]] &&
+                [[ " ${COMP_WORDS[*]} " != *" --enable"* &&
+                    " ${COMP_WORDS[*]} " != *" --disable"* ]] &&
                     items+=(--enable --disable)
                 _get_excluded_items "${items[@]}"
                 COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
             fi
-            if [[ " ${COMP_WORDS[@]} " == *" network info"* ||
-                " ${COMP_WORDS[@]} " == *" network delete"* ]]; then
+            if [[ " ${COMP_WORDS[*]} " == *" network info"* ||
+                " ${COMP_WORDS[*]} " == *" network delete"* ]]; then
                 COMPREPLY=( $(compgen -W "--name" -- ${cur}) )
             fi
             ;;
