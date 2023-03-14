@@ -2574,9 +2574,6 @@ _VBoxManage() {
         showmediuminfo)
             if [[ ${prev} == ${cmd} ]]; then
                 COMPREPLY=( $(compgen -W "disk dvd floppy" -- ${cur}) )
-                _hdd_comp
-                _dvds_comp
-                _floppy_comp
             else
                 case "${prev}" in
                     disk)
@@ -2589,9 +2586,7 @@ _VBoxManage() {
                         _floppy_comp
                         ;;
                     *)
-                        items=(--delete)
-                        _get_excluded_items "${items[@]}"
-                        COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+                        COMPREPLY=( )
                         ;;
                 esac
             fi
