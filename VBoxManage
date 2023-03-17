@@ -1804,6 +1804,29 @@ _VBoxManage() {
             fi
             ;;
 
+        hostonlynet)
+            if [[ ${prev} == ${cmd} ]]; then
+                COMPREPLY=( $(compgen -W "add modify remove" -- ${cur}) )
+            else
+                subcommand=${COMP_WORDS[2]}
+                if [[ " ${COMP_WORDS[*]} " != *" --name"* &&
+                    " ${COMP_WORDS[*]} " != *" --id"* ]]; then
+                    COMPREPLY=( $(compgen -W "--name --id" -- ${cur}) )
+                else
+                    case "${subcommand}" in
+                        add|modify)
+                            items=( --netmask --lower-ip --upper-ip )
+                            [[ " ${COMP_WORDS[*]} " != *" --enable "* &&
+                                " ${COMP_WORDS[*]} " != *" --disable "* ]] &&
+                                items+=( --enable --disable )
+                            _get_excluded_items "${items[@]}"
+                            COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+                            ;;
+                    esac
+                fi
+            fi
+            ;;
+
         import)
             items=(--basefolder --cloud --cloudbucket --cloudinstanceid
                 --cloudprofile --controller --cpus --description --disk
