@@ -655,41 +655,6 @@ _VBoxManage() {
             fi
             ;;
 
-        cloudprofile)
-            if [[ " ${COMP_WORDS[*]} " != *" --provider"* ||
-                " ${COMP_WORDS[*]} " != *" --profile"* ]]; then
-                items=(--provider --profile)
-            else
-            [[ " ${COMP_WORDS[*]} " != *" add"* &&
-                " ${COMP_WORDS[*]} " != *" update"* &&
-                " ${COMP_WORDS[*]} " != *" delete"* &&
-                " ${COMP_WORDS[*]} " != *" show"* ]] &&
-                items=(add update delete show)
-            fi
-            _get_excluded_items "${items[@]}"
-            COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
-
-            if [[ " ${COMP_WORDS[*]} " == *" add"* ||
-                " ${COMP_WORDS[*]} " == *" update"* ]]; then
-                COMPREPLY=( $(compgen -W "--clouduser --fingerprint --keyfile
-                    --passphrase --tenancy --compartment --region" -- ${cur}) )
-            else
-                case "${prev}" in
-                    --provider)
-                        COMPREPLY=()
-                        _cloudproviders_comp
-                        ;;
-                    --profile)
-                        COMPREPLY=()
-                        _cloudprofiles_comp
-                        ;;
-                    --keyfile)
-                        COMPREPLY=( $(compgen -f -- ${cur}) )
-                        ;;
-                esac
-            fi
-            ;;
-
         cloud)
             if [ "${prev}" == "cloud" ]; then
                 items=(--provider --profile network)
@@ -811,6 +776,41 @@ _VBoxManage() {
             if [[ " ${COMP_WORDS[*]} " == *" network info"* ||
                 " ${COMP_WORDS[*]} " == *" network delete"* ]]; then
                 COMPREPLY=( $(compgen -W "--name" -- ${cur}) )
+            fi
+            ;;
+
+        cloudprofile)
+            if [[ " ${COMP_WORDS[*]} " != *" --provider"* ||
+                " ${COMP_WORDS[*]} " != *" --profile"* ]]; then
+                items=(--provider --profile)
+            else
+            [[ " ${COMP_WORDS[*]} " != *" add"* &&
+                " ${COMP_WORDS[*]} " != *" update"* &&
+                " ${COMP_WORDS[*]} " != *" delete"* &&
+                " ${COMP_WORDS[*]} " != *" show"* ]] &&
+                items=(add update delete show)
+            fi
+            _get_excluded_items "${items[@]}"
+            COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+
+            if [[ " ${COMP_WORDS[*]} " == *" add"* ||
+                " ${COMP_WORDS[*]} " == *" update"* ]]; then
+                COMPREPLY=( $(compgen -W "--clouduser --fingerprint --keyfile
+                    --passphrase --tenancy --compartment --region" -- ${cur}) )
+            else
+                case "${prev}" in
+                    --provider)
+                        COMPREPLY=()
+                        _cloudproviders_comp
+                        ;;
+                    --profile)
+                        COMPREPLY=()
+                        _cloudprofiles_comp
+                        ;;
+                    --keyfile)
+                        COMPREPLY=( $(compgen -f -- ${cur}) )
+                        ;;
+                esac
             fi
             ;;
 
@@ -2801,81 +2801,6 @@ _VBoxManage() {
             fi
             ;;
 
-        unregistervm)
-            if [[ ${prev} == ${cmd} ]]; then
-                _vms_comp vms
-            else
-                local items=(--delete)
-                _get_excluded_items "${items[@]}"
-                COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
-            fi
-            ;;
-
-        usbfilter)
-            if [[ COMP_CWORD -ge 3 ]]; then
-                subcommand="${COMP_WORDS[2]}"
-                if [[ $subcommand == "${cmd}" ]]; then
-                    subcommand="${COMP_WORDS[3]}"
-                fi
-            fi
-
-            if [[ ${prev} == ${cmd} ]]; then
-                COMPREPLY=( $(compgen -W "add modify remove" -- ${cur}) )
-            else
-                case "${prev}" in
-                    --target)
-                        _vms_comp vms
-                        COMPREPLY+=( $(compgen -W "global" -- ${cur}) )
-                        ;;
-                    --action)
-                        COMPREPLY=( $(compgen -W "ignore hold" -- ${cur}) )
-                        ;;
-                    --active|--remote)
-                        COMPREPLY=( $(compgen -W "yes no" -- ${cur}) )
-                        ;;
-                esac
-                if [[ ${#COMPREPLY[@]} -eq 0 ]]; then
-                    case "${subcommand}" in
-                        add|modify)
-                            local items=(--target --name --action --active
-                            --vendorid --productid --revision --manufacturer
-                            --product --remote --serialnumber --maskedinterfaces)
-                            _get_excluded_items "${items[@]}"
-                            COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
-                            ;;
-                        remove)
-                            local items=(--target)
-                            _get_excluded_items "${items[@]}"
-                            COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
-                            ;;
-                    esac
-                fi
-            fi
-            ;;
-
-        usbdevsource)
-            if [[ COMP_CWORD -ge 3 ]]; then
-                subcommand="${COMP_WORDS[2]}"
-                if [[ $subcommand == "${cmd}" ]]; then
-                    subcommand="${COMP_WORDS[3]}"
-                fi
-            fi
-
-            if [[ ${prev} == ${cmd} ]]; then
-                COMPREPLY=( $(compgen -W "add remove" -- ${cur}) )
-            else
-                if [[ ${#COMPREPLY[@]} -eq 0 ]]; then
-                    case "${subcommand}" in
-                        add)
-                            local items=(--address --backend)
-                            _get_excluded_items "${items[@]}"
-                            COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
-                            ;;
-                    esac
-                fi
-            fi
-            ;;
-
         unattended)
             if [[ COMP_CWORD -ge 3 ]]; then
                 subcommand="${COMP_WORDS[2]}"
@@ -2930,6 +2855,81 @@ _VBoxManage() {
                     esac
                 fi
 
+            fi
+            ;;
+
+        unregistervm)
+            if [[ ${prev} == ${cmd} ]]; then
+                _vms_comp vms
+            else
+                local items=(--delete)
+                _get_excluded_items "${items[@]}"
+                COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+            fi
+            ;;
+
+        usbdevsource)
+            if [[ COMP_CWORD -ge 3 ]]; then
+                subcommand="${COMP_WORDS[2]}"
+                if [[ $subcommand == "${cmd}" ]]; then
+                    subcommand="${COMP_WORDS[3]}"
+                fi
+            fi
+
+            if [[ ${prev} == ${cmd} ]]; then
+                COMPREPLY=( $(compgen -W "add remove" -- ${cur}) )
+            else
+                if [[ ${#COMPREPLY[@]} -eq 0 ]]; then
+                    case "${subcommand}" in
+                        add)
+                            local items=(--address --backend)
+                            _get_excluded_items "${items[@]}"
+                            COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+                            ;;
+                    esac
+                fi
+            fi
+            ;;
+
+        usbfilter)
+            if [[ COMP_CWORD -ge 3 ]]; then
+                subcommand="${COMP_WORDS[2]}"
+                if [[ $subcommand == "${cmd}" ]]; then
+                    subcommand="${COMP_WORDS[3]}"
+                fi
+            fi
+
+            if [[ ${prev} == ${cmd} ]]; then
+                COMPREPLY=( $(compgen -W "add modify remove" -- ${cur}) )
+            else
+                case "${prev}" in
+                    --target)
+                        _vms_comp vms
+                        COMPREPLY+=( $(compgen -W "global" -- ${cur}) )
+                        ;;
+                    --action)
+                        COMPREPLY=( $(compgen -W "ignore hold" -- ${cur}) )
+                        ;;
+                    --active|--remote)
+                        COMPREPLY=( $(compgen -W "yes no" -- ${cur}) )
+                        ;;
+                esac
+                if [[ ${#COMPREPLY[@]} -eq 0 ]]; then
+                    case "${subcommand}" in
+                        add|modify)
+                            local items=(--target --name --action --active
+                            --vendorid --productid --revision --manufacturer
+                            --product --remote --serialnumber --maskedinterfaces)
+                            _get_excluded_items "${items[@]}"
+                            COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+                            ;;
+                        remove)
+                            local items=(--target)
+                            _get_excluded_items "${items[@]}"
+                            COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+                            ;;
+                    esac
+                fi
             fi
             ;;
 
