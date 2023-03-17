@@ -2868,6 +2868,36 @@ _VBoxManage() {
             fi
             ;;
 
+        updatecheck)
+            if [[ ${prev} == ${cmd} ]]; then
+                COMPREPLY=( $(compgen -W "list modify perform" -- ${cur}) )
+            else
+                subcommand=${COMP_WORDS[2]}
+                case "${subcommand}" in
+                    list|perform)
+                        items=( --machine-readable )
+                        _get_excluded_items "${items[@]}"
+                        COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+                        ;;
+                    modify)
+                        case "${prev}" in
+                            --channel)
+                                COMPREPLY=( $(compgen -W "stable withbetas all" \
+                                    -- ${cur}) )
+                            ;;
+                        *)
+                            items=( --channel --frequency )
+                            [[ " ${COMP_WORDS[*]} " != *" --enable "* &&
+                                " ${COMP_WORDS[*]} " != *" --disable "* ]] &&
+                                items+=( --enable --disable )
+                            _get_excluded_items "${items[@]}"
+                            COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+                            ;;
+                       esac
+                esac
+            fi
+            ;;
+
         usbdevsource)
             if [[ COMP_CWORD -ge 3 ]]; then
                 subcommand="${COMP_WORDS[2]}"
