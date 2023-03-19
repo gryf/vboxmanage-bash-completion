@@ -423,7 +423,7 @@ _VBoxManage() {
     # foo bar disk baz
     # will search for word disk.
     _get_medium () {
-        case "${COMP_WORDS[COMP_CWORD-2]}" in
+        case "${COMP_WORDS[$COMP_CWORD-2]}" in
             disk)
                 _hdd_comp
                 ;;
@@ -475,9 +475,9 @@ _VBoxManage() {
     COMP_WORDBREAKS=${COMP_WORDBREAKS//|/}  # remove pipe from comp word breaks
     COMPREPLY=()
 
-    cur="${COMP_WORDS[COMP_CWORD]}"
-    prev="${COMP_WORDS[COMP_CWORD-1]}"
-    if [[ COMP_CWORD -ge 2 ]]; then
+    cur="${COMP_WORDS[$COMP_CWORD]}"
+    prev="${COMP_WORDS[$COMP_CWORD-1]}"
+    if [[ $COMP_CWORD -ge 2 ]]; then
         cmd="${COMP_WORDS[1]}"
         if [[ $cmd == "-q" ]]; then
                 cmd="${COMP_WORDS[2]}"
@@ -1740,7 +1740,7 @@ _VBoxManage() {
 
             if [[ "${prev}" == "${subcommand}" ]]; then
                 _vms_comp vms
-            elif [[ " ${items[@]} " == *" $subcommand "* ]]; then
+            elif [[ " ${items[*]} " == *" $subcommand "* ]]; then
                 case "${subcommand}" in
                     get)
                         _get_excluded_items "--verbose"
@@ -1751,7 +1751,8 @@ _VBoxManage() {
                         COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
                         ;;
                     enumerate)
-                        _get_excluded_items "--patterns"
+                        _get_excluded_items "--no-timestamp --no-flags --relative
+                        --old-format"
                         COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
                         ;;
                     wait)
@@ -2803,7 +2804,7 @@ _VBoxManage() {
             ;;
 
         unattended)
-            if [[ COMP_CWORD -ge 3 ]]; then
+            if [[ $COMP_CWORD -ge 3 ]]; then
                 subcommand="${COMP_WORDS[2]}"
                 if [[ $subcommand == "${cmd}" ]]; then
                     subcommand="${COMP_WORDS[3]}"
@@ -2900,7 +2901,7 @@ _VBoxManage() {
             ;;
 
         usbdevsource)
-            if [[ COMP_CWORD -ge 3 ]]; then
+            if [[ $COMP_CWORD -ge 3 ]]; then
                 subcommand="${COMP_WORDS[2]}"
                 if [[ $subcommand == "${cmd}" ]]; then
                     subcommand="${COMP_WORDS[3]}"
@@ -2923,7 +2924,7 @@ _VBoxManage() {
             ;;
 
         usbfilter)
-            if [[ COMP_CWORD -ge 3 ]]; then
+            if [[ $COMP_CWORD -ge 3 ]]; then
                 subcommand="${COMP_WORDS[2]}"
                 if [[ $subcommand == "${cmd}" ]]; then
                     subcommand="${COMP_WORDS[3]}"
