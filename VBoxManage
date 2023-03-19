@@ -563,35 +563,31 @@ _VBoxManage() {
 
         clonemedium)
             if [[ ${prev} == ${cmd} ]]; then
-                COMPREPLY=( $(compgen -W "disk dvd floppy" -- ${cur}) )
+                _hdd_comp
+                _floppy_comp
+                _dvds_comp
+            elif [[ ${#COMP_WORDS[@]} -eq 4 ]]; then
+                COMPREPLY=( $(compgen -f -- ${cur}) )
             else
+
                 case "${prev}" in
-                    disk)
-                        _hdd_comp
+                    --format)
+                        COMPREPLY=( $(compgen -W "VDI VMDK VHD RAW" -- ${cur}) )
                         ;;
-                    dvd)
-                        _dvds_comp
-                        ;;
-                    floppy)
-                        _floppy_comp
+                    --variant)
+                        COMPREPLY=( $(compgen -W "Standard Fixed Split2G Stream
+                            ESX" -- ${cur}) )
                         ;;
                     *)
-                        _find_item_name 2
-                        items=(--format --variant --existing)
+                        items=( --existing --format --variant )
+                        [[ " ${COMP_WORDS[*]} " != *" disk "* &&
+                        " ${COMP_WORDS[*]} " != *" dvd "* &&
+                        " ${COMP_WORDS[*]} " != *" floppy "* ]] &&
+                        items+=(disk dvd floppy)
                         _get_excluded_items "${items[@]}"
                         COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
 
-                        case "${prev}" in
-                            --format)
-                                COMPREPLY=( $(compgen -W "VDI VMDK VHD RAW" --\
-                                    ${cur}) )
-                                ;;
-                            --variant)
-                                COMPREPLY=( $(compgen -W "Standard Fixed Split2G
-                                Stream ESX" -- ${cur}) )
-                                ;;
-                        esac
-                    ;;
+                        ;;
                 esac
             fi
             ;;
