@@ -586,7 +586,6 @@ _VBoxManage() {
                         items+=(disk dvd floppy)
                         _get_excluded_items "${items[@]}"
                         COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
-
                         ;;
                 esac
             fi
@@ -1915,7 +1914,7 @@ _VBoxManage() {
                     disk|dvd|floppy)
                         COMPREPLY=( $(compgen -W "get set delete" -- ${cur}) )
                         ;;
-                    get|set|floppy)
+                    get|set|delete)
                         _get_medium
                         ;;
                 esac
