@@ -1016,8 +1016,8 @@ _VBoxManage() {
                         COMPREPLY=( $(compgen -W "${items[*]}" -- ${cur}) )
                         ;;
                     *)
-                        [[ " ${COMP_WORDS[@]} " == *" --size "* ||
-                            " ${COMP_WORDS[@]} " == *" --sizebyte "* ]] &&
+                        [[ " ${COMP_WORDS[*]} " == *" --size "* ||
+                            " ${COMP_WORDS[*]} " == *" --sizebyte "* ]] &&
                             items=(--filename --diffparent --format --variant)
                         _get_excluded_items "${items[@]}"
                         COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
@@ -1031,12 +1031,12 @@ _VBoxManage() {
                                 _hdd_comp
                                 ;;
                             --format)
-                                COMPREPLY=( $(compgen -W "VDI VMDK VHD" --\
-                                    ${cur}) )
+                                COMPREPLY=( $(compgen -W "VDI VMDK VHD" \
+                                    -- ${cur}) )
                                 ;;
                             --variant)
                                 COMPREPLY=( $(compgen -W "Standard Fixed Split2G
-                                Stream ESX Formatted" -- ${cur}) )
+                                Stream ESX Formatted RawDisk" -- ${cur}) )
                                 ;;
                         esac
                         ;;
