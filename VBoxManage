@@ -2740,17 +2740,21 @@ _VBoxManage() {
                 _vms_comp vms
             else
                 _find_item_name 2
-                local items=(--storagectl --port --device --type --medium --mtype
-                --comment --setuuid --setparentuuid --passthrough --tempeject
-                --nonrotational --discard --hotpluggable --bandwidthgroup
-                --forceunmount --server --target --tport --lun --encodedlun
-                --username --password --initiator --intnet --passwordfile)
+                local items=( --bandwidthgroup --comment --device --discard
+                --encodedlun --forceunmount --hotpluggable --initiator --intnet
+                --lun --medium --mtype --nonrotational --passthrough --password
+                --passwordfile --port --server --setparentuuid --setuuid
+                --storagectl --target --tempeject --tport --type --username )
                 _get_excluded_items "${items[@]}"
                 COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
 
                 case "${prev}" in
-                    --type)
-                        COMPREPLY=( $(compgen -W "dvddrive hdd fdd" -- ${cur}) )
+                    --bandwidthgroup)
+                        COMPREPLY=( $(compgen -W "none" -- ${cur}) )
+                        ;;
+                    --discard|--hotpluggable|--nonrotational|--passthrough|\
+                    --tempeject)
+                        COMPREPLY=( $(compgen -W "on off" -- ${cur}) )
                         ;;
                     --medium)
                         COMPREPLY=()
@@ -2767,11 +2771,11 @@ _VBoxManage() {
                         COMPREPLY=( $(compgen -W "normal writethrough immutable
                         shareable readonly multiattach" -- ${cur}) )
                         ;;
-                    --passthrough|--tempeject|--nonrotational|--discard)
-                        COMPREPLY=( $(compgen -W "on off" -- ${cur}) )
-                        ;;
                     --passwordfile)
                         COMPREPLY=( $(compgen -f -- ${cur}) )
+                        ;;
+                    --type)
+                        COMPREPLY=( $(compgen -W "dvddrive hdd fdd" -- ${cur}) )
                         ;;
                 esac
             fi
