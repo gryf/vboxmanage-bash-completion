@@ -2782,8 +2782,8 @@ _VBoxManage() {
             ;;
 
         storagectl)
-            local items=(--name --add --controller --portcount --hostiocache
-            --bootable --rename --remove)
+            local items=( --add --bootable --controller --hostiocache --name
+                --portcount --remove --rename )
             if [[ ${prev} == ${cmd} ]]; then
                 _vms_comp vms
             else
@@ -2791,12 +2791,13 @@ _VBoxManage() {
                 COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
                 case "${prev}" in
                     --add)
-                        COMPREPLY=( $(compgen -W "ide sata scsi floppy
-                        sas usb pcie" -- ${cur}) )
+                        COMPREPLY=( $(compgen -W "floppy ide pcie sas sata scsi
+                            usb" -- ${cur}) )
                         ;;
                     --controller)
-                        COMPREPLY=( $(compgen -W "LSILogic LSILogicSAS BusLogic
-                        IntelAHCI PIIX3 PIIX4 ICH6 I82078 USB NVMe" -- ${cur}) )
+                        COMPREPLY=( $(compgen -W "BusLogic I82078 ICH6 IntelAhci
+                            LSILogic LSILogicSAS NVMe PIIX3 PIIX4 USB VirtIO" \
+                                -- ${cur}) )
                         ;;
                     --bootable|--hostiocache)
                         COMPREPLY=( $(compgen -W "on off" -- ${cur}) )
