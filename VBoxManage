@@ -982,11 +982,12 @@ _VBoxManage() {
             ;;
 
         convertfromraw)
-            local items=(--format --variant --uuid)
-
             if [[ ${prev} == ${cmd} ]]; then
-                COMPREPLY=( $(compgen -W "${items[*]}" -- ${cur}) )
+                COMPREPLY=( $(compgen -f -- ${cur}) )
+            elif [[ ${#COMP_WORDS[@]} -eq 4 ]]; then
+                COMPREPLY=( $(compgen -f -- ${cur}) )
             else
+                items=(--format --variant --uuid)
                 _get_excluded_items "${items[@]}"
                 COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
                 case "${prev}" in
