@@ -507,13 +507,13 @@ _VBoxManage() {
             ;;
 
         bandwidthctl)
-            local items=(add set remove list)
+            local items=( add list remove set )
             if [[ ${prev} == ${cmd} ]]; then
                 _vms_comp vms
             else
                 _find_item_name 2
                 subcommand=${COMP_WORDS[$((index+1))]}
-                if [[ " ${items[@]} " == *" $subcommand "* ]]; then
+                if [[ " ${items[*]} " == *" $subcommand "* ]]; then
                     case "${subcommand}" in
                         add)
                             items=(--type --limit)
@@ -524,7 +524,7 @@ _VBoxManage() {
                             if [[ ${prev} == "set" ]]; then
                                 _bandwidthctl_comp
                             else
-                                [[ " ${COMP_WORDS[@]} " != *" --limit "* ]] && \
+                                [[ " ${COMP_WORDS[*]} " != *" --limit "* ]] && \
                                     COMPREPLY=( $(compgen -W "--limit" -- \
                                     ${cur}) )
                             fi
