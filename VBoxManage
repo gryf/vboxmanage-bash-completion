@@ -1777,18 +1777,18 @@ _VBoxManage() {
             esac
 
             if [[ ${#COMPREPLY[@]} -eq 0  && \
-                " ${items[@]} " == *" $subcommand "* ]]; then
+                " ${items[*]} " == *" $subcommand "* ]]; then
                 case "${subcommand}" in
                     ipconfig)
                         items=(--dhcp --ip --ipv6 --netmask --netmasklengthv6)
-                        [[ " ${COMP_WORDS[@]} " == *" --dhcp "* ]] && items=()
-                        [[ " ${COMP_WORDS[@]} " == *" --ip "* ]] &&
+                        [[ " ${COMP_WORDS[*]} " == *" --dhcp "* ]] && items=()
+                        [[ " ${COMP_WORDS[*]} " == *" --ip "* ]] &&
                             items=(--netmask)
-                        [[ " ${COMP_WORDS[@]} " == *" --netmask "* ]] &&
+                        [[ " ${COMP_WORDS[*]} " == *" --netmask "* ]] &&
                             items=(--ip)
-                        [[ " ${COMP_WORDS[@]} " == *" --ipv6 "* ]] &&
+                        [[ " ${COMP_WORDS[*]} " == *" --ipv6 "* ]] &&
                             items=(--netmasklengthv6)
-                        [[ " ${COMP_WORDS[@]} " == *" --netmasklengthv6 "* ]] &&
+                        [[ " ${COMP_WORDS[*]} " == *" --netmasklengthv6 "* ]] &&
                             items=(--ipv6)
 
                         _get_excluded_items "${items[@]}"
@@ -1924,9 +1924,9 @@ _VBoxManage() {
             ;;
 
         metrics)
-            items=(list setup query enable disable collect)
+            items=( collect disable enable list query setup )
             subcommand=${COMP_WORDS[2]}
-            if [[ " ${items[@]} " == *" $subcommand "* ]]; then
+            if [[ " ${items[*]} " == *" $subcommand "* ]]; then
                 case "${subcommand}" in
                     list|query)
                         if [[ "${subcommand}" == "${prev}" ]]; then
@@ -2460,20 +2460,20 @@ _VBoxManage() {
             ;;
 
         natnetwork)
-            items=(add remove modify start stop list)
+            items=( add list modify remove start stop )
             subcommand=${COMP_WORDS[2]}
             if [[ "${prev}" == "--netname" ]]; then
                 _natnet_comp
-            elif [[ "${prev}" == "--dhcp" ]]; then
+            elif [[ "${prev}" == "--dhcp" || "${prev}" == "--ipv6" ]]; then
                 COMPREPLY=( $(compgen -W "on off" -- ${cur}) )
-            elif [[ " ${items[@]} " == *" $subcommand "* ]]; then
+            elif [[ " ${items[*]} " == *" $subcommand "* ]]; then
                 case "${subcommand}" in
                     add|modify)
                         items=(--netname --network --dhcp --port-forward-4
                         --loopback-4 --ipv6 --port-forward-6 --loopback-6)
 
-                        [[ " ${COMP_WORDS[@]} " != *" --enable"* &&
-                            " ${COMP_WORDS[@]} " != *" --disable"* ]] &&
+                        [[ " ${COMP_WORDS[*]} " != *" --enable"* &&
+                            " ${COMP_WORDS[*]} " != *" --disable"* ]] &&
                             items+=(--enable --disable)
 
                         _get_excluded_items "${items[@]}"
