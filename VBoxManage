@@ -4,7 +4,7 @@
 # URL: https://bitbucket.org/gryf/vboxmanage-bash-completion
 # URL: https://github.com/gryf/vboxmanage-bash-completion
 # License: 3-clause BSD-style license (see LICENSE file)
-# Version: 6.1.38
+# Version: 7.0.4
 
 
 _VBoxManage() {
@@ -41,7 +41,7 @@ _VBoxManage() {
 
         result=""
         for i in $@; do
-            [[ " ${COMP_WORDS[@]} " == *" $i "* ]] && continue
+            [[ " ${COMP_WORDS[*]} " == *" $i "* ]] && continue
             result="$result $i"
         done
     }
@@ -51,7 +51,7 @@ _VBoxManage() {
 
         result=""
         for i in $@; do
-            if [[ " ${COMP_WORDS[@]} " == *" $i "* ]]; then
+            if [[ " ${COMP_WORDS[*]} " == *" $i "* ]]; then
                 result="ITIS"
                 break
             fi
@@ -1417,203 +1417,147 @@ _VBoxManage() {
             ;;
 
         guestcontrol)
-            local items=(run start copyfrom copyto mkdir createdir
-            createdirectory rmdir removedir removedirectory removefile rm mv
-            move ren rename mktemp createtemp createtemporary stat list
-            closeprocess closesession updatega updateguestadditions
-            updateadditions watch)
+            local items=( run start copyfrom copyto mkdir rmdir rm mv mktemp
+                stat list closeprocess closesession updatega watch )
 
             if [[ ${prev} == ${cmd} ]]; then
                 _vms_comp runningvms
             else
                 _find_item_name 2
                 subcommand=${COMP_WORDS[$((index+1))]}
-                if [[ " ${items[@]} " == *" $subcommand "* ]]; then
+                if [[ " ${items[*]} " == *" $subcommand "* ]]; then
                     case "${subcommand}" in
                         run)
-                            items=(--exe --timeout --unquoted-args
-                            --ignore-operhaned-processes --profile
-                            --dos2unix --unix2dos --username --domain --)
+                            items=( --domain --dos2unix --exe
+                                --ignore-operhaned-processes --profile --putenv
+                                --quiet --timeout --unix2dos --unquoted-args
+                                --username --verbose -- )
 
-                            [[ " ${COMP_WORDS[@]} " != *" --password "* ||
-                                " ${COMP_WORDS[@]} " != *" --passwordfile "* ]] &&
+                            [[ " ${COMP_WORDS[*]} " != *" --password "* ||
+                                " ${COMP_WORDS[*]} " != *" --passwordfile "* ]] &&
                                 items+=(--passwordfile --password)
-                            [[ " ${COMP_WORDS[@]} " != *" --putenv "* &&
-                                " ${COMP_WORDS[@]} " != *" -E "* ]] &&
-                                items+=(--putenv -E)
-                            [[ " ${COMP_WORDS[@]} " != *" --no-wait-stdout "* &&
-                                " ${COMP_WORDS[@]} " != *" --wait-stdout "* ]] &&
+                            [[ " ${COMP_WORDS[*]} " != *" --no-wait-stdout "* &&
+                                " ${COMP_WORDS[*]} " != *" --wait-stdout "* ]] &&
                                 items+=(--no-wait-stdout --wait-stdout)
-                            [[ " ${COMP_WORDS[@]} " != *" --no-wait-stderr"* &&
-                                " ${COMP_WORDS[@]} " != *" --wait-stderr "* ]] &&
+                            [[ " ${COMP_WORDS[*]} " != *" --no-wait-stderr"* &&
+                                " ${COMP_WORDS[*]} " != *" --wait-stderr "* ]] &&
                                 items+=(--no-wait-stderr --wait-stderr)
-                            [[ " ${COMP_WORDS[@]} " != *" --verbose "* &&
-                                " ${COMP_WORDS[@]} " != *" -v "* ]] &&
-                                items+=(--verbose -v)
-                            [[ " ${COMP_WORDS[@]} " != *" --quiet "* &&
-                                " ${COMP_WORDS[@]} " != *" -q "* ]] &&
-                                items+=(--quiet -q)
 
                             _get_excluded_items "${items[@]}"
                             COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
                             ;;
 
                         start)
-                            items=(--exe --timeout --unquoted-args
-                            --ignore-operhaned-processes --profile
-                            --username --domain --passwordfile --password --)
+                            items=( --domain --exe --ignore-orphaned-processes
+                                --profile --putenv --quiet --timeout
+                                --unquoted-args --username --verbose -- )
 
-                            [[ " ${COMP_WORDS[@]} " != *" --password "* ||
-                                " ${COMP_WORDS[@]} " != *" --passwordfile "* ]] &&
+                            [[ " ${COMP_WORDS[*]} " != *" --password "* ||
+                                " ${COMP_WORDS[*]} " != *" --passwordfile "* ]] &&
                                 items+=(--passwordfile --password)
-                            [[ " ${COMP_WORDS[@]} " != *" --verbose "* &&
-                                " ${COMP_WORDS[@]} " != *" -v "* ]] &&
-                                items+=(--verbose -v)
-                            [[ " ${COMP_WORDS[@]} " != *" --quiet "* &&
-                                " ${COMP_WORDS[@]} " != *" -q "* ]] &&
-                                items+=(--quiet -q)
 
                             _get_excluded_items "${items[@]}"
                             COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
                             ;;
 
                         copyfrom|copyto)
-                            items=(--follow --target-directory --username
-                                --domain)
+                            items=( --dereference --domain --quiet --no-replace
+                                --recursive --target-directory --update
+                                --username --verbose )
 
-                            [[ " ${COMP_WORDS[@]} " != *" --recursive "* &&
-                                " ${COMP_WORDS[@]} " != *" -R "* ]] &&
-                                items+=(--recursive -R)
-                            [[ " ${COMP_WORDS[@]} " != *" --password "* ||
-                                " ${COMP_WORDS[@]} " != *" --passwordfile "* ]] &&
+                            [[ " ${COMP_WORDS[*]} " != *" --password "* ||
+                                " ${COMP_WORDS[*]} " != *" --passwordfile "* ]] &&
                                 items+=(--passwordfile --password)
-                            [[ " ${COMP_WORDS[@]} " != *" --verbose "* &&
-                                " ${COMP_WORDS[@]} " != *" -v "* ]] &&
-                                items+=(--verbose -v)
-                            [[ " ${COMP_WORDS[@]} " != *" --quiet "* &&
-                                " ${COMP_WORDS[@]} " != *" -q "* ]] &&
-                                items+=(--quiet -q)
 
                             _get_excluded_items "${items[@]}"
                             COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
                             ;;
 
-                        createdirectory|createdir|mkdir)
-                            items=(--parents --mode --username --domain)
-                            [[ " ${COMP_WORDS[@]} " != *" --password "* ||
-                                " ${COMP_WORDS[@]} " != *" --passwordfile "* ]] &&
+                        mkdir)
+                            items=( --domain --mode --parents --quiet
+                                --username --verbose )
+                            [[ " ${COMP_WORDS[*]} " != *" --password "* ||
+                                " ${COMP_WORDS[*]} " != *" --passwordfile "* ]] &&
                                 items+=(--passwordfile --password)
-                            [[ " ${COMP_WORDS[@]} " != *" --verbose "* &&
-                                " ${COMP_WORDS[@]} " != *" -v "* ]] &&
-                                items+=(--verbose -v)
-                            [[ " ${COMP_WORDS[@]} " != *" --quiet "* &&
-                                " ${COMP_WORDS[@]} " != *" -q "* ]] &&
-                                items+=(--quiet -q)
 
                             _get_excluded_items "${items[@]}"
                             COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
                             ;;
 
-                        removedir|removedirectory|rmdir)
-                            items=(--username --domain)
-                            [[ " ${COMP_WORDS[@]} " != *" --password "* &&
-                                " ${COMP_WORDS[@]} " != *" --passwordfile "* ]] &&
+                        rmdir)
+                            items=( --domain --quiet --recursive --username
+                                --verbose )
+                            [[ " ${COMP_WORDS[*]} " != *" --password "* &&
+                                " ${COMP_WORDS[*]} " != *" --passwordfile "* ]] &&
                                 items+=(--passwordfile --password)
-                            [[ " ${COMP_WORDS[@]} " != *" --recursive "* &&
-                                " ${COMP_WORDS[@]} " != *" -R "* ]] &&
-                                items+=(--recursive -R)
-                            [[ " ${COMP_WORDS[@]} " != *" --verbose "* &&
-                                " ${COMP_WORDS[@]} " != *" -v "* ]] &&
-                                items+=(--verbose -v)
-                            [[ " ${COMP_WORDS[@]} " != *" --quiet "* &&
-                                " ${COMP_WORDS[@]} " != *" -q "* ]] &&
-                                items+=(--quiet -q)
 
                             _get_excluded_items "${items[@]}"
                             COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
                             ;;
 
-                        removefile|rm)
-                            items=(--username --domain)
-                            [[ " ${COMP_WORDS[@]} " != *" --force "* &&
-                                " ${COMP_WORDS[@]} " != *" -f "* ]] &&
-                                items+=(--force -f)
-                            [[ " ${COMP_WORDS[@]} " != *" --password "* &&
-                                " ${COMP_WORDS[@]} " != *" --passwordfile "* ]] &&
+                        rm)
+                            items=( --domain --force --quiet --username
+                                --verbose )
+                            [[ " ${COMP_WORDS[*]} " != *" --password "* &&
+                                " ${COMP_WORDS[*]} " != *" --passwordfile "* ]] &&
                                 items+=(--passwordfile --password)
-                            [[ " ${COMP_WORDS[@]} " != *" --verbose "* &&
-                                " ${COMP_WORDS[@]} " != *" -v "* ]] &&
-                                items+=(--verbose -v)
-                            [[ " ${COMP_WORDS[@]} " != *" --quiet "* &&
-                                " ${COMP_WORDS[@]} " != *" -q "* ]] &&
-                                items+=(--quiet -q)
 
                             _get_excluded_items "${items[@]}"
                             COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
                             ;;
 
-                        rename|ren|move|mv)
-                            items=(--username --domain)
-                            [[ " ${COMP_WORDS[@]} " != *" --password "* &&
-                                " ${COMP_WORDS[@]} " != *" --passwordfile "* ]] &&
+                        mv)
+                            items=( --domain --quiet --username --verbose )
+                            [[ " ${COMP_WORDS[*]} " != *" --password "* &&
+                                " ${COMP_WORDS[*]} " != *" --passwordfile "* ]] &&
                                 items+=(--passwordfile --password)
-                            [[ " ${COMP_WORDS[@]} " != *" --verbose "* &&
-                                " ${COMP_WORDS[@]} " != *" -v "* ]] &&
-                                items+=(--verbose -v)
-                            [[ " ${COMP_WORDS[@]} " != *" --quiet "* &&
-                                " ${COMP_WORDS[@]} " != *" -q "* ]] &&
-                                items+=(--quiet -q)
 
                             _get_excluded_items "${items[@]}"
                             COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
                             ;;
 
-                        createtemporary|createtemp|mktemp)
-                            items=(--username --domain --secure --tmpdir --mode)
-                            [[ " ${COMP_WORDS[@]} " != *" --password "* &&
-                                " ${COMP_WORDS[@]} " != *" --passwordfile "* ]] &&
+                        mktemp)
+                            items=( --domain --mode --quiet --secure --tmpdir
+                                --username --verbose )
+                            [[ " ${COMP_WORDS[*]} " != *" --password "* &&
+                                " ${COMP_WORDS[*]} " != *" --passwordfile "* ]] &&
                                 items+=(--passwordfile --password)
-                            [[ " ${COMP_WORDS[@]} " != *" --verbose "* &&
-                                " ${COMP_WORDS[@]} " != *" -v "* ]] &&
-                                items+=(--verbose -v)
-                            [[ " ${COMP_WORDS[@]} " != *" --quiet "* &&
-                                " ${COMP_WORDS[@]} " != *" -q "* ]] &&
-                                items+=(--quiet -q)
 
                             _get_excluded_items "${items[@]}"
                             COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+                            ;;
+
+                        stat)
+                            if [[ "${cur}" == "stat" ]]; then
+                                COMPREPLY=( $(compgen -- ${cur}) )
+                            else
+                                items=( --domain --quiet --username --verbose )
+                                [[ " ${COMP_WORDS[*]} " != *" --password "* &&
+                                    " ${COMP_WORDS[*]} " != *" --passwordfile "* ]] &&
+                                    items+=(--passwordfile --password)
+
+                                _get_excluded_items "${items[@]}"
+                                COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+                            fi
                             ;;
 
                         list)
-                            items=()
-                            [[ " ${COMP_WORDS[@]} " != *" all "* &&
-                                " ${COMP_WORDS[@]} " != *" sessions  "* &&
-                                " ${COMP_WORDS[@]} " != *" processes "* &&
-                                " ${COMP_WORDS[@]} " != *" files "* ]] &&
+                            items=( --quiet --verbose )
+                            [[ " ${COMP_WORDS[*]} " != *" all "* &&
+                                " ${COMP_WORDS[*]} " != *" sessions  "* &&
+                                " ${COMP_WORDS[*]} " != *" processes "* &&
+                                " ${COMP_WORDS[*]} " != *" files "* ]] &&
                                 items+=(all sessions processes files)
-
-                                [[ " ${COMP_WORDS[@]} " != *" --verbose "* &&
-                                    " ${COMP_WORDS[@]} " != *" -v "* ]] &&
-                                    items+=(--verbose -v)
-                                [[ " ${COMP_WORDS[@]} " != *" --quiet "* &&
-                                    " ${COMP_WORDS[@]} " != *" -q "* ]] &&
-                                    items+=(--quiet -q)
 
                             _get_excluded_items "${items[@]}"
                             COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
                             ;;
 
                         closeprocess)
-                            items=()
-                            [[ " ${COMP_WORDS[@]} " != *" --verbose "* &&
-                                " ${COMP_WORDS[@]} " != *" -v "* ]] &&
-                                items+=(--verbose -v)
-                            [[ " ${COMP_WORDS[@]} " != *" --quiet "* &&
-                                " ${COMP_WORDS[@]} " != *" -q "* ]] &&
-                                items+=(--quiet -q)
-                            [[ " ${COMP_WORDS[@]} " != *" --session-id "* ]] &&
+                            items=( --quiet --verbose )
+                            [[ " ${COMP_WORDS[*]} " != *" --session-id "* ]] &&
                                 items+=(--session-name)
-                            [[ " ${COMP_WORDS[@]} " != *" --session-name "* ]] &&
+                            [[ " ${COMP_WORDS[*]} " != *" --session-name "* ]] &&
                                 items+=(--session-id)
 
                             _get_excluded_items "${items[@]}"
@@ -1621,97 +1565,31 @@ _VBoxManage() {
                             ;;
 
                         closesession)
-                            items=()
-                            [[ " ${COMP_WORDS[@]} " != *" --verbose "* &&
-                                " ${COMP_WORDS[@]} " != *" -v "* ]] &&
-                                items+=(--verbose -v)
-                            [[ " ${COMP_WORDS[@]} " != *" --quiet "* &&
-                                " ${COMP_WORDS[@]} " != *" -q "* ]] &&
-                                items+=(--quiet -q)
-                            [[ " ${COMP_WORDS[@]} " != *" --session-id "* &&
-                                " ${COMP_WORDS[@]} " != *" --session-name "* &&
-                                " ${COMP_WORDS[@]} " != *" --all "* ]] &&
+                            items=( --quiet --verbose )
+                            [[ " ${COMP_WORDS[*]} " != *" --session-id "* &&
+                                " ${COMP_WORDS[*]} " != *" --session-name "* &&
+                                " ${COMP_WORDS[*]} " != *" --all "* ]] &&
                                 items+=(--session-id --session-name --all)
 
                             _get_excluded_items "${items[@]}"
                             COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
                             ;;
 
-                        process)
-                            if [[ " ${COMP_WORDS[@]} " == *" process kill "* ]];
-                            then
-                                items=(--verbose)
-                                [[ " ${COMP_WORDS[@]} " != *" --session-name "* &&
-                                    " ${COMP_WORDS[@]} " != *" --session-id "* ]] &&
-                                    items+=(--session-id --session-name)
-                                _get_excluded_items "${items[@]}"
-                                COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
-                            else
-                                _get_excluded_items "kill"
-                                COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
-                            fi
-                            ;;
 
-                        stat)
-                            if [[ "${cur}" == "stat" ]]; then
-                                COMPREPLY=( $(compgen -- ${cur}) )
-                            else
-                                items=(--username --domain --verbose)
-                                [[ " ${COMP_WORDS[@]} " != *" --password "* &&
-                                    " ${COMP_WORDS[@]} " != *" --passwordfile "* ]] &&
-                                    items+=(--passwordfile --password)
-                                [[ " ${COMP_WORDS[@]} " != *" --verbose "* &&
-                                    " ${COMP_WORDS[@]} " != *" -v "* ]] &&
-                                    items+=(--verbose -v)
-                                [[ " ${COMP_WORDS[@]} " != *" --quiet "* &&
-                                    " ${COMP_WORDS[@]} " != *" -q "* ]] &&
-                                    items+=(--quiet -q)
-
-                                _get_excluded_items "${items[@]}"
-                                COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
-                            fi
-                            ;;
-
-                        updatega|updateguestadditions|updateadditions)
-                            items=(--source --wait-start)
-                            [[ " ${COMP_WORDS[@]} " != *" --verbose "* &&
-                                " ${COMP_WORDS[@]} " != *" -v "* ]] &&
-                                items+=(--verbose -v)
-                            [[ " ${COMP_WORDS[@]} " != *" --quiet "* &&
-                                " ${COMP_WORDS[@]} " != *" -q "* ]] &&
-                                items+=(--quiet -q)
-
+                        updatega)
+                            items=( --quiet --verbose --source --wait-start )
                             _get_excluded_items "${items[@]}"
                             COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
                             ;;
 
                         watch)
-                            items=()
-                            [[ " ${COMP_WORDS[@]} " != *" --verbose "* &&
-                                " ${COMP_WORDS[@]} " != *" -v "* ]] &&
-                                items+=(--verbose -v)
-                            [[ " ${COMP_WORDS[@]} " != *" --quiet "* &&
-                                " ${COMP_WORDS[@]} " != *" -q "* ]] &&
-                                items+=(--quiet -q)
-
-                            _get_excluded_items "--verbose"
+                            items=( --quiet --verbose )
+                            _get_excluded_items "${items[@]}"
                             COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
                             ;;
                     esac
 
                     case "${prev}" in
-                        close)
-                            items=(--verbose)
-                            [[ " ${COMP_WORDS[@]} " != *" --session-name "* &&
-                                " ${COMP_WORDS[@]} " != *" --session-id "* &&
-                                " ${COMP_WORDS[@]} " != *" --all "* ]] &&
-                                items+=(--session-id --session-name --all)
-                            _get_excluded_items "${items[@]}"
-                            COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
-                            ;;
-                        --image)
-                            COMPREPLY=( $(compgen -- ${cur}) )
-                            ;;
                         --target-directory|--tmpdir)
                             COMPREPLY=( $(compgen -o dirnames -- ${cur}) )
                             ;;
@@ -1843,7 +1721,7 @@ _VBoxManage() {
                         COMPREPLY=( $(compgen -o dirnames -- ${cur}) )
                         ;;
 
-                    --eula)=
+                    --eula)
                         COMPREPLY=( $(compgen -W "show accept" -- ${cur}) )
                         ;;
                     --settingsfile)
@@ -2673,7 +2551,7 @@ _VBoxManage() {
             else
                 _find_item_name 2
                 subcommand=${COMP_WORDS[$((index+1))]}
-                if [[ " ${items[@]} " == *" $subcommand "* ]]; then
+                if [[ " ${items[*]} " == *" $subcommand "* ]]; then
                     case "${subcommand}" in
                         take)
                             items=(--description --live --uniquename)
