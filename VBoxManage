@@ -4,7 +4,7 @@
 # URL: https://bitbucket.org/gryf/vboxmanage-bash-completion
 # URL: https://github.com/gryf/vboxmanage-bash-completion
 # License: 3-clause BSD-style license (see LICENSE file)
-# Version: 7.0.4
+# Version: 7.0.6
 
 
 _VBoxManage() {
@@ -1517,8 +1517,8 @@ _VBoxManage() {
                             ;;
 
                         mktemp)
-                            items=( --domain --mode --quiet --secure --tmpdir
-                                --username --verbose )
+                            items=( --directory --domain --mode --quiet --secure
+                                --tmpdir --username --verbose )
                             [[ " ${COMP_WORDS[*]} " != *" --password "* &&
                                 " ${COMP_WORDS[*]} " != *" --passwordfile "* ]] &&
                                 items+=(--passwordfile --password)
@@ -2828,8 +2828,9 @@ _VBoxManage() {
                     case "${subcommand}" in
                         add|modify)
                             local items=(--target --name --action --active
-                            --vendorid --productid --revision --manufacturer
-                            --product --remote --serialnumber --maskedinterfaces)
+                            --vendorid --productid --port --revision
+                            --manufacturer --product --remote --serialnumber
+                            --maskedinterfaces)
                             _get_excluded_items "${items[@]}"
                             COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
                             ;;
