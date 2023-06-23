@@ -4,7 +4,7 @@
 # URL: https://bitbucket.org/gryf/vboxmanage-bash-completion
 # URL: https://github.com/gryf/vboxmanage-bash-completion
 # License: 3-clause BSD-style license (see LICENSE file)
-# Version: 7.0.6
+# Version: 7.0.8
 
 
 _VBoxManage() {
@@ -819,23 +819,21 @@ _VBoxManage() {
                 changeuartmode1 changeuartmode2 clipboard cpuexecutioncap
                 draganddrop guestmemoryballoon keyboardputfile
                 keyboardputscancode keyboardputstring natpf1 natpf2 natpf3
-                natpf4 natpf5 natpf6 natpf7 natpf8 natpf9 natpf1delete
-                natpf2delete natpf3delete natpf4delete natpf5delete natpf6delete
-                natpf7delete natpf8delete nic1 nic2 nic3 nic4 nic5 nic6 nic7
-                nic8 nicpromisc1 nicpromisc2 nicpromisc3 nicpromisc4 nicpromisc5
-                nicpromisc6 nicpromisc7 nicpromisc8 nicproperty1 nicproperty2
-                nicproperty3 nicproperty4 nicproperty5 nicproperty6 nicproperty7
-                nicproperty8 nictrace1 nictrace2 nictrace3 nictrace4 nictrace5
-                nictrace6 nictrace7 nictrace8 nictracefile1 nictracefile2
-                nictracefile3 nictracefile4 nictracefile5 nictracefile6
-                nictracefile7 nictracefile8 pause plugcpu poweroff reboot
-                recording removeallencpasswords removeencpassword reset resume
-                savestate screenshotpng setcredentials setlinkstate1
-                setlinkstate2 setlinkstate3 setlinkstate4 setlinkstate5
-                setlinkstate6 setlinkstate7 setlinkstate8 setscreenlayout
-                setvideomodehint shutdown teleport unplugcpu usbattach usbdetach
-                vm-process-priority vrde vrdeport vrdeproperty
-                vrdevideochannelquality webcam )
+                natpf4 natpf5 natpf6 natpf7 natpf8 natpf9 nic1 nic2 nic3 nic4 
+                nic5 nic6 nic7 nic8 nicpromisc1 nicpromisc2 nicpromisc3 
+                nicpromisc4 nicpromisc5 nicpromisc6 nicpromisc7 nicpromisc8 
+                nicproperty1 nicproperty2 nicproperty3 nicproperty4 nicproperty5 
+                nicproperty6 nicproperty7 nicproperty8 nictrace1 nictrace2 
+                nictrace3 nictrace4 nictrace5 nictrace6 nictrace7 nictrace8 
+                nictracefile1 nictracefile2 nictracefile3 nictracefile4 
+                nictracefile5 nictracefile6 nictracefile7 nictracefile8 pause 
+                plugcpu poweroff reboot recording removeallencpasswords 
+                removeencpassword reset resume savestate screenshotpng 
+                setcredentials setlinkstate1 setlinkstate2 setlinkstate3 
+                setlinkstate4 setlinkstate5 setlinkstate6 setlinkstate7 
+                setlinkstate8 setscreenlayout setvideomodehint shutdown teleport 
+                unplugcpu usbattach usbdetach vm-process-priority vrde vrdeport 
+                vrdeproperty vrdevideochannelquality webcam )
 
                 _find_item_name 2
                 subcommand=${COMP_WORDS[$((index+1))]}
@@ -932,9 +930,8 @@ _VBoxManage() {
                             COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
                             ;;
                         changeuartmode[1-2])
-                            tmp=(disconnected serverpipe-name clientpipe-name
-                                tcpserverport tcpclienthostname:port filefilename
-                                device-name)
+                            tmp=(disconnected server client tcpserver tcpclient 
+                                file device-name)
                             _get_excluded_items "${tmp[@]}"
                             COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
                             ;;
@@ -1041,8 +1038,8 @@ _VBoxManage() {
             ;;
 
         createvm)
-            items=( --basefolder --ciphercipher --default --group --name --ostype
-                --password-idpassword-id --passwordfile --register --uuid )
+            items=( --basefolder --cipher --default --group --name --ostype
+                --password-id --password --register --uuid )
             if [[ ${prev} == ${cmd} ]]; then
                 COMPREPLY=( $(compgen -W "${items[*]}" -- ${cur}) )
             else
@@ -1061,7 +1058,7 @@ _VBoxManage() {
                     --basefolder)
                         COMPREPLY=( $(compgen -o dirnames -- ${cur}) )
                         ;;
-                    --passwordfile)
+                    --password)
                         COMPREPLY=( $(compgen -f -- ${cur}) )
                         ;;
                 esac
@@ -1302,7 +1299,7 @@ _VBoxManage() {
                 if [[ " ${items[*]} " == *" $subcommand "* ]]; then
                     case "${subcommand}" in
                         addpassword)
-                            items=( --passwordfile --password-id )
+                            items=( --password --password-id )
                             _get_excluded_items "${items[@]}"
                             COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
                             ;;
@@ -1313,15 +1310,15 @@ _VBoxManage() {
                             COMPREPLY=()
                             ;;
                         setencryption)
-                            items=( --old-passwordfile --ciphercipher-identifier
-                                --new-passwordfile --new-password-id --force )
+                            items=( --old-password --cipher
+                                --new-password --new-password-id --force )
                             _get_excluded_items "${items[@]}"
                             COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
                             ;;
                     esac
                 else
                     case "$prev" in
-                        --new-passwordfile|--old-passwordfile|--passwordfile)
+                        --new-password|--old-password|--password)
                             COMPREPLY=( $(compgen -f -- ${cur}) )
                             ;;
                         *)
@@ -1873,7 +1870,7 @@ _VBoxManage() {
                     *)
                         _find_item_name 2
                         items=( --autoreset --compact --description --move
-                            --property --setlocation --type )
+                            --property --property-file --setlocation --type )
                         [[ " ${COMP_WORDS[*]} " != *" --resize "* &&
                             " ${COMP_WORDS[*]} " != *" --resizebyte"* ]] &&
                             items+=( --resizebyte --resize )
@@ -1891,7 +1888,7 @@ _VBoxManage() {
                             --move)
                                 COMPREPLY=( $(compgen -o dirnames -- ${cur}) )
                                 ;;
-                            --setlocation)
+                            --setlocation|--property-file)
                                 COMPREPLY=( $(compgen -f -- ${cur}) )
                                 ;;
                         esac
@@ -1902,7 +1899,7 @@ _VBoxManage() {
 
         modifynvram)
             items=( changevar deletevar enrollmssignatures enrollorclpk
-                enrollpk inituefivarstore listvars queryvar )
+                enrollpk enrollmok inituefivarstore listvars queryvar )
             # _get_excluded_items "${items[@]}"
             # COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
 
@@ -1919,6 +1916,15 @@ _VBoxManage() {
                                 COMPREPLY=( $(compgen -f -- ${cur}) )
                             else
                                 items=( --platform-key --owner-uuid )
+                                _get_excluded_items "${items[@]}"
+                                COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+                            fi
+                            ;;
+                        enrollmok)
+                            if [ "${prev}" = "--mok" ]; then
+                                COMPREPLY=( $(compgen -f -- ${cur}) )
+                            else
+                                items=( --mok --owner-uuid )
                                 _get_excluded_items "${items[@]}"
                                 COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
                             fi
@@ -2194,9 +2200,9 @@ _VBoxManage() {
                         ;;
 
                     --uart-mode[1-2])
-                        COMPREPLY=( $(compgen -W "disconnected serverpipe
-                            clientpipe tcpserverport tcpclienthostname:port
-                            filefilename device-name" -- ${cur}) )
+                        COMPREPLY=( $(compgen -W "disconnected server
+                            client tcpserver tcpclient
+                            file device-name" -- ${cur}) )
                         ;;
 
                     --uart-type[1-2])
@@ -2377,10 +2383,10 @@ _VBoxManage() {
                 [[ ${#COMPREPLY[@]} = 1 && "${COMPREPLY[0]}" != *".vbox" ]] && \
                     COMPREPLY[0]="${COMPREPLY[0]}/"
             else
-                if [[ $prev == "--passwordfile" ]]; then
+                if [[ $prev == "--password" ]]; then
                     COMPREPLY=( $(compgen -f -- ${cur}) )
                 else
-                    local items=( --passwordfile )
+                    local items=( --password )
                     _get_excluded_items "${items[@]}"
                     COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
                 fi
@@ -2495,12 +2501,12 @@ _VBoxManage() {
                 _vms_comp vms
             else
                 local items=( --details --machinereadable --log --password-id
-                --password --password-idid --passwordfile )
+                --password )
                 _get_excluded_items "${items[@]}"
                 COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
 
                 case "${prev}" in
-                    --log|--passwordfile)
+                    --log|--password)
                         COMPREPLY=( $(compgen -f -- ${cur}) )
                         ;;
                 esac
@@ -2601,10 +2607,10 @@ _VBoxManage() {
                 _vms_comp vms 1
             elif [[ "${prev}" == "--type" ]]; then
                 COMPREPLY=( $(compgen -W "gui sdl headless separate" -- ${cur}) )
-            elif [[ "${prev}" == "--passwordfile" ]]; then
+            elif [[ "${prev}" == "--password" ]]; then
                 COMPREPLY=( $(compgen -f -- ${cur}) )
             else
-                items=( --type --putenv --passwordfile --password-id )
+                items=( --type --putenv --password --password-id )
                 _get_excluded_items "${items[@]}"
                 COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
             fi
