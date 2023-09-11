@@ -4,7 +4,7 @@
 # URL: https://bitbucket.org/gryf/vboxmanage-bash-completion
 # URL: https://github.com/gryf/vboxmanage-bash-completion
 # License: 3-clause BSD-style license (see LICENSE file)
-# Version: 7.0.8
+# Version: 7.0.10
 
 
 _VBoxManage() {
@@ -677,11 +677,12 @@ _VBoxManage() {
                     _cloudprofiles_comp
                     ;;
                 list)
-                    COMPREPLY=( $(compgen -W "instances images" -- ${cur}) )
+                    COMPREPLY=( $(compgen -W "instances images vnicattachments"
+                        -- ${cur}) )
                     ;;
                 instance)
                     COMPREPLY=( $(compgen -W "create info terminate start
-                        pause" -- ${cur}) )
+                        pause reset" -- ${cur}) )
                     ;;
                 image)
                     COMPREPLY=( $(compgen -W "create info delete import
@@ -1425,7 +1426,7 @@ _VBoxManage() {
                 if [[ " ${items[*]} " == *" $subcommand "* ]]; then
                     case "${subcommand}" in
                         run)
-                            items=( --domain --dos2unix --exe
+                            items=( --arg0 --domain --dos2unix --exe
                                 --ignore-operhaned-processes --profile --putenv
                                 --quiet --timeout --unix2dos --unquoted-args
                                 --username --verbose -- )
@@ -1445,9 +1446,10 @@ _VBoxManage() {
                             ;;
 
                         start)
-                            items=( --domain --exe --ignore-orphaned-processes
-                                --profile --putenv --quiet --timeout
-                                --unquoted-args --username --verbose -- )
+                            items=( --arg0 --domain --exe
+                                --ignore-orphaned-processes --profile --putenv 
+                                --quiet --timeout --unquoted-args --username 
+                                --verbose -- )
 
                             [[ " ${COMP_WORDS[*]} " != *" --password "* ||
                                 " ${COMP_WORDS[*]} " != *" --passwordfile "* ]] &&
