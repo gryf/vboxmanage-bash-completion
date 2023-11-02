@@ -693,6 +693,13 @@ _VBoxManage() {
                         COMPREPLY=( $(compgen -W "setup create" -- ${cur}) )
                     fi
                     ;;
+                reset)
+                    COMPREPLY=( $(compgen -W "--id" -- ${cur}) )
+                    ;;
+                vnicattachments)
+                    COMPREPLY=( $(compgen -W "--compartment-id --filter"
+                        -- ${cur}) )
+                    ;;
             esac
             if [[ " ${COMP_WORDS[*]} " == *" list images"* ||
                 " ${COMP_WORDS[*]} " == *" list instances"* ]]; then
@@ -820,20 +827,20 @@ _VBoxManage() {
                 changeuartmode1 changeuartmode2 clipboard cpuexecutioncap
                 draganddrop guestmemoryballoon keyboardputfile
                 keyboardputscancode keyboardputstring natpf1 natpf2 natpf3
-                natpf4 natpf5 natpf6 natpf7 natpf8 natpf9 nic1 nic2 nic3 nic4 
-                nic5 nic6 nic7 nic8 nicpromisc1 nicpromisc2 nicpromisc3 
-                nicpromisc4 nicpromisc5 nicpromisc6 nicpromisc7 nicpromisc8 
-                nicproperty1 nicproperty2 nicproperty3 nicproperty4 nicproperty5 
-                nicproperty6 nicproperty7 nicproperty8 nictrace1 nictrace2 
-                nictrace3 nictrace4 nictrace5 nictrace6 nictrace7 nictrace8 
-                nictracefile1 nictracefile2 nictracefile3 nictracefile4 
-                nictracefile5 nictracefile6 nictracefile7 nictracefile8 pause 
-                plugcpu poweroff reboot recording removeallencpasswords 
-                removeencpassword reset resume savestate screenshotpng 
-                setcredentials setlinkstate1 setlinkstate2 setlinkstate3 
-                setlinkstate4 setlinkstate5 setlinkstate6 setlinkstate7 
-                setlinkstate8 setscreenlayout setvideomodehint shutdown teleport 
-                unplugcpu usbattach usbdetach vm-process-priority vrde vrdeport 
+                natpf4 natpf5 natpf6 natpf7 natpf8 natpf9 nic1 nic2 nic3 nic4
+                nic5 nic6 nic7 nic8 nicpromisc1 nicpromisc2 nicpromisc3
+                nicpromisc4 nicpromisc5 nicpromisc6 nicpromisc7 nicpromisc8
+                nicproperty1 nicproperty2 nicproperty3 nicproperty4 nicproperty5
+                nicproperty6 nicproperty7 nicproperty8 nictrace1 nictrace2
+                nictrace3 nictrace4 nictrace5 nictrace6 nictrace7 nictrace8
+                nictracefile1 nictracefile2 nictracefile3 nictracefile4
+                nictracefile5 nictracefile6 nictracefile7 nictracefile8 pause
+                plugcpu poweroff reboot recording removeallencpasswords
+                removeencpassword reset resume savestate screenshotpng
+                setcredentials setlinkstate1 setlinkstate2 setlinkstate3
+                setlinkstate4 setlinkstate5 setlinkstate6 setlinkstate7
+                setlinkstate8 setscreenlayout setvideomodehint shutdown teleport
+                unplugcpu usbattach usbdetach vm-process-priority vrde vrdeport
                 vrdeproperty vrdevideochannelquality webcam )
 
                 _find_item_name 2
@@ -1447,8 +1454,8 @@ _VBoxManage() {
 
                         start)
                             items=( --arg0 --domain --exe
-                                --ignore-orphaned-processes --profile --putenv 
-                                --quiet --timeout --unquoted-args --username 
+                                --ignore-orphaned-processes --profile --putenv
+                                --quiet --timeout --unquoted-args --username
                                 --verbose -- )
 
                             [[ " ${COMP_WORDS[*]} " != *" --password "* ||
