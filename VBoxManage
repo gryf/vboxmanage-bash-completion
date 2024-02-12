@@ -1,10 +1,9 @@
 # bash command-line completion for VBoxManage command
 #
 # Author: Roman 'gryf' Dobosz <gryf73@gmail.com>
-# URL: https://bitbucket.org/gryf/vboxmanage-bash-completion
 # URL: https://github.com/gryf/vboxmanage-bash-completion
 # License: 3-clause BSD-style license (see LICENSE file)
-# Version: 7.0.10
+# Version: 7.0.12
 
 
 _VBoxManage() {
@@ -938,7 +937,7 @@ _VBoxManage() {
                             COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
                             ;;
                         changeuartmode[1-2])
-                            tmp=(disconnected server client tcpserver tcpclient 
+                            tmp=(disconnected server client tcpserver tcpclient
                                 file device-name)
                             _get_excluded_items "${tmp[@]}"
                             COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
