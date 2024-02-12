@@ -164,8 +164,8 @@ _VBoxManage() {
         compopt -o filenames
 
         vms=$(VBoxManage list vms -l | \
-            egrep '^Name|State' | \
-            egrep -B1 'State:\s+saved' | \
+            grep -E '^Name|State' | \
+            grep -E -B1 'State:\s+saved' | \
             grep Name |$VBMC_SED 's/Name:\s\+//' | \
             tr '\n' '|' | \
             $VBMC_SED 's/|$//' | \
@@ -199,7 +199,7 @@ _VBoxManage() {
         local item
 
         list=$(VBoxManage list ostypes | \
-            egrep ^ID: | \
+            grep -E ^ID: | \
             $VBMC_SED 's/ID:\s\+//' | \
             tr '\n' '|' | \
             $VBMC_SED 's/|$//')
@@ -234,7 +234,7 @@ _VBoxManage() {
         local item
 
         list=$(VBoxManage list hostonlyifs | \
-            egrep ^Name: | \
+            grep -E ^Name: | \
             $VBMC_SED 's/Name:\s\+//' | \
             $VBMC_SED 's/\s/\\ /g'| \
             tr '\n' '|' | \
@@ -377,7 +377,7 @@ _VBoxManage() {
         local item
 
         list=$(VBoxManage list bridgedifs | \
-            egrep ^Name: | \
+            grep -E ^Name: | \
             $VBMC_SED 's/Name:\s\+//' | \
             $VBMC_SED 's/\s/\\ /g'| \
             tr '\n' '|' | \
@@ -395,7 +395,7 @@ _VBoxManage() {
         local item
 
         list=$(VBoxManage list intnets| \
-            egrep ^Name: | \
+            grep -E ^Name: | \
             $VBMC_SED 's/Name:\s\+//' | \
             $VBMC_SED 's/\s/\\ /g'| \
             tr '\n' '|' | \
