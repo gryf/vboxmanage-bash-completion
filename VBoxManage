@@ -3,7 +3,7 @@
 # Author: Roman 'gryf' Dobosz <gryf73@gmail.com>
 # URL: https://github.com/gryf/vboxmanage-bash-completion
 # License: 3-clause BSD-style license (see LICENSE file)
-# Version: 7.0.14
+# Version: 7.0.20
 
 
 _VBoxManage() {
@@ -1045,7 +1045,7 @@ _VBoxManage() {
             ;;
 
         createvm)
-            items=( --basefolder --cipher --default --group --name --ostype
+            items=( --basefolder --cipher --default --groups --name --ostype
                 --password-id --password --register --uuid )
             if [[ ${prev} == ${cmd} ]]; then
                 COMPREPLY=( $(compgen -W "${items[*]}" -- ${cur}) )
@@ -1054,7 +1054,7 @@ _VBoxManage() {
                 COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
 
                 case "${prev}" in
-                    --group)
+                    --groups)
                         COMPREPLY=()
                         _group_comp
                         ;;
