@@ -42,6 +42,7 @@ be:
 * ~/bash-completion.d/
 * /usr/local/etc/bash-completion.d/
 * /etc/bash_completion.d/
+* ~/.local/share/bash-completion
 * etc.
 
 It's also okay to copy it into some directory, and place proper line in
