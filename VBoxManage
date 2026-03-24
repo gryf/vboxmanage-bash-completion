@@ -3,7 +3,7 @@
 # Author: Roman 'gryf' Dobosz <gryf73@gmail.com>
 # URL: https://github.com/gryf/vboxmanage-bash-completion
 # License: 3-clause BSD-style license (see LICENSE file)
-# Version: 7.0.22
+# Version: 7.1.8
 
 
 _VBoxManage() {
@@ -329,6 +329,9 @@ _VBoxManage() {
         list=$(VBoxManage list | $VBMC_SED -e '1,2d' \
             -e 's/VBoxManage list //' \
             -e 's/[\[\]\|]/ /g' \
+            -e 's/ arm/ /g' \
+            -e 's/ x86 / /g' \
+            -e 's/platform-arch=/platform-arch/g' \
             -e 's/|/ /g'|xargs echo)
         COMPREPLY=( $(compgen -W "$list" -- ${cur}) )
     }
@@ -680,8 +683,8 @@ _VBoxManage() {
                         -- ${cur}) )
                     ;;
                 instance)
-                    COMPREPLY=( $(compgen -W "create info terminate start
-                        pause reset" -- ${cur}) )
+                    COMPREPLY=( $(compgen -W "clone create info metricdata
+                        metriclist terminate start pause reset" -- ${cur}) )
                     ;;
                 image)
                     COMPREPLY=( $(compgen -W "create info delete import
@@ -703,6 +706,18 @@ _VBoxManage() {
             if [[ " ${COMP_WORDS[*]} " == *" list images"* ||
                 " ${COMP_WORDS[*]} " == *" list instances"* ]]; then
                 items=(--state --compartment-id)
+                _get_excluded_items "${items[@]}"
+                COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+            fi
+
+            if [[ " ${COMP_WORDS[*]} " == *" instance clone"* ]]; then
+                items=(--id --clone-name)
+                _get_excluded_items "${items[@]}"
+                COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+            fi
+
+            if [[ " ${COMP_WORDS[*]} " == *" instance metricdata"* ]]; then
+                items=(--id --metric-name --metric-points)
                 _get_excluded_items "${items[@]}"
                 COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
             fi
@@ -729,6 +744,7 @@ _VBoxManage() {
                 esac
             fi
             if [[ " ${COMP_WORDS[*]} " == *" instance info"* ||
+                " ${COMP_WORDS[*]} " == *" instance metriclist"* ||
                 " ${COMP_WORDS[*]} " == *" instance terminate"* ||
                 " ${COMP_WORDS[*]} " == *" instance start"* ||
                 " ${COMP_WORDS[*]} " == *" instance pause"* ]]; then
@@ -821,7 +837,7 @@ _VBoxManage() {
                 _vms_comp runningvms
             else
                 local items=( acpipowerbutton acpisleepbutton addencpassword
-                audioin audioout autostart-delayseconds autostart-enabled1
+                audioin audioout autostart-delay autostart-enabled1
                 autostart-enabled2 autostart-enabled3 autostart-enabled4
                 changeuartmode1 changeuartmode2 clipboard cpuexecutioncap
                 draganddrop guestmemoryballoon keyboardputfile
@@ -887,8 +903,8 @@ _VBoxManage() {
                         recording)
                             [[ ${prev} == "recording" ]] && \
                                 COMPREPLY=( $(compgen -W "filename maxfilesize
-                                    maxtime off on screens videofps videorate
-                                    videores"  -- ${cur}) )
+                                    maxtime off on opts screens start stop
+                                    videofps videorate videores"  -- ${cur}) )
                             case "${prev}" in
                                 screens)
                                     COMPREPLY=( $(compgen -W "all none
@@ -1046,7 +1062,8 @@ _VBoxManage() {
 
         createvm)
             items=( --basefolder --cipher --default --groups --name --ostype
-                --password-id --password --register --uuid )
+                --password-id --password --platform-architecture --register
+                --uuid )
             if [[ ${prev} == ${cmd} ]]; then
                 COMPREPLY=( $(compgen -W "${items[*]}" -- ${cur}) )
             else
@@ -1067,6 +1084,9 @@ _VBoxManage() {
                         ;;
                     --password)
                         COMPREPLY=( $(compgen -f -- ${cur}) )
+                        ;;
+                    --platform-architecture)
+                        COMPREPLY=( $(compgen -W "x86 arm" -- ${cur}) )
                         ;;
                 esac
             fi
@@ -1421,8 +1441,8 @@ _VBoxManage() {
             ;;
 
         guestcontrol)
-            local items=( run start copyfrom copyto mkdir rmdir rm mv mktemp
-                stat list closeprocess closesession updatega watch )
+            local items=( run start copyfrom copyto fsinfo mkdir mount rmdir rm
+                mv mktemp stat list closeprocess closesession updatega watch )
 
             if [[ ${prev} == ${cmd} ]]; then
                 _vms_comp runningvms
@@ -1432,7 +1452,7 @@ _VBoxManage() {
                 if [[ " ${items[*]} " == *" $subcommand "* ]]; then
                     case "${subcommand}" in
                         run)
-                            items=( --arg0 --domain --dos2unix --exe
+                            items=( --arg0 --cwd --domain --dos2unix --exe
                                 --ignore-operhaned-processes --profile --putenv
                                 --quiet --timeout --unix2dos --unquoted-args
                                 --username --verbose -- )
@@ -1452,7 +1472,7 @@ _VBoxManage() {
                             ;;
 
                         start)
-                            items=( --arg0 --domain --exe
+                            items=( --arg0 --cwd --domain --exe
                                 --ignore-orphaned-processes --profile --putenv
                                 --quiet --timeout --unquoted-args --username
                                 --verbose -- )
@@ -1478,9 +1498,32 @@ _VBoxManage() {
                             COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
                             ;;
 
+                        fsinfo)
+                            items=( --domain --human-readable --total
+                                --username )
+                            [[ " ${COMP_WORDS[*]} " != *" --password "* ||
+                                " ${COMP_WORDS[*]} " != *" --passwordfile "* ]] &&
+                                items+=(--passwordfile --password)
+                            [[ " ${COMP_WORDS[*]} " != *" --quiet"* ||
+                                " ${COMP_WORDS[*]} " != *" --verbose"* ]] &&
+                                items+=( --quiet --verbose )
+                            _get_excluded_items "${items[@]}"
+                            COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+                            ;;
+
                         mkdir)
                             items=( --domain --mode --parents --quiet
                                 --username --verbose )
+                            [[ " ${COMP_WORDS[*]} " != *" --password "* ||
+                                " ${COMP_WORDS[*]} " != *" --passwordfile "* ]] &&
+                                items+=(--passwordfile --password)
+
+                            _get_excluded_items "${items[@]}"
+                            COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+                            ;;
+
+                        mount)
+                            items=( --username --verbose )
                             [[ " ${COMP_WORDS[*]} " != *" --password "* ||
                                 " ${COMP_WORDS[*]} " != *" --passwordfile "* ]] &&
                                 items+=(--passwordfile --password)
@@ -1607,6 +1650,9 @@ _VBoxManage() {
                                 COMPREPLY[0]="${COMPREPLY[0]}/"
                             ;;
                         --passwordfile)
+                            COMPREPLY=( $(compgen -f -- ${cur}) )
+                            ;;
+                        --cwd)
                             COMPREPLY=( $(compgen -f -- ${cur}) )
                             ;;
                     esac
@@ -1755,8 +1801,11 @@ _VBoxManage() {
                     --long|-l)
                         COMPREPLY=( $(compgen -W "-s --sorted" -- ${cur}) )
                         ;;
+                    --platform-arch)
+                        COMPREPLY=( $(compgen -W "x86 arm" -- ${cur}) )
+                        ;;
                     *)
-                        COMPREPLY=( $(compgen -W "-l --long -s --sorted" -- ${cur}) )
+                        COMPREPLY=( $(compgen -W "-l --long -s --sorted --platform-arch" -- ${cur}) )
                         ;;
                 esac
             fi
@@ -1907,7 +1956,7 @@ _VBoxManage() {
 
         modifynvram)
             items=( changevar deletevar enrollmssignatures enrollorclpk
-                enrollpk enrollmok inituefivarstore listvars queryvar )
+                enrollpk enrollmok inituefivarstore listvars queryvar secureboot)
             # _get_excluded_items "${items[@]}"
             # COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
 
@@ -1955,45 +2004,58 @@ _VBoxManage() {
                         listvars)
                             COMPREPLY=( )
                             ;;
+                        secureboot)
+                            COMPREPLY=( $(compgen -W "--enable --disable" \
+                                -- ${cur}) )
+                            ;;
                     esac
                 else
                     [[ ${#COMPREPLY[@]} -eq 0 ]] && \
                         COMPREPLY=( $(compgen -W "${items[*]}" -- ${cur}) )
                 fi
+                case "${prev}" in
+                    --enable)
+                        COMPREPLY=( )
+                        ;;
+                    --disable)
+                        COMPREPLY=( )
+                        ;;
+                esac
             fi
             ;;
 
         modifyvm)
-            items=( --accelerate-2d-video --accelerate-3d --acpi --apic --audio
+            items=(--accelerate-2d-video --accelerate-3d --acpi --apic --audio
                 --audio-codec --audio-controller --audio-in --audio-out
-                --autostart-delay --autostart-enabled --bios-apic
-                --bios-bootm-enu --bios-logo-display-time --bios-logo-fade-in
-                --bios-logo-fade-out --bios-logo-image-path --bios-pxe-debug
-                --bios-system-time-offset --boot1 --boot2 --boot3 --boot4
-                --bridge-adapter1 --bridge-adapter2 --bridge-adapter3
+                --autostart-delay --autostart-enabled --boot1 --boot2 --boot3
+                --boot4 --bridge-adapter1 --bridge-adapter2 --bridge-adapter3
                 --bridge-adapter4 --bridge-adapter5 --bridge-adapter6
                 --bridge-adapter7 --bridge-adapter8 --cable-connected1
                 --cable-connected2 --cable-connected3 --cable-connected4
                 --cable-connected5 --cable-connected6 --cable-connected7
-                --cloud-network1 --cloud-network2 --cloud-network3
-                --cloud-network4 --cable-connected8 --chipset --clipboard-mode
-                --cpu-profile --cpu-execution-cap --cpu-hotplug
-                --cpuid-portability-level --cpuid-remove --cpuid-set
-                --cpuid-remove-all --cpus --default-frontend --description
-                --drag-and-drop --firmware --graphicscontroller --groups
-                --guest-debug-address --guest-debug-io-provider
-                --guest-debug-port --guest-debug-provider --guest-memory-balloon
-                --hardware-uuid --host-only-adapter1 --host-only-adapter2
-                --host-only-adapter3 --host-only-adapter4 --host-only-adapter5
-                --host-only-adapter6 --host-only-adapter7 --host-only-adapter8
-                --host-only-net1 --host-only-net2 --host-only-net3
-                --host-only-net4 --host-only-net5 --host-only-net6
-                --host-only-net7 --host-only-net8 --hpet --hwvirtex
-                --ibpb-on-vm-entry --ibpb-on-vm-exit --icon-file --intnet1
-                --intnet2 --intnet3 --intnet4 --intnet5 --intnet6 --intnet7
-                --intnet8 --ioapic --iommu --keyboard --l1d-flush-on-sched
-                --l1d-flush-on-vm-entry --large-pages --long-mode --lpt1
-                --lpt-mode1 --mac-address1 --mac-address2 --mac-address3
+                --cable-connected8 --chipset --clipboard-file-transfers
+                --clipboard-mode --cloud-network1 --cloud-network2
+                --cloud-network3 --cloud-network4 --cpu-execution-cap
+                --cpu-hotplug --cpu-profile --cpuid-portability-level
+                --cpuid-remove --cpuid-remove-all --cpuid-set --cpus
+                --default-frontend --description --drag-and-drop --firmware
+                --firmware-apic --firmware-boot-menu
+                --firmware-logo-display-time --firmware-logo-fade-in
+                --firmware-logo-fade-out --firmware-logo-image-path
+                --firmware-pxe-debug --firmware-system-time-offset
+                --graphicscontroller --groups --guest-debug-address
+                --guest-debug-io-provider --guest-debug-port
+                --guest-debug-provider --guest-memory-balloon --hardware-uuid
+                --host-only-adapter1 --host-only-adapter2 --host-only-adapter3
+                --host-only-adapter4 --host-only-adapter5 --host-only-adapter6
+                --host-only-adapter7 --host-only-adapter8 --host-only-net1
+                --host-only-net2 --host-only-net3 --host-only-net4
+                --host-only-net5 --host-only-net6 --host-only-net7
+                --host-only-net8 --hwvirtex --ibpb-on-vm-entry --ibpb-on-vm-exit
+                --icon-file --intnet1 --intnet2 --intnet3 --intnet4 --intnet5
+                --intnet6 --intnet7 --intnet8 --ioapic --iommu --keyboard
+                --l1d-flush-on-sched --l1d-flush-on-vm-entry --large-pages
+                --lpt-mode1 --lpt1 --mac-address1 --mac-address2 --mac-address3
                 --mac-address4 --mac-address5 --mac-address6 --mac-address7
                 --mac-address8 --mds-clear-on-sched --mds-clear-on-vm-entry
                 --memory --monitor-count --mouse --name --nat-alias-mode1
@@ -2022,51 +2084,51 @@ _VBoxManage() {
                 --nat-pf1 --nat-pf2 --nat-pf3 --nat-pf4 --nat-pf5 --nat-pf6
                 --nat-pf7 --nat-pf8 --nat-settings1 --nat-settings2
                 --nat-settings3 --nat-settings4 --nat-settings5 --nat-settings6
-                --nat-settings7 --nat-settings8 --nat-tftp-file1 --nat-tftp-file2
-                --nat-tftp-file3 --nat-tftp-file4 --nat-tftp-file5
-                --nat-tftp-file6 --nat-tftp-file7 --nat-tftp-file8
-                --nat-tftp-prefix1 --nat-tftp-prefix2 --nat-tftp-prefix3
-                --nat-tftp-prefix4 --nat-tftp-prefix5 --nat-tftp-prefix6
-                --nat-tftp-prefix7 --nat-tftp-prefix8 --nat-tftp-server1
-                --nat-tftp-server2 --nat-tftp-server3 --nat-tftp-server4
-                --nat-tftp-server5 --nat-tftp-server6 --nat-tftp-server7
-                --nat-tftp-server8 --nested-hw-virt --nested-paging --nic1 --nic2
-                --nic3 --nic4 --nic5 --nic6 --nic7 --nic8 --nic-bandwidth-group1
-                --nic-boot-prio1 --nic-generic-drv1 --nic-generic-drv2
-                --nic-generic-drv3 --nic-generic-drv4 --nic-generic-drv5
-                --nic-generic-drv6 --nic-generic-drv7 --nic-generic-drv8
-                --nic-promisc1 --nic-promisc2 --nic-promisc3 --nic-promisc4
-                --nic-promisc5 --nic-promisc6 --nic-promisc7 --nic-promisc8
-                --nic-property1 --nic-property2 --nic-property3 --nic-property4
-                --nic-property5 --nic-property6 --nic-property7 --nic-property8
-                --nic-speed1 --nic-speed2 --nic-speed3 --nic-speed4 --nic-speed5
-                --nic-speed6 --nic-speed7 --nic-speed8 --nic-trace1 --nic-trace2
-                --nic-trace3 --nic-trace4 --nic-trace5 --nic-trace6 --nic-trace7
-                --nic-trace8 --nic-trace-file1 --nic-trace-file2
+                --nat-settings7 --nat-settings8 --nat-tftp-file1
+                --nat-tftp-file2 --nat-tftp-file3 --nat-tftp-file4
+                --nat-tftp-file5 --nat-tftp-file6 --nat-tftp-file7
+                --nat-tftp-file8 --nat-tftp-prefix1 --nat-tftp-prefix2
+                --nat-tftp-prefix3 --nat-tftp-prefix4 --nat-tftp-prefix5
+                --nat-tftp-prefix6 --nat-tftp-prefix7 --nat-tftp-prefix8
+                --nat-tftp-server1 --nat-tftp-server2 --nat-tftp-server3
+                --nat-tftp-server4 --nat-tftp-server5 --nat-tftp-server6
+                --nat-tftp-server7 --nat-tftp-server8 --nested-hw-virt
+                --nested-paging --nic-bandwidth-group1 --nic-boot-prio1
+                --nic-generic-drv1 --nic-generic-drv2 --nic-generic-drv3
+                --nic-generic-drv4 --nic-generic-drv5 --nic-generic-drv6
+                --nic-generic-drv7 --nic-generic-drv8 --nic-promisc1
+                --nic-promisc2 --nic-promisc3 --nic-promisc4 --nic-promisc5
+                --nic-promisc6 --nic-promisc7 --nic-promisc8 --nic-property1
+                --nic-property2 --nic-property3 --nic-property4 --nic-property5
+                --nic-property6 --nic-property7 --nic-property8 --nic-speed1
+                --nic-speed2 --nic-speed3 --nic-speed4 --nic-speed5 --nic-speed6
+                --nic-speed7 --nic-speed8 --nic-trace-file1 --nic-trace-file2
                 --nic-trace-file3 --nic-trace-file4 --nic-trace-file5
-                --nic-trace-file6 --nic-trace-file7 --nic-trace-file8 --nic-type1
-                --nic-type2 --nic-type3 --nic-type4 --nic-type5 --nic-type6
-                --nic-type7 --nic-type8 --os-type --pae --page-fusion
-                --paravirt-debug --paravirt-provider --pci-attach --pci-detach
-                --plug-cpu --recording --recording-file --recording-max-size
+                --nic-trace-file6 --nic-trace-file7 --nic-trace-file8
+                --nic-trace1 --nic-trace2 --nic-trace3 --nic-trace4 --nic-trace5
+                --nic-trace6 --nic-trace7 --nic-trace8 --nic-type1 --nic-type2
+                --nic-type3 --nic-type4 --nic-type5 --nic-type6 --nic-type7
+                --nic-type8 --nic1 --nic2 --nic3 --nic4 --nic5 --nic6 --nic7
+                --nic8 --os-type --page-fusion --paravirt-debug
+                --paravirt-provider --pci-attach --pci-detach --plug-cpu
+                --recording --recording-file --recording-max-size
                 --recording-max-time --recording-opts --recording-screens
                 --recording-video-fps --recording-video-rate
-                --recording-video-res --rtc-use-utc --snapshot-folder --spec-ctrl
-                --system-uuid-le --teleporter --teleporter-address
+                --recording-video-res --rtc-use-utc --snapshot-folder
+                --spec-ctrl --system-uuid-le --teleporter --teleporter-address
                 --teleporter-password --teleporter-password-file
                 --teleporter-port --testing-cfg-dwordidx --testing-enabled
                 --testing-mmio --tpm-location --tpm-type
                 --tracing-allow-vm-access --tracing-config --tracing-enabled
-                --triple-fault-reset --uart1 --uart2 --uart-mode1 --uart-mode2
-                --uart-type1 --uart-type2 --unplug-cpu --usb-card-reader
+                --triple-fault-reset --uart-mode1 --uart-mode2 --uart-type1
+                --uart-type2 --uart1 --uart2 --unplug-cpu --usb-card-reader
                 --usb-ehci --usb-ohci --usb-rename --usb-xhci
-                --virt-vmsave-vmload --vm-process-priority --vram --vrde
-                --vrde-address --vrde-auth-library --vrde-auth-type
-                --vrde-extpack --vrde-multi-con --vrde-port --vrde-property
-                --vrde-reuse-con --vrde-video-channel
-                --vrde-video-channel-quality --vtx-ux --vtx-vpid --x2apic )
-
-
+                --virt-vmsave-vmload --vm-execution-engine --vm-process-priority
+                --vram --vrde --vrde-address --vrde-auth-library
+                --vrde-auth-type --vrde-extpack --vrde-multi-con --vrde-port
+                --vrde-property --vrde-reuse-con --vrde-video-channel
+                --vrde-video-channel-quality --x86-hpet --x86-long-mode
+                --x86-pae --x86-vtx-ux --x86-vtx-vpid --x86-x2apic)
 
             if [[ ${prev} == ${cmd} ]]; then
                 _vms_comp vms
@@ -2086,28 +2148,34 @@ _VBoxManage() {
 
                     --accelerate-2d-video|--accelerate-3d|--acpi|--apic|\
                     --audio-in|--audio-out|--autostart-enabled|\
-                    --bios-logo-fade-in|--bios-logo-fade-out|--bios-pxe-debug|\
                     --cable-connected1|--cable-connected2|--cable-connected3|\
                     --cable-connected4|--cable-connected5|--cable-connected6|\
-                    --cable-connected7|--cable-connected8|--cpu-hotplug|--hpet|\
-                    --hwvirtex|--ibpb-on-vm-entry|--ibpb-on-vm-exit|--ioapic|\
-                    --l1d-flush-on-sched|--l1d-flush-on-vm-entry|--large-pages|\
-                    --long-mode|--mds-clear-on-sched|--mds-clear-on-vm-entry|\
-                    --nat-dns-host-resolver[1-8]|--nat-dns-pass-domain[1-8]|\
-                    --nat-dns-proxy[1-8]|--nat-localhostreachable[1-8]|\
-                    --nested-hw-virt|--nested-paging|--nic-trace[1-8]|--pae|\
-                    --page-fusion|--recording|--rtc-use-utc|--spec-ctrl|\
-                    --system-uuid-le|--teleporter|--testing-enabled|\
-                    --testing-mmio|--tracing-allow-vm-access|--tracing-enabled|\
-                    --triple-fault-reset|--usb-card-reader|--usb-ehci|\
-                    --usb-ohci|--usb-xhci|--virt-vmsave-vmload|--vrde-multi-con|\
-                    --vrde-reuse-con|--vrde-video-channel|--vrde|--vtx-ux|\
-                    --vtx-vpid|--x2apic)
+                    --cable-connected7|--cable-connected8|--cpu-hotplug|\
+                    --firmware-logo-fade-in|--firmware-logo-fade-out|\
+                    --firmware-pxe-debug|--hwvirtex|--ibpb-on-vm-entry|\
+                    --ibpb-on-vm-exit|--ioapic|--l1d-flush-on-sched|\
+                    --l1d-flush-on-vm-entry|--large-pages|--mds-clear-on-sched|\
+                    --mds-clear-on-vm-entry|--nat-dns-host-resolver[1-8]|\
+                    --nat-dns-pass-domain[1-8]|--nat-dns-proxy[1-8]|\
+                    --nat-localhostreachable[1-8]|--nested-hw-virt|\
+                    --nested-paging|--nic-trace[1-8]|--page-fusion|--recording|\
+                    --rtc-use-utc|--spec-ctrl|--system-uuid-le|--teleporter|\
+                    --testing-enabled|--testing-mmio|--tracing-allow-vm-access|\
+                    --tracing-enabled|--triple-fault-reset|--usb-card-reader|\
+                    --usb-ehci|--usb-ohci|--usb-xhci|--virt-vmsave-vmload|--vrde|\
+                    --vrde-multi-con|--vrde-reuse-con|--vrde-video-channel|\
+                    --x86-hpet|--x86-long-mode|--x86-pae|--x86-vtx-ux|\
+                    --x86-vtx-vpid|--x86-x2apic)
                         COMPREPLY=( $(compgen -W "on off" -- ${cur}) )
                         ;;
 
+                    --clipboard-file-transfers)
+                        COMPREPLY=( $(compgen -W "disabled enabled" -- ${cur}) )
+                        ;;
+
                     --graphicscontroller)
-                        COMPREPLY=( $(compgen -W "none vboxvga vmsvga vboxsvga" \
+                        COMPREPLY=( $(compgen -W \
+                            "none vboxvga vmsvga vboxsvga qemuramfb" \
                             -- ${cur}) )
                         ;;
 
@@ -2117,10 +2185,10 @@ _VBoxManage() {
                         ;;
 
                     --chipset)
-                        COMPREPLY=( $(compgen -W "ich9 piix3" -- ${cur}) )
+                        COMPREPLY=( $(compgen -W "ich9 piix3 armv8virtual" -- ${cur}) )
                         ;;
 
-                    --bios-boot-menu)
+                    --firmware-boot-menu)
                         COMPREPLY=( $(compgen -W "disabled menuonly
                         messageandmenu" -- ${cur}) )
                         ;;
@@ -2263,19 +2331,25 @@ _VBoxManage() {
                             -- ${cur}) )
                         ;;
 
-                    --bios-apic)
+                    --firmware-apic)
                         COMPREPLY=( $(compgen -W "disabled apic x2apic" \
                             -- ${cur}) )
                         ;;
 
                     --teleporter-password-file|--icon-file|--recording-file|\
-                        --bios-logo-image-path|--nic-trace-file[1-8]|\
+                        --firmware-logo-image-path|--nic-trace-file[1-8]|\
                         --nat-tftp-file[1-8])
                         COMPREPLY=( $(compgen -f -- ${cur}) )
                         ;;
 
                     --vm-process-priority)
                         COMPREPLY=( $(compgen -W "default flat low normal high" \
+                            -- ${cur}) )
+                        ;;
+
+                    --vm-execution-engine)
+                        COMPREPLY=( $(compgen -W \
+                            "default hm hwvirt nem native-api interpreter recompiler" \
                             -- ${cur}) )
                         ;;
 
@@ -2447,10 +2521,10 @@ _VBoxManage() {
             ;;
 
         sharedfolder)
-            items=(add remove)
+            items=(add remove modify)
             subcommand=${COMP_WORDS[2]}
             case "${prev}" in
-                add|remove)
+                add|remove|modify)
                     _vms_comp vms
                     ;;
                 --hostpath)
@@ -2462,17 +2536,34 @@ _VBoxManage() {
                         _sharedfolder_comp "${name}"
                     fi
                     ;;
+                --readonly)
+                    COMPREPLY=( $(compgen -W "true false" -- ${cur}) )
+                    ;;
+                --auto-mount-point)
+                    COMPREPLY=( $(compgen -o dirnames -- ${cur}) )
+                    ;;
+
+                --symlink-policy)
+                    COMPREPLY=( $(compgen -W "forbidden subtree relative
+                        any" -- ${cur}) )
+                    ;;
             esac
             if [[ ${#COMPREPLY[@]} -eq 0 ]]; then
                 case "${subcommand}" in
                     add)
                         items=(--name --hostpath --transient --readonly
-                        --automount --auto-mount-point)
+                            --automount --auto-mount-point)
                         _get_excluded_items "${items[@]}"
                         COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
                         ;;
                     remove)
                         items=(--name --transient)
+                        _get_excluded_items "${items[@]}"
+                        COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+                        ;;
+                    modify)
+                        items=(--readonly --automount  --auto-mount-point
+                            --symlink-policy)
                         _get_excluded_items "${items[@]}"
                         COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
                         ;;
@@ -2731,17 +2822,18 @@ _VBoxManage() {
                             if [[ ${prev} == ${subcommand} ]]; then
                                 _vms_comp vms
                             else
-                                local items=(--additions-iso
-                                --auxiliary-base-path --country --dry-run
-                                --extra-install-kernel-parameters
-                                --full-user-name --hostname --image-index
-                                --install-additions --install-txs --iso --key
-                                --language --locale --no-install-additions
-                                --no-install-txs --package-selection-adjustment
-                                --password --password-file
-                                --post-install-command --post-install-template
-                                --script-template --start-vm --time-zone --user
-                                --validation-kit-iso)
+                                local items=(--additions-iso --admin-password
+                                    --auxiliary-base-path --country --dry-run
+                                    --extra-install-kernel-parameters
+                                    --full-user-name --hostname --image-index
+                                    --install-additions --install-txs --iso
+                                    --key --language --locale
+                                    --no-install-additions --no-install-txs
+                                    --package-selection-adjustment
+                                    --password-file --post-install-command
+                                    --post-install-template --script-template
+                                    --start-vm --time-zone --user
+                                    --user-password --validation-kit-iso)
                                 _get_excluded_items "${items[@]}"
                                 COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
                             fi
