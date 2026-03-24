@@ -3,7 +3,7 @@
 # Author: Roman 'gryf' Dobosz <gryf73@gmail.com>
 # URL: https://github.com/gryf/vboxmanage-bash-completion
 # License: 3-clause BSD-style license (see LICENSE file)
-# Version: 7.1.8
+# Version: 7.2.4
 
 
 _VBoxManage() {
@@ -472,6 +472,24 @@ _VBoxManage() {
         do
             [[ ${item^^} == ${cur^^}* ]] && COMPREPLY+=("$item")
         done
+    }
+
+    _iface_comp() {
+        local ifaces
+        local item
+        ifaces=$(VBoxManage objtracker ifaces | \
+            grep -v "Supported interfaces:" | \
+            $VBMC_SED 's/^\s\+//g' | \
+            $VBMC_SED 's/\s\+$//g' | \
+            tr '\n' '|' | \
+            $VBMC_SED 's/|$//')
+        IFS='|' read -ra ifaces <<< "$ifaces"
+
+        for item in "${ifaces[@]}"
+        do
+            [[ ${item^^} == ${cur^^}* ]] && COMPREPLY+=("$item")
+        done
+
     }
 
     COMP_WORDBREAKS=${COMP_WORDBREAKS//|/}  # remove pipe from comp word breaks
@@ -2025,109 +2043,107 @@ _VBoxManage() {
             ;;
 
         modifyvm)
-            items=(--accelerate-2d-video --accelerate-3d --acpi --apic --audio
-                --audio-codec --audio-controller --audio-in --audio-out
-                --autostart-delay --autostart-enabled --boot1 --boot2 --boot3
-                --boot4 --bridge-adapter1 --bridge-adapter2 --bridge-adapter3
-                --bridge-adapter4 --bridge-adapter5 --bridge-adapter6
-                --bridge-adapter7 --bridge-adapter8 --cable-connected1
-                --cable-connected2 --cable-connected3 --cable-connected4
-                --cable-connected5 --cable-connected6 --cable-connected7
-                --cable-connected8 --chipset --clipboard-file-transfers
-                --clipboard-mode --cloud-network1 --cloud-network2
-                --cloud-network3 --cloud-network4 --cpu-execution-cap
-                --cpu-hotplug --cpu-profile --cpuid-portability-level
-                --cpuid-remove --cpuid-remove-all --cpuid-set --cpus
-                --default-frontend --description --drag-and-drop --firmware
-                --firmware-apic --firmware-boot-menu
-                --firmware-logo-display-time --firmware-logo-fade-in
-                --firmware-logo-fade-out --firmware-logo-image-path
-                --firmware-pxe-debug --firmware-system-time-offset
-                --graphicscontroller --groups --guest-debug-address
-                --guest-debug-io-provider --guest-debug-port
-                --guest-debug-provider --guest-memory-balloon --hardware-uuid
-                --host-only-adapter1 --host-only-adapter2 --host-only-adapter3
-                --host-only-adapter4 --host-only-adapter5 --host-only-adapter6
-                --host-only-adapter7 --host-only-adapter8 --host-only-net1
-                --host-only-net2 --host-only-net3 --host-only-net4
-                --host-only-net5 --host-only-net6 --host-only-net7
-                --host-only-net8 --hwvirtex --ibpb-on-vm-entry --ibpb-on-vm-exit
-                --icon-file --intnet1 --intnet2 --intnet3 --intnet4 --intnet5
-                --intnet6 --intnet7 --intnet8 --ioapic --iommu --keyboard
-                --l1d-flush-on-sched --l1d-flush-on-vm-entry --large-pages
-                --lpt-mode1 --lpt1 --mac-address1 --mac-address2 --mac-address3
-                --mac-address4 --mac-address5 --mac-address6 --mac-address7
-                --mac-address8 --mds-clear-on-sched --mds-clear-on-vm-entry
-                --memory --monitor-count --mouse --name --nat-alias-mode1
-                --nat-alias-mode2 --nat-alias-mode3 --nat-alias-mode4
-                --nat-alias-mode5 --nat-alias-mode6 --nat-alias-mode7
-                --nat-alias-mode8 --nat-bind-ip1 --nat-bind-ip2 --nat-bind-ip3
-                --nat-bind-ip4 --nat-bind-ip5 --nat-bind-ip6 --nat-bind-ip7
-                --nat-bind-ip8 --nat-dns-host-resolver1 --nat-dns-host-resolver2
-                --nat-dns-host-resolver3 --nat-dns-host-resolver4
-                --nat-dns-host-resolver5 --nat-dns-host-resolver6
-                --nat-dns-host-resolver7 --nat-dns-host-resolver8
-                --nat-dns-pass-domain1 --nat-dns-pass-domain2
-                --nat-dns-pass-domain3 --nat-dns-pass-domain4
-                --nat-dns-pass-domain5 --nat-dns-pass-domain6
-                --nat-dns-pass-domain7 --nat-dns-pass-domain8 --nat-dns-proxy1
-                --nat-dns-proxy2 --nat-dns-proxy3 --nat-dns-proxy4
-                --nat-dns-proxy5 --nat-dns-proxy6 --nat-dns-proxy7
-                --nat-dns-proxy8 --nat-localhostreachable1
-                --nat-localhostreachable2 --nat-localhostreachable3
-                --nat-localhostreachable4 --nat-localhostreachable5
-                --nat-localhostreachable6 --nat-localhostreachable7
-                --nat-localhostreachable8 --nat-net1 --nat-net2 --nat-net3
-                --nat-net4 --nat-net5 --nat-net6 --nat-net7 --nat-net8
-                --nat-network1 --nat-network2 --nat-network3 --nat-network4
-                --nat-network5 --nat-network6 --nat-network7 --nat-network8
-                --nat-pf1 --nat-pf2 --nat-pf3 --nat-pf4 --nat-pf5 --nat-pf6
-                --nat-pf7 --nat-pf8 --nat-settings1 --nat-settings2
-                --nat-settings3 --nat-settings4 --nat-settings5 --nat-settings6
-                --nat-settings7 --nat-settings8 --nat-tftp-file1
-                --nat-tftp-file2 --nat-tftp-file3 --nat-tftp-file4
-                --nat-tftp-file5 --nat-tftp-file6 --nat-tftp-file7
-                --nat-tftp-file8 --nat-tftp-prefix1 --nat-tftp-prefix2
-                --nat-tftp-prefix3 --nat-tftp-prefix4 --nat-tftp-prefix5
-                --nat-tftp-prefix6 --nat-tftp-prefix7 --nat-tftp-prefix8
-                --nat-tftp-server1 --nat-tftp-server2 --nat-tftp-server3
-                --nat-tftp-server4 --nat-tftp-server5 --nat-tftp-server6
-                --nat-tftp-server7 --nat-tftp-server8 --nested-hw-virt
-                --nested-paging --nic-bandwidth-group1 --nic-boot-prio1
-                --nic-generic-drv1 --nic-generic-drv2 --nic-generic-drv3
-                --nic-generic-drv4 --nic-generic-drv5 --nic-generic-drv6
-                --nic-generic-drv7 --nic-generic-drv8 --nic-promisc1
-                --nic-promisc2 --nic-promisc3 --nic-promisc4 --nic-promisc5
-                --nic-promisc6 --nic-promisc7 --nic-promisc8 --nic-property1
-                --nic-property2 --nic-property3 --nic-property4 --nic-property5
-                --nic-property6 --nic-property7 --nic-property8 --nic-speed1
-                --nic-speed2 --nic-speed3 --nic-speed4 --nic-speed5 --nic-speed6
-                --nic-speed7 --nic-speed8 --nic-trace-file1 --nic-trace-file2
-                --nic-trace-file3 --nic-trace-file4 --nic-trace-file5
-                --nic-trace-file6 --nic-trace-file7 --nic-trace-file8
-                --nic-trace1 --nic-trace2 --nic-trace3 --nic-trace4 --nic-trace5
-                --nic-trace6 --nic-trace7 --nic-trace8 --nic-type1 --nic-type2
-                --nic-type3 --nic-type4 --nic-type5 --nic-type6 --nic-type7
-                --nic-type8 --nic1 --nic2 --nic3 --nic4 --nic5 --nic6 --nic7
-                --nic8 --os-type --page-fusion --paravirt-debug
-                --paravirt-provider --pci-attach --pci-detach --plug-cpu
-                --recording --recording-file --recording-max-size
-                --recording-max-time --recording-opts --recording-screens
-                --recording-video-fps --recording-video-rate
-                --recording-video-res --rtc-use-utc --snapshot-folder
-                --spec-ctrl --system-uuid-le --teleporter --teleporter-address
-                --teleporter-password --teleporter-password-file
-                --teleporter-port --testing-cfg-dwordidx --testing-enabled
-                --testing-mmio --tpm-location --tpm-type
-                --tracing-allow-vm-access --tracing-config --tracing-enabled
-                --triple-fault-reset --uart-mode1 --uart-mode2 --uart-type1
-                --uart-type2 --uart1 --uart2 --unplug-cpu --usb-card-reader
-                --usb-ehci --usb-ohci --usb-rename --usb-xhci
-                --virt-vmsave-vmload --vm-execution-engine --vm-process-priority
-                --vram --vrde --vrde-address --vrde-auth-library
-                --vrde-auth-type --vrde-extpack --vrde-multi-con --vrde-port
-                --vrde-property --vrde-reuse-con --vrde-video-channel
-                --vrde-video-channel-quality --x86-hpet --x86-long-mode
+            items=(--accelerate-3d --acpi --apic --arm-gic-its --audio 
+                --audio-codec --audio-controller --audio-in --audio-out 
+                --autostart-delay --autostart-enabled --boot1 --boot2 --boot3 
+                --boot4 --bridge-adapter1 --bridge-adapter2 --bridge-adapter3 
+                --bridge-adapter4 --bridge-adapter5 --bridge-adapter6 
+                --bridge-adapter7 --bridge-adapter8 --cable-connected1 
+                --cable-connected2 --cable-connected3 --cable-connected4 
+                --cable-connected5 --cable-connected6 --cable-connected7 
+                --cable-connected8 --chipset --clipboard-file-transfers 
+                --clipboard-mode --cloud-network1 --cloud-network2 
+                --cloud-network3 --cloud-network4 --cpu-execution-cap 
+                --cpu-hotplug --cpu-profile --cpuid-portability-level 
+                --cpuid-remove --cpuid-remove-all --cpuid-set --cpus 
+                --default-frontend --description --drag-and-drop --firmware 
+                --firmware-apic --firmware-boot-menu 
+                --firmware-logo-display-time --firmware-logo-fade-in 
+                --firmware-logo-fade-out --firmware-logo-image-path 
+                --firmware-pxe-debug --firmware-system-time-offset 
+                --graphicscontroller --groups --guest-debug-address 
+                --guest-debug-io-provider --guest-debug-port 
+                --guest-debug-provider --guest-memory-balloon --hardware-uuid 
+                --host-only-adapter1 --host-only-adapter2 --host-only-adapter3 
+                --host-only-adapter4 --host-only-adapter5 --host-only-adapter6 
+                --host-only-adapter7 --host-only-adapter8 --host-only-net1 
+                --host-only-net2 --host-only-net3 --host-only-net4 
+                --host-only-net5 --host-only-net6 --host-only-net7 
+                --host-only-net8 --hwvirtex --ibpb-on-vm-entry --ibpb-on-vm-exit 
+                --icon-file --intnet1 --intnet2 --intnet3 --intnet4 --intnet5 
+                --intnet6 --intnet7 --intnet8 --ioapic --iommu --keyboard 
+                --l1d-flush-on-sched --l1d-flush-on-vm-entry --large-pages 
+                --lpt-mode1 --lpt1 --mac-address1 --mac-address2 --mac-address3 
+                --mac-address4 --mac-address5 --mac-address6 --mac-address7 
+                --mac-address8 --mds-clear-on-sched --mds-clear-on-vm-entry 
+                --memory --monitor-count --mouse --name --nat-bind-ip1 
+                --nat-bind-ip2 --nat-bind-ip3 --nat-bind-ip4 --nat-bind-ip5 
+                --nat-bind-ip6 --nat-bind-ip7 --nat-bind-ip8 
+                --nat-dns-pass-domain1 --nat-dns-pass-domain2 
+                --nat-dns-pass-domain3 --nat-dns-pass-domain4 
+                --nat-dns-pass-domain5 --nat-dns-pass-domain6 
+                --nat-dns-pass-domain7 --nat-dns-pass-domain8 --nat-enable-tftp1 
+                --nat-enable-tftp2 --nat-enable-tftp3 --nat-enable-tftp4 
+                --nat-enable-tftp5 --nat-enable-tftp6 --nat-enable-tftp7 
+                --nat-enable-tftp8 --nat-forward-broadcast1 
+                --nat-forward-broadcast2 --nat-forward-broadcast3 
+                --nat-forward-broadcast4 --nat-forward-broadcast5 
+                --nat-forward-broadcast6 --nat-forward-broadcast7 
+                --nat-forward-broadcast8 --nat-localhostreachable1 
+                --nat-localhostreachable2 --nat-localhostreachable3 
+                --nat-localhostreachable4 --nat-localhostreachable5 
+                --nat-localhostreachable6 --nat-localhostreachable7 
+                --nat-localhostreachable8 --nat-net1 --nat-net2 --nat-net3 
+                --nat-net4 --nat-net5 --nat-net6 --nat-net7 --nat-net8 
+                --nat-network1 --nat-network2 --nat-network3 --nat-network4 
+                --nat-network5 --nat-network6 --nat-network7 --nat-network8 
+                --nat-pf1 --nat-pf2 --nat-pf3 --nat-pf4 --nat-pf5 --nat-pf6 
+                --nat-pf7 --nat-pf8 --nat-settings1 --nat-settings2 
+                --nat-settings3 --nat-settings4 --nat-settings5 --nat-settings6 
+                --nat-settings7 --nat-settings8 --nat-tftp-file1 
+                --nat-tftp-file2 --nat-tftp-file3 --nat-tftp-file4 
+                --nat-tftp-file5 --nat-tftp-file6 --nat-tftp-file7 
+                --nat-tftp-file8 --nat-tftp-prefix1 --nat-tftp-prefix2 
+                --nat-tftp-prefix3 --nat-tftp-prefix4 --nat-tftp-prefix5 
+                --nat-tftp-prefix6 --nat-tftp-prefix7 --nat-tftp-prefix8 
+                --nat-tftp-server1 --nat-tftp-server2 --nat-tftp-server3 
+                --nat-tftp-server4 --nat-tftp-server5 --nat-tftp-server6 
+                --nat-tftp-server7 --nat-tftp-server8 --nested-hw-virt 
+                --nested-paging --nic-bandwidth-group1 --nic-boot-prio1 
+                --nic-generic-drv1 --nic-generic-drv2 --nic-generic-drv3 
+                --nic-generic-drv4 --nic-generic-drv5 --nic-generic-drv6 
+                --nic-generic-drv7 --nic-generic-drv8 --nic-promisc1 
+                --nic-promisc2 --nic-promisc3 --nic-promisc4 --nic-promisc5 
+                --nic-promisc6 --nic-promisc7 --nic-promisc8 --nic-property1 
+                --nic-property2 --nic-property3 --nic-property4 --nic-property5 
+                --nic-property6 --nic-property7 --nic-property8 --nic-speed1 
+                --nic-speed2 --nic-speed3 --nic-speed4 --nic-speed5 --nic-speed6 
+                --nic-speed7 --nic-speed8 --nic-trace-file1 --nic-trace-file2 
+                --nic-trace-file3 --nic-trace-file4 --nic-trace-file5 
+                --nic-trace-file6 --nic-trace-file7 --nic-trace-file8 
+                --nic-trace1 --nic-trace2 --nic-trace3 --nic-trace4 --nic-trace5 
+                --nic-trace6 --nic-trace7 --nic-trace8 --nic-type1 --nic-type2 
+                --nic-type3 --nic-type4 --nic-type5 --nic-type6 --nic-type7 
+                --nic-type8 --nic1 --nic2 --nic3 --nic4 --nic5 --nic6 --nic7 
+                --nic8 --os-type --page-fusion --paravirt-debug 
+                --paravirt-provider --pci-attach --pci-detach --plug-cpu 
+                --recording --recording-file --recording-max-size 
+                --recording-max-time --recording-opts --recording-screens 
+                --recording-video-fps --recording-video-rate 
+                --recording-video-res --rtc-use-utc --snapshot-folder 
+                --spec-ctrl --system-uuid-le --teleporter --teleporter-address 
+                --teleporter-password --teleporter-password-file 
+                --teleporter-port --testing-cfg-dwordidx --testing-enabled 
+                --testing-mmio --tpm-location --tpm-type 
+                --tracing-allow-vm-access --tracing-config --tracing-enabled 
+                --triple-fault-reset --uart-mode1 --uart-mode2 --uart-type1 
+                --uart-type2 --uart1 --uart2 --unplug-cpu --usb-card-reader 
+                --usb-ehci --usb-ohci --usb-rename --usb-xhci 
+                --virt-vmsave-vmload --vm-execution-engine --vm-process-priority 
+                --vram --vrde --vrde-address --vrde-auth-library 
+                --vrde-auth-type --vrde-extpack --vrde-multi-con --vrde-port 
+                --vrde-property --vrde-reuse-con --vrde-video-channel 
+                --vrde-video-channel-quality --x86-hpet --x86-long-mode 
                 --x86-pae --x86-vtx-ux --x86-vtx-vpid --x86-x2apic)
 
             if [[ ${prev} == ${cmd} ]]; then
@@ -2146,23 +2162,23 @@ _VBoxManage() {
                         _os_comp
                         ;;
 
-                    --accelerate-2d-video|--accelerate-3d|--acpi|--apic|\
-                    --audio-in|--audio-out|--autostart-enabled|\
-                    --cable-connected1|--cable-connected2|--cable-connected3|\
-                    --cable-connected4|--cable-connected5|--cable-connected6|\
-                    --cable-connected7|--cable-connected8|--cpu-hotplug|\
-                    --firmware-logo-fade-in|--firmware-logo-fade-out|\
-                    --firmware-pxe-debug|--hwvirtex|--ibpb-on-vm-entry|\
-                    --ibpb-on-vm-exit|--ioapic|--l1d-flush-on-sched|\
-                    --l1d-flush-on-vm-entry|--large-pages|--mds-clear-on-sched|\
-                    --mds-clear-on-vm-entry|--nat-dns-host-resolver[1-8]|\
-                    --nat-dns-pass-domain[1-8]|--nat-dns-proxy[1-8]|\
-                    --nat-localhostreachable[1-8]|--nested-hw-virt|\
-                    --nested-paging|--nic-trace[1-8]|--page-fusion|--recording|\
-                    --rtc-use-utc|--spec-ctrl|--system-uuid-le|--teleporter|\
-                    --testing-enabled|--testing-mmio|--tracing-allow-vm-access|\
-                    --tracing-enabled|--triple-fault-reset|--usb-card-reader|\
-                    --usb-ehci|--usb-ohci|--usb-xhci|--virt-vmsave-vmload|--vrde|\
+                    --accelerate-3d|--acpi|--apic|--arm-gic-its|--audio-in|\
+                    --audio-out|--autostart-enabled|--cable-connected1|\
+                    --cable-connected2|--cable-connected3|--cable-connected4|\
+                    --cable-connected5|--cable-connected6|--cable-connected7|\
+                    --cable-connected8|--cpu-hotplug|--firmware-logo-fade-in|\
+                    --firmware-logo-fade-out|--firmware-pxe-debug|--hwvirtex|\
+                    --ibpb-on-vm-entry|--ibpb-on-vm-exit|--ioapic|\
+                    --l1d-flush-on-sched|--l1d-flush-on-vm-entry|--large-pages|\
+                    --mds-clear-on-sched|--mds-clear-on-vm-entry|\
+                    --nat-dns-pass-domain[1-8]|--nat-enable-tftp[1-8]|\
+                    --nat-forward-broadcast[1-8]|--nat-localhostreachable[1-8]|\
+                    --nested-hw-virt|--nested-paging|--nic-trace[1-8]|\
+                    --page-fusion|--recording|--rtc-use-utc|--spec-ctrl|\
+                    --system-uuid-le|--teleporter|--testing-enabled|\
+                    --testing-mmio|--tracing-allow-vm-access|--tracing-enabled|\
+                    --triple-fault-reset|--usb-card-reader|--usb-ehci|\
+                    --usb-ohci|--usb-xhci|--virt-vmsave-vmload|--vrde|\
                     --vrde-multi-con|--vrde-reuse-con|--vrde-video-channel|\
                     --x86-hpet|--x86-long-mode|--x86-pae|--x86-vtx-ux|\
                     --x86-vtx-vpid|--x86-x2apic)
@@ -2206,7 +2222,7 @@ _VBoxManage() {
 
                     --nic-type[1-8])
                         COMPREPLY=( $(compgen -W "Am79C970A Am79C973 82540EM
-                            82543GC 82545EM virtio" -- ${cur}) )
+                            82543GC 82545EM virtio usbnet" -- ${cur}) )
                         ;;
 
                     --nic-promisc[1-8])
@@ -2252,10 +2268,6 @@ _VBoxManage() {
 
                     --nat-pf[1-8])
                         COMPREPLY=( $(compgen -W "delete" -- ${cur}) )
-                        ;;
-
-                    --nat-alias-mode[1-8])
-                        COMPREPLY=( $(compgen -W "default" -- ${cur}) )
                         ;;
 
                     --macaddress[1-8])
@@ -2456,6 +2468,27 @@ _VBoxManage() {
             fi
             ;;
 
+        objtracker)
+            items=(ifaces objlist objinfo)
+            case "${prev}" in
+                objlist)
+                    items=(--ifacename)
+                    _get_excluded_items "${items[@]}"
+                    COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+                    ;;
+                objinfo)
+                    items=(--ifacename --id)
+                    _get_excluded_items "${items[@]}"
+                    COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
+                    ;;
+                --ifacename)
+                    _iface_comp
+                    ;;
+            esac
+            [[ ${#COMPREPLY[@]} -eq 0 ]] && \
+                COMPREPLY=( $(compgen -W "${items[*]}" -- ${cur}) )
+            ;;
+
         registervm)
             if [[ ${prev} == ${cmd} ]]; then
                 bind 'set mark-directories on'
@@ -2524,7 +2557,11 @@ _VBoxManage() {
             items=(add remove modify)
             subcommand=${COMP_WORDS[2]}
             case "${prev}" in
-                add|remove|modify)
+                add|remove)
+                    _vms_comp vms
+                    COMPREPLY+=( "global" )
+                    ;;
+                modify)
                     _vms_comp vms
                     ;;
                 --hostpath)
@@ -2798,7 +2835,8 @@ _VBoxManage() {
                 COMPREPLY=( $(compgen -W "detect install" -- ${cur}) )
             else
                 case "${prev}" in
-                    --iso|--password-file|--additions-iso|--validation-kit-iso|\
+                    --admin-password-file|--iso|--user-password-file|\
+                        --additions-iso|--validation-kit-iso|\
                         --script-template|--post-install-template)
                         COMPREPLY+=( $(compgen -f -- ${cur}) )
                         ;;
@@ -2822,25 +2860,31 @@ _VBoxManage() {
                             if [[ ${prev} == ${subcommand} ]]; then
                                 _vms_comp vms
                             else
-                                local items=(--additions-iso --admin-password
-                                    --auxiliary-base-path --country --dry-run
-                                    --extra-install-kernel-parameters
-                                    --full-user-name --hostname --image-index
-                                    --install-additions --install-txs --iso
-                                    --key --language --locale
-                                    --no-install-additions --no-install-txs
-                                    --package-selection-adjustment
-                                    --password-file --post-install-command
-                                    --post-install-template --script-template
-                                    --start-vm --time-zone --user
-                                    --user-password --validation-kit-iso)
-                                _get_excluded_items "${items[@]}"
+                                local items=(--additions-iso
+                                    --auxiliary-base-path --country --dry-run 
+                                    --extra-install-kernel-parameters 
+                                    --full-user-name --hostname --image-index 
+                                    --install-additions --install-txs --iso 
+                                    --key --language --locale 
+                                    --no-install-additions --no-install-txs 
+                                    --package-selection-adjustment 
+                                    --post-install-command 
+                                    --post-install-template --proxy 
+                                    --script-template --start-vm --time-zone 
+                                    --user --validation-kit-iso)
+
+                                [[ " ${COMP_WORDS[*]} " != *" --admin-password "* &&
+                                    " ${COMP_WORDS[*]} " != *" --admin-password-file"* ]] &&
+                                    items+=( --admin-password-file --admin-password )
+                                [[ " ${COMP_WORDS[*]} " != *" --user-password "* &&
+                                    " ${COMP_WORDS[*]} " != *" --user-password-file"* ]] &&
+                                    items+=( --user-password-file --user-password )
+
                                 COMPREPLY=( $(compgen -W "$result" -- ${cur}) )
                             fi
                             ;;
                     esac
                 fi
-
             fi
             ;;
 
@@ -2949,7 +2993,6 @@ _VBoxManage() {
                 fi
             fi
             ;;
-
     esac
 }
 complete -o default -F _VBoxManage VBoxManage
